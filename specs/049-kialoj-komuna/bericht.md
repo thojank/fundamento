@@ -1,6 +1,6 @@
 # Spec 049 – Bericht (Gründe für komuna: 24 Reguloj, 75 Entscheidungen)
 
-Entwurf aus KIA-3.1 (2026-11-12). Abschnitt 1 aus KIA-4.1 nach dem einen Push und dem einen Dispatch, nur lokal committet. Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag 049), [`tasks.md`](tasks.md). Bilder und Messung liegen außerhalb des Repos unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec049/`.
+Entwurf aus KIA-3.1 (2026-11-12). Abschnitt 1 aus KIA-4.1; Abschnitt 1a nach der Abnahme vom 2026-11-12 (zweiter Push und zweiter Dispatch, ausnahmsweise erlaubt), nur lokal committet. Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md) (Nachtrag 049), [`tasks.md`](tasks.md). Bilder und Messung liegen außerhalb des Repos unter `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec049/`.
 
 ## 1. PR, Commit, Dispatch, CI
 
@@ -27,6 +27,10 @@ Entwurf aus KIA-3.1 (2026-11-12). Abschnitt 1 aus KIA-4.1 nach dem einen Push un
 | Rendered checks (Vitrino, cetero-1 bis -3) | grün | |
 | Rendered checks (Vitrino-Werkstatt, werkstatt-1 und -2) | grün | |
 | Rendered checks (Make Kit, Quickstart) | grün | |
+
+## 1a. Abnahme des Maintainers (2026-11-12) und zweiter Lauf
+
+<!-- PLATZHALTER Abnahme: zweiter Push, zweiter Dispatch, CI je Job -->
 
 ## 2. Bilder (keine Baselines)
 
@@ -103,15 +107,15 @@ Alle in `packages/aspekto-komuna/reguloj.json`, `aspekto: "komuna"`, `manual`. I
 - **B-4:** Der metiejo-Test liest `specs/048-…/luecken.json` nicht, weil `turbo.json` den Pfad für metiejo nicht hasht. Er baut den Vorher-Stand im Speicher; der modelo-Test vergleicht mit der 048-Liste.
 - **F-KIA2-1 (Maintainer 2026-11-11):** `fm modelo validate` meldete 48 × `traduko-missing`. `tradukoj.ts` hielt komunas Reguloj wegen ihrer Ids ohne Namensraum für Kern-Texte. Fix außerhalb der ursprünglichen Frei-Liste: `packages/modelo/src/lingvo/tradukoj.ts:72` filtert zusätzlich `regulo.aspekto === undefined`. Dazu kommt der neue Test `tradukoj-049.test.ts` (erst rot, dann grün). `data/tradukoj.json` bleibt unverändert.
 - **F-KIA2-2 (Maintainer 2026-11-12):** Der Kialo von T4 nannte ein Design-Werkzeug, was AK-12 (Art. VIII) in Regulo-Texten verbietet. Er wurde zu „…damit Web und Design-Werkzeug dieselbe Zahl verstehen…“ geändert. Die Prüfung bleibt unverändert.
-- **F-049-2 / Q-5 (offen):** `packages/aspekto-komuna/package.json` führt `reguloj.json` nicht in `files`. Ein veröffentlichtes npm-Paket trüge die Gründe nicht. Das Repo liest den Ordner direkt, deshalb sind die Tests grün.
+- **F-049-2 / Q-5 (erledigt, Maintainer 2026-11-12):** `reguloj.json` steht jetzt in `files` von `packages/aspekto-komuna/package.json`. Den Test `packages/modelo/src/data/aspekto-komuna-paketo-049.test.ts` (`npm pack --dry-run`) gab es zuerst rot (`e785c1c0`), mit `3905928d` ist er grün. Den älteren Test `aspekto-komuna.test.ts:21`, der die Liste `files` genau festhält, verlangt das neue Verhalten um einen Eintrag zu erweitern.
 - **F-KIA1-2:** Über alle Knoten hatte komuna vor 049 142 Knoten mit `kialoDe` = `neniu`; 048 zählte 77 nur bei Übernahmen. Nachher zeigt `bilder` 0 Übernahmen ohne Grund in der Kette.
 - **F-049-3 (CI):** `buehne-036.spec.ts:545` [firefox] lief im Dispatch in die Test-Zeitgrenze, war im `pull_request`-Lauf auf demselben Commit aber grün. Es ist ein weiterer Zeittest nach einer Server-Prüfung, wie `zweitfarbe-036`. Er wurde nicht wiederholt, und keine Grenze wurde angehoben.
 - **Lokale Läufe:** Von den 10 betroffenen Paketen sind 9 grün (`--concurrency=1`). In `projekcioj` liefen 2 Tests unter Last in die Zeitgrenze (`komuna-fonto` ①-6, `figma-cxiuj`); allein laufen beide grün. Keine Grenze wurde angehoben.
 
 ## 7. Was der Maintainer als Nächstes tut
 
-1. Den PR prüfen (Link in Abschnitt 1), vor allem die 24 Statements. Sie sind aus der Spalte „Wert“ von §5 formuliert und waren nicht Teil der Freigabe: `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwccryipy9hehhxi/repos/fundamento/packages/aspekto-komuna/reguloj.json`.
-2. Die Code-Änderung außerhalb der Frei-Liste gegenlesen: `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwccryipy9hehhxi/repos/fundamento/packages/modelo/src/lingvo/tradukoj.ts:72`.
-3. Den lokalen KIA-4.1-Commit (`Spec 049 KIA-4.1: Bericht – PR, CI je Job`, Branch `261111-spec-049-grnde-fr-komun-c9d179`) pushen oder übernehmen.
-4. Q-5 entscheiden: `reguloj.json` in `files` von `packages/aspekto-komuna/package.json` aufnehmen (eigener kleiner PR).
-5. Die nächsten Gründe planen: ekzemplo (156) und provo (160) nach `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwccryipy9hehhxi/repos/fundamento/specs/049-kialoj-komuna/luecken.json`, oder Kern-Gründe in einem eigenen Lauf heben.
+Die Abnahme vom 2026-11-12 bestätigt die Kialoj, die Statements, `tradukoj.ts:72` und Q-5 (Abschnitt 1a). Offen bleibt:
+
+1. Den lokalen Commit mit der CI-Tabelle des zweiten Dispatchs (Abschnitt 1a, `Spec 049 Abnahme: Bericht – CI je Job`, Branch `261111-spec-049-grnde-fr-komun-c9d179` in `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwccryipy9hehhxi/repos/fundamento`) pushen oder übernehmen.
+2. PR [#163](https://github.com/thojank/fundamento/pull/163) mergen, wenn die CI nur die bekannt fremden Roten zeigt.
+3. Die nächsten Gründe planen: ekzemplo (156) und provo (160) nach `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwccryipy9hehhxi/repos/fundamento/specs/049-kialoj-komuna/luecken.json`, oder Kern-Gründe in einem eigenen Lauf heben.

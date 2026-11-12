@@ -97,3 +97,20 @@ Nach dem Commit: `pnpm check:privat` PASS, `pnpm check:clean-room` PASS; `packag
 | `packages/modelo/src/checks/regularo/index.test.ts:88` | `reguloj: count("reguloj.json", "reguloj"),` | Z. 88–98: Kern + Länge von `packages/aspekto-komuna/reguloj.json`, aus der Datei | `check:regularo` zählt Paket-Reguloj mit (B-3, Maintainer 2026-11-11) |
 | `packages/mcp/test/fixtures/kontrakto/describe.json` (`describe/standard`) | `reguloj` 62 / `withKialo` 62 | 86 / 86, Satz entsprechend | `describe` zählt Paket-Reguloj (B-1 A, Maintainer 2026-11-11) |
 
+## Abnahme des Maintainers (2026-11-12)
+
+- [x] **Alle 24 Kialoj ausdrücklich bestätigt**, ohne Änderung am Wortlaut. Das schließt die in §5 mit **A** markierten ein: B2, S1, S2, S3, S4, G2, G3. Vorher galt ☐ als „frei“; jetzt liegt die Freigabe ausdrücklich vor.
+- [x] **Die 24 Statements bestätigt.**
+- [x] **`packages/modelo/src/lingvo/tradukoj.ts:72` bestätigt** (F-KIA2-1).
+- [x] **Q-5 = ja:**
+  - `e785c1c0` rot: `aspekto-komuna-paketo-049.test.ts` (`npm pack --dry-run --json --ignore-scripts`) vermisst `reguloj.json`.
+  - `3905928d` grün: `reguloj.json` in `files`.
+  - Ganzes modelo-Paket danach: der eine Rote (`aspekto-komuna.test.ts:18`, Liste `files` genau festgehalten) bekommt den Eintrag. Dann sind `aspekto-komuna`, `aspekto-komuna-paketo-049`, `docs`, `phase0-ids` und `release-workflow` grün (310/310), ebenso `turbo-inputs` und `regularo-komuna-049`.
+- [x] **Zweiter Push**, ausnahmsweise erlaubt (Abweichung von AC-13). Er bringt `e3be8d44`, die Q-5-Commits und diese Abnahme in PR #163. Danach genau ein `workflow_dispatch`, kein Rerun, kein weiterer Push.
+
+### Weitere geänderte bestehende Tests
+
+| Datei:Zeile | vorher | nachher | Grund |
+|---|---|---|---|
+| `packages/modelo/src/data/aspekto-komuna.test.ts:21-31` | `files` = `[… "jugxoj.json", "deveno.json"]` | zusätzlich `"reguloj.json"` | Q-5 (Maintainer 2026-11-12): Das Paket trägt seine Reguloj. |
+
