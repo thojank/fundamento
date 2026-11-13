@@ -106,7 +106,9 @@ const GEGENPROBOJ: readonly Gegenprobe[] = [
   },
 ];
 
-const M1 = ["anmelden-m1", "konto-m1"] as const;
+// K8I-006 (F-052-1): `konto-m1-plena` is the full M-1 konto fragment (a byte copy, with the heading
+// of the attribute list). The re-evaluation found it green under the flat-tree measurement.
+const M1 = ["anmelden-m1", "konto-m1", "konto-m1-plena"] as const;
 const NOMOJ = [...M1, ...GEGENPROBOJ.map((g) => g.nomo)];
 
 const fiksajxoj = new Map(
@@ -237,6 +239,59 @@ describe("Spec 052 AC-N3: the M-1 markup is 1 in every brand × scheme", () => {
         malobservoj.push(`${kie}: badges → subtitle verteilita`);
       else if (!surStupo(paro.px, stupojDe(render)))
         malobservoj.push(`${kie}: badges → subtitle ${paro.px} px off every step`);
+    }
+    expect(malobservoj).toEqual([]);
+  });
+});
+
+describe("Spec 052 F-052-1: the full M-1 konto fragment (with the heading, Rest C) is 1", () => {
+  it("konto-m1-plena (M-1 F konto, unchanged): interspacoj = 1 in all combinations", () => {
+    expect(cxieUnu("konto-m1-plena")).toEqual([]);
+  });
+
+  it("konto-m1-plena: exactly one verteilita pair per combination, from fm-pagxo (subtitle → actions)", () => {
+    const faktoj = faktojDe("konto-m1-plena");
+    const indekso = (slot: string) =>
+      faktoj.elements.findIndex((elemento) => elemento.attrs.slot === slot);
+    const [subtitle, actions] = [indekso("subtitle"), indekso("actions")];
+    expect(subtitle).toBeGreaterThanOrEqual(0);
+    expect(actions).toBeGreaterThan(subtitle);
+    const renders = k8Renders(faktoj);
+    expect(renders).toHaveLength(KOMBINACIOJ);
+    const malobservoj: string[] = [];
+    for (const render of renders) {
+      const kie = `${render.aspekto}/${render.scheme}`;
+      const verteilitaj = render.k8.interspacoj.filter((i) => i.verteilita !== undefined);
+      const priskribo = verteilitaj
+        .map((i) => `${i.antaux} → ${i.post} (${i.verteilita?.ero})`)
+        .join(", ");
+      const [paro] = verteilitaj;
+      if (
+        verteilitaj.length !== 1 ||
+        paro?.verteilita?.ero !== "fm-pagxo" ||
+        paro.antaux !== subtitle ||
+        paro.post !== actions
+      )
+        malobservoj.push(`${kie}: verteilita ${verteilitaj.length}: ${priskribo}`);
+    }
+    expect(malobservoj).toEqual([]);
+  });
+
+  it("konto-m1-plena: heading → dl of fm-atributlisto is measured, not verteilita, on a step", () => {
+    const faktoj = faktojDe("konto-m1-plena");
+    const heading = faktoj.elements.findIndex((elemento) => elemento.attrs.slot === "heading");
+    expect(heading).toBeGreaterThanOrEqual(0);
+    expect(faktoj.elements[heading + 1]?.tag).toBe("dl");
+    const malobservoj: string[] = [];
+    for (const render of k8Renders(faktoj)) {
+      const kie = `${render.aspekto}/${render.scheme}`;
+      const paro = render.k8.interspacoj.find(
+        (interspaco) => interspaco.antaux === heading && interspaco.post === heading + 1,
+      );
+      if (paro === undefined) malobservoj.push(`${kie}: heading → dl not measured`);
+      else if (paro.verteilita !== undefined) malobservoj.push(`${kie}: heading → dl verteilita`);
+      else if (!surStupo(paro.px, stupojDe(render)))
+        malobservoj.push(`${kie}: heading → dl ${paro.px} px off every step`);
     }
     expect(malobservoj).toEqual([]);
   });

@@ -222,6 +222,34 @@ describe("the K8 twin (T-2, E-4)", () => {
     expect(neFiksaj).toEqual([]);
   });
 
+  it("(2) both give the same output for the rendered K8 facts with verteilita (Spec 052), a fixed point", () => {
+    const dosierujo = fileURLToPath(new URL("../../test/fixtures/k8/", import.meta.url));
+    const k8 = readdirSync(dosierujo).flatMap((nomo): [string, FaktoAspekto][] => {
+      const fakto = JSON.parse(readFileSync(join(dosierujo, nomo, "faktoj.json"), "utf8")) as Facts;
+      return fakto.renders.flatMap((render, k): [string, FaktoAspekto][] =>
+        render.k8?.interspacoj.some((interspaco) => interspaco.verteilita !== undefined)
+          ? [[`${nomo} #${k} ${render.aspekto} ${render.scheme}`, render.k8]]
+          : [],
+      );
+    });
+    // konto-m1 and konto-m1-plena: one per brand × scheme each (the data decides, at least those).
+    expect(k8.length).toBeGreaterThanOrEqual(16);
+    expect(malsamajKazoj(normigiAspektoFaktojn, ekranojNormigi, k8)).toEqual([]);
+    const neFiksaj = k8.flatMap(([nomo, faktoj]) =>
+      stabilaJson(normigiAspektoFaktojn(faktoj)) === stabilaJson(faktoj) ? [] : [nomo],
+    );
+    expect(neFiksaj).toEqual([]);
+    // The comparison sees the field: a normaliser that drops verteilita differs on every case.
+    const senVerteilita: Normigilo = (kruda) => {
+      const normigita = normigiAspektoFaktojn(kruda);
+      return {
+        ...normigita,
+        interspacoj: normigita.interspacoj.map(({ verteilita: _v, ...interspaco }) => interspaco),
+      };
+    };
+    expect(malsamajKazoj(normigiAspektoFaktojn, senVerteilita, k8)).toHaveLength(k8.length);
+  });
+
   describe("(3) a deliberately changed copy makes the comparison red", () => {
     it("(1) is red for a copy of aspektoFaktojEnPagxo with another element list", () => {
       const fonto = ekranojAspekto.toString();

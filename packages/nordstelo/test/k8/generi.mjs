@@ -61,6 +61,9 @@ const NOMOJ = [
   "gegenprobe-e1-deklarativa-ombro",
   "gegenprobe-e2-fermita-ombro",
   "gegenprobe-e3-ombro-part",
+  // K8I-006 (F-052-1): the full M-1 konto fragment, a byte copy with the heading of the attribute
+  // list (Rest C), pinning the re-evaluation's „konto green“ in CI.
+  "konto-m1-plena",
 ];
 
 /** CSS generic family words (CSS Fonts 4), none of them a brand's own family. */

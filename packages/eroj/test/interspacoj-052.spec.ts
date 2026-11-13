@@ -15,7 +15,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { projectModeloSource } from "@fundamento/modelo";
+import { defaultModeloSource, loadModelo, projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj } from "@fundamento/projekcioj";
 import { expect, type Page, test } from "@playwright/test";
 import { TAB } from "./alirebleco.js";
@@ -177,6 +177,30 @@ async function politeRegionsInTree(page: Page): Promise<number | undefined> {
 
 const near = (actual: number, expected: number) =>
   Math.round(Math.abs(actual - expected) * 100) / 100 <= AUF_STUFO;
+
+/** The Sxablonoj this file renders, each with the live regions its cases leave empty. */
+const COVERED_LIVE = { filtrilo: ["status"], sxelo: ["notices"] };
+
+// K8I-006 (AC-A3): the set of Sxablonoj with a live region comes from the Modelo; a new one fails
+// here until it gets its own browser case.
+test("every Sxablono with a live region in the Modelo has its cases in this file", () => {
+  for (const source of [projectModeloSource(CXIUJ_CONFIG), defaultModeloSource()]) {
+    const { modelo } = loadModelo(source);
+    expect(modelo).toBeDefined();
+    const live = Object.fromEntries(
+      (modelo?.sxablonoj ?? [])
+        .map(
+          (entry) =>
+            [
+              entry.sxablono.name,
+              entry.skemo.regions.filter((region) => region.live !== undefined).map((r) => r.name),
+            ] as const,
+        )
+        .filter(([, regions]) => regions.length > 0),
+    );
+    expect(live).toEqual(COVERED_LIVE);
+  }
+});
 
 for (const aspekto of ASPEKTOJ) {
   for (const scheme of SCHEMES) {

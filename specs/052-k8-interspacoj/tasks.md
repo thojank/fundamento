@@ -11,11 +11,11 @@ Sechs Tickets, ein Strang, streng nacheinander (D-052-08): `K8I-001 → K8I-002 
 | K8I-003 | 3 Fixes | Fix A: leere Live-Bereiche im Projektor (`data-fm-leer`), Neubau Eroj, Baselines nach D-052-06 | K8I-002 | erledigt 2026-11-13 (`konto-m1` rot bis K8I-004) |
 | K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | erledigt 2026-11-13 (`konto-m1`, `anmelden-m1` = 1 in allen 8 Kombinationen); Folge K8I-004b (B-004-4, D-052-13) erledigt 2026-11-13 |
 | K8I-005 | 4 Nachweis | Neubewertung M-1 (Kontrolle und gerendert) ohne Modell, `neubewertung.md`, Rest C als Befund | K8I-004 | erledigt 2026-11-13 (Kontrolle 8/8 byte-gleich; gerendert F 4/4 statt erwartet 3/4, F-052-1) |
-| K8I-006 | 5 Tests | Test-Ticket: Gesamtstand, AC-Matrix vollständig, Querschnitt | K8I-005 | offen |
+| K8I-006 | 5 Tests | Test-Ticket: Gesamtstand, AC-Matrix vollständig, Querschnitt | K8I-005 | erledigt 2026-11-13 (AC-Matrix unten, `konto-m1-plena` = 1 in allen 8 Kombinationen) |
 
 ## AC-Zuordnung (AC → Ticket → Test)
 
-Geplante Belege. Datei- und Testnamen stehen fest, sobald das Ticket sie anlegt; K8I-006 füllt die Matrix mit den echten Namen und Ergebnissen.
+Geplante Belege. Datei- und Testnamen stehen fest, sobald das Ticket sie anlegt; K8I-006 füllt die Matrix mit den echten Namen und Ergebnissen (siehe [AC-Matrix K8I-006](#k8i-006-im-einzelnen-gesamtstand-ac-matrix-querschnitt), dort geprüft).
 
 | AC | Inhalt (kurz) | Ticket | Test bzw. Befehl |
 |---|---|---|---|
@@ -297,6 +297,98 @@ Bericht: [`neubewertung.md`](neubewertung.md). Kein Modell, kein Netz, keine Än
 - **D-052-14** `simplaDokumento` statt `ekranaDokumento` (Weg von M-1), Abweichung vom Wortlaut des Tickets.
 - Die gerenderten `fakto.json` tragen die vollständigen K8-Fakten (`renders[].k8`), anders als der Export von Spec 050; damit lassen sich K8 und die Selbstprüfung aus dem Repo nachrechnen (zusammen ≈ 1,5 MB).
 
+## K8I-006 im Einzelnen (Gesamtstand, AC-Matrix, Querschnitt)
+
+Gemessen auf `83462abf` plus den Tests dieses Tickets. Jeder Beleg unten ist nachgesehen (Datei, Testname) bzw. selbst gelaufen, nicht aus den Tickets übernommen. Kein Modell, kein Netz, kein Produkt-Code geändert.
+
+### Commit K8I-006
+
+- Spec 052 K8I-006: tests on the integrated result (nur Testdateien, das neue Fixture `konto-m1-plena`, die Namensliste von `generi.mjs` und diese `tasks.md`)
+
+### Ergänzte Tests
+
+| Datei | Neu | Wozu |
+|---|---|---|
+| `packages/nordstelo/test/fixtures/k8/konto-m1-plena/` | Fixture (`enigo.html`, `faktoj.json`, `atendo.json`), in `NOMOJ` von `test/k8/generi.mjs` | F-052-1 in der CI festhalten: das volle `konto` aus M-1 (mit Überschrift, Rest C) |
+| `packages/nordstelo/src/k8/interspacoj-052.test.ts` | `describe` „Spec 052 F-052-1: the full M-1 konto fragment (with the heading, Rest C) is 1“: „konto-m1-plena (M-1 F konto, unchanged): interspacoj = 1 in all combinations“, „konto-m1-plena: exactly one verteilita pair per combination, from fm-pagxo (subtitle → actions)“, „konto-m1-plena: heading → dl of fm-atributlisto is measured, not verteilita, on a step“; `konto-m1-plena` in `M1` (also auch `k8()` = `atendo.json`) | AC-N2/F-052-1, AC-C1 |
+| `packages/nordstelo/src/k8/querschnitt-052.test.ts` (neu) | „the fixture folders are exactly the names the generator renders“ (Ordner = `NOMOJ` aus dem Quelltext von `generi.mjs`), „some fixtures carry verteilita pairs …“, je Fixture „`<name>`: k8() equals atendo.json with the cxiuj-config and the repository Modelo“ (14), „AUF_STUFO is still 0.5 px (D-08)“ | Querschnitt `k8.ts` = Referenzrechnung, AC-G1 |
+| `packages/nordstelo/src/k8/determinismo.test.ts` | Fixture-Liste aus dem Ordner abgeleitet statt `["roh", "sxablono"]`; „covers every generated K8 fixture, those with verteilita pairs among them“ | Querschnitt Determinismus: alle 14 Fixtures, je dreimal (gleiche Bytes, permutierte Listen und Renders mit 5 Seeds, eine Kombination je Marke × Schema) |
+| `packages/nordstelo/src/k8/zwilling.test.ts` | „(2) both give the same output for the rendered K8 facts with verteilita (Spec 052), a fixed point“ – alle gerenderten K8-Fakten mit `verteilita` aus `test/fixtures/k8` (heute 16: `konto-m1`, `konto-m1-plena`), mit Gegenprobe (ein Normalisierer ohne `verteilita` weicht in jedem Fall ab) | Querschnitt Zwilling mit `verteilita` an echten Renders |
+| `packages/eroj/test/interspacoj-052.spec.ts` | „every Sxablono with a live region in the Modelo has its cases in this file“ (Menge aus der cxiuj-Config- und der Repo-Modelo = `{ filtrilo: [status], sxelo: [notices] }`) | Querschnitt Live-Regel: eine neue Sxablono mit `live` macht den Browser-Test rot, bis sie Fälle hat |
+
+### Herkunft `konto-m1-plena` (D-95, V-5)
+
+| Fixture | Quelle | SHA-256 der Quelle | Änderung | Ergebnis |
+|---|---|---|---|---|
+| `konto-m1-plena` | `specs/050-mvp-probelauf/daten/m1/F/konto/fragmento.html` (781 Byte) | `8ef028ff58ce939c4597e6be0df6cdeabdfd5fd3561e12fdc53579e988cbd618` | keine (`cp`, `cmp` gleich; `enigo.html` hat denselben SHA-256) | `faktoj.json` 160 243 Byte (`b3ab59c2…6af5a0b`), `atendo.json` 5 262 Byte (`c588ef0a…6f5561`) |
+
+Erzeugt mit `pnpm turbo run build --filter=@fundamento/nordstelo...` (aus dem Cache), `node packages/nordstelo/test/k8/generi.mjs` zweimal, `cp -r … /tmp/s052-k8-006` dazwischen: `diff -r` leer. `git diff --exit-code -- packages/nordstelo/test/fixtures/k8`: Exit 0, alle 13 bestehenden Fixtures byte-gleich. Last 6,0–6,1.
+
+**`konto-m1-plena` je Marke (hell und dunkel gleich):**
+
+| Marke | `interspacoj` | `kvoto` | `verteilita` | heading → dl (`11→12`, `y`) |
+|---|---|---|---|---|
+| komuna | 1 | 1 | genau 1: `8→9` subtitle → actions, `x`, 930,05 px, `fm-pagxo` | 16 px (`spacing.large`) |
+| ekzemplo | 1 | 1 | genau 1: `8→9`, 817,5 px, `fm-pagxo` | 12 px |
+| provo | 1 | 1 | genau 1: `8→9`, 911,58 px, `fm-pagxo` | 20 px |
+| provo-kompakta | 1 | 1 | genau 1: `8→9`, 957,14 px, `fm-pagxo` | 12 px |
+
+Kialo in allen 8: „vollständig, 1 verteilte Abstände nicht gezählt“. Das bestätigt K8I-005 (F-052-1) und die Werte der Probe in `/tmp/s052-rest-c/` (16 / 12 / 20 / 12 px). An `fm-atributlisto` und an der Messung von Inline-Elementen ändert das nichts (AC-C1, Diff-Beleg unten).
+
+### AC-Matrix (geprüft)
+
+| AC | Beleg (Datei › Test bzw. Befehl) | Ergebnis K8I-006 |
+|---|---|---|
+| AC-A1 | `packages/eroj/test/interspacoj-052.spec.ts` › „Spec 052 A fm-sxelo `<marke>` `<schema>`“ › „1: notices empty – nav to main is one spacing.medium“ (8 Kombinationen, Sollwert aus der Custom Property, Toleranz `AUF_STUFO` 0,5) | Chromium, Firefox, WebKit je 49/0 |
+| AC-A2 | dieselbe Datei › „2: notices filled (in the markup and later by script) – a gap on each side“, „3: notices empty – marked, polite, not hidden, in the accessibility tree; fill and empty again“ (Chromium zusätzlich CDP-AX-Baum, B-002-5), „4: the focused skip link moves no gap of the frame“; `fm-filtrilo` „5.3: status empty – marked, polite, not hidden, in the snapshot; fill and empty again“ | grün in allen drei Engines |
+| AC-A3 | `packages/projekcioj/src/celoj/web-component/live-052.test.ts` › „every Sxablono with a live region gets the rule (the set from the Modelo)“, „a test copy with live on another region gives that region, without a name list“, „the repo Modelo has live regions exactly in sxelo (notices) and filtrilo (status)“; Eroj „5.1: status empty – takes no room …“ (`fm-filtrilo`); **neu** Eroj „every Sxablono with a live region in the Modelo has its cases in this file“ | grün (projekcioj-Paket, Eroj 3 Engines) |
+| AC-A4 | `live-052.test.ts` › „pins exactly the Sxablonoj of the Modelo that have no live region“, „element module, inline element and stylesheet keep their bytes“ (SHA-256 von `662ed28f`); Bild-Inventur und `cmp`-Vergleich `plan.md` › K8I-003 › Baselines (40 namentlich geändert, 50 byte-gleich, Bildreferenzen: keine) | Guard grün; Bildvergleich ist ein dokumentierter Lauf von K8I-003, in K8I-006 nicht wiederholt (kein Referenzbild im Repo betroffen) |
+| AC-B1 | `packages/nordstelo/src/k8/interspacoj-052.test.ts` › „konto-m1: badges → subtitle is measured and lies on a step of its combination (lead)“, „konto-m1: no pair over 100 px that is not verteilita“, „anmelden-m1 …“/„konto-m1 …: interspacoj = 1 in all combinations“; `faktoj.test.ts` › „carries verteilita through, as part of the sort and dedupe keys“; `zwilling.test.ts` (1) | grün |
+| AC-B2 | `interspacoj-052.test.ts` › „Spec 052 counter-probes of D-052-01 (AC-B2, AC-B3)“: (c), (d1), (d2), (3c), (e1), (e2), (e3) je „…: interspacoj < 1 in komuna, ekzemplo, provo, provo-kompakta; no pair verteilita“; `k8.test.ts` › „k8 – interspacoj with verteilita (D-052-01, V-2)“ (4 Tests, darunter der Kialo-Satz „n verteilte Abstände nicht gezählt“); positiv: `konto-m1`, `konto-m1-plena` nur `fm-pagxo` | grün |
+| AC-B3 | dieselben Gegenproben (a)–(d2), (3c), (e1)–(e3) und je „`<name>` self-test: a loosened copy (every pair verteilita) fails the expectation“ (9 Selbsttests); rot belegt in K8I-002 (`56267833`), K8I-004 (Zwischenstand, Build-Log oben), K8I-004b (`81d51d05`, `906e835b`) | grün; rot-Belege in den Commits bzw. oben |
+| AC-B4 | `plan.md` › D-052-01; `git log --format=%h c439918f..HEAD`: `662ed28f` (nur `specs/052-*`) ist der erste Commit, vor `9f67d684` und jedem Code-Commit | erfüllt |
+| AC-B5 | `zwilling.test.ts` › „(1) %s is the same source in nordstelo and ekranoj“, „(2) both normalisers give the same output for the cases of faktoj.test.ts“ (Fall `VERTEILITA`), **neu** „(2) … rendered K8 facts with verteilita (Spec 052), a fixed point“; `gegenprobe.test.ts` › „both results equal atendo.json byte for byte“ (`roh`, `sxablono` unverändert seit K8I-002); `zwilling.test.ts` › „(2) both give the same output for the stored K8 facts of ablauf-038/post, a fixed point“ (gespeicherte Fakten ohne Feld); `k8.test.ts` › „without the field: the value and the three sentences of today, no count appended“ | grün |
+| AC-C1 | `neubewertung.md` Abschnitt 5; Diff-Beleg: `git diff c439918f --stat -- packages/modelo/data packages/eroj/src packages/eroj/scripts packages/projekcioj/src/celoj/web-component/ero-template.ts` leer; `git diff c439918f -- packages/nordstelo/src/k8/faktoj.ts` ohne Sonderfall für Inline-Elemente (die einzigen „inline“-Treffer sind `inline-flex`/`inline-grid` in `distribuas`, Bedingung 1 für Container); **neu** `konto-m1-plena` › „heading → dl … measured, not verteilita, on a step“ | erfüllt |
+| AC-N1 | (a) `node specs/050-mvp-probelauf/pruefen.mjs` Exit 0, F 0/4; (b) `neubewertung.mjs --nur-kontrolle` 8/8 byte-gleich (K8I-005, `daten/neubewertung/kontrolle.json`) | in K8I-005 gelaufen (Roh-Fakten außerhalb des Repos), in K8I-006 nicht wiederholt |
+| AC-N2 | `neubewertung.md` Abschnitt 4: F 4/4 (F-052-1); `pruefen.mjs --daten specs/052-k8-interspacoj/daten/neubewertung --ohne-bericht` Exit 0 (K8I-005); **neu in CI:** `konto-m1-plena` = 1 in allen 8 Kombinationen (`interspacoj-052.test.ts`) | `konto` grün jetzt auch als CI-Test belegt; `anmelden` als `anmelden-m1`; `registrieren` und `passwort-vergessen` nur durch den Bericht (kein Fixture) |
+| AC-N3 | `interspacoj-052.test.ts` › „anmelden-m1 (M-1 F anmelden, unchanged): interspacoj = 1 in all combinations“, „konto-m1 (M-1 F konto without the heading, Rest C): …“; rot belegt in K8I-002 (`anmelden-m1` 0,8571 provo/provo-kompakta; `konto-m1` < 1 überall) | grün |
+| AC-N4 | rote Commits `9f67d684`, `f9a757f7`, `56267833`, `81d51d05`, `906e835b` mit Ausgabe oben; Paketläufe unten | grün außer den fremden (unten) |
+| AC-N5 | `neubewertung.md` Abschnitte 3, 6, 7; `neubewertung.mjs --selbstpruefung` (K8I-005) | in K8I-005 belegt |
+| AC-N6 | `neubewertung.md` Abschnitt 10 („nicht gestartet“) | erfüllt |
+| AC-G1 | **neu** `querschnitt-052.test.ts` › „AUF_STUFO is still 0.5 px (D-08)“; `git diff -U0 c439918f -- packages/nordstelo/src/k8/k8.ts \| grep -E "^[-+].*(AUF_STUFO\|surStupo\|k8Plena\|mankoj\|MANKO_AL_MERKMAL\|distanco)"` → kein Treffer (einziger Hunk `@@ -187,22 +187,34 @@`, `interspacoj()`); `git diff --stat c439918f -- packages/ekranoj/src/verda.ts packages/ekranoj/src/rondoj.ts` leer (Grün-Regel `decidiVerdon`); `git diff c439918f --stat -- '**/vitest*.config.ts' '**/playwright*.config.ts' .github turbo.json` leer; `.only(`/`.skip(` in `packages/*/src packages/*/test`: dieselben 3 Treffer wie auf `c439918f` (`mcp/src/http.test.ts:97`, `eroj/test/forced-colors.spec.ts:14`, `eroj/test/quickstart.spec.ts:47`) | erfüllt |
+| AC-G2 | PR vom aktuellen `main` | **Orchestrator** |
+| AC-G3 | kein Modell-Lauf; K8I-006 hat keinen gestartet | erfüllt (je Ticket im Build-Log) |
+| AC-G4 | PR offen, CI je Job, Bericht | **Orchestrator** |
+
+**Nicht voll im CI belegt (bewusst):** AC-A4 (Bildvergleich ist ein dokumentierter Lauf, kein CI-Test; der Code-Guard läuft in CI), AC-N1/AC-N2/AC-N5 (Neubewertung braucht die Roh-Fakten von M-1 außerhalb des Repos; in CI nur `konto-m1-plena` und `anmelden-m1`), AC-G2/AC-G4 (Orchestrator).
+
+### Läufe (nacheinander, `FM_AUSGABE=knapp`, Last vor jedem Lauf < 10)
+
+| Lauf | Ergebnis |
+|---|---|
+| `pnpm --filter @fundamento/nordstelo exec vitest run src/k8/` | 164 bestanden, 0 rot (vorher 105) |
+| `pnpm --filter @fundamento/projekcioj test` | 1 556 bestanden, 1 rot, 6 übersprungen: rot nur `src/celoj/figma/figma-cxiuj.test.ts:32` „Hook timed out in 180000ms“ (`beforeAll`, Build aller Beispielmarken; Last während des Laufs bis 53, eine VM auf der Maschine); die 5 übersprungenen sind die Tests dieser Datei. Ein Rerun (R-8) der Datei: **5 bestanden, 0 rot** in 58,5 s. Ohne Bezug zu Spec 052 (Figma-Celo unverändert) |
+| `pnpm --filter @fundamento/nordstelo test` | 367 bestanden, 0 rot (vorher 308) |
+| `pnpm --filter @fundamento/ekranoj test` | 301 bestanden, 0 rot (`rondoj.test.ts:733` grün) |
+| Eroj `playwright test test/interspacoj-052.spec.ts --project=chromium` | 49 bestanden, 0 rot |
+| … `--project=firefox` | 49 bestanden, 0 rot (erster Lauf in Firefox) |
+| … `--project=webkit` | 49 bestanden, 0 rot (erster Lauf in WebKit) |
+| Eroj Chromium `sxablonoj` / `sxablonoj-2` / `sxablonoj-3` / `nachlese-8` / `metiejo` / `studio-035` / `buehne-036` | 6/0, 4/0, 6/0, 6/0, 6/0, 6/0, 20/0 |
+| `pnpm --filter @fundamento/modelo exec vitest run src/ci/turbo-inputs.test.ts` | 8 bestanden, 0 rot (`:679` in diesem Lauf grün) |
+| `pnpm --filter @fundamento/modelo exec vitest run src/ci/` (neue Dateien per `git add -N` sichtbar) | 158 bestanden, 0 rot – die neuen Dateien lösen in den CI-Tests nichts aus |
+| `pnpm lint` | Exit 0, 22/22 Tasks; nur bestehende Warnungen in fremden Dateien, keine in den Dateien dieses Tickets |
+| `pnpm check:parity` | `differences=0 items=45`, 0 Fehler |
+| `pnpm check:privat` | 0 Fehler (4 489 Dateien, mit den neuen) |
+| `pnpm test:betroffen` (Basis `c439918f`, 7 Pakete: cli, ekranoj, eroj, metiejo, modelo, nordstelo, projekcioj; Engines chromium, firefox, webkit) | Lauf 1: rot nur nordstelo `src/ac8.test.ts:156` und `src/ablauf/integra.test.ts:131` „Hook timed out in 10000ms“; Turbo bricht danach ab. Rerun (R-8): dieselben zwei plus `src/ablauf/raporto.test.ts:70` und `:236` „Test timed out in 5000ms“, Last bis 51 (alle Paket-Suiten parallel). Dieselben Dateien einzeln bei Last 9: 11 bestanden, 0 rot; die nordstelo-Suite allein 367/0. Deshalb derselbe Befehl nacheinander: `turbo run test --concurrency=1 --continue` mit denselben Filtern und `PLAYWRIGHT_ENGINES` (keine Grenze geändert): **cli, ekranoj, metiejo, modelo, nordstelo grün**; projekcioj 1 556/1 rot (`figma-cxiuj.test.ts:32` Hook-Timeout wie oben); eroj Vitest 43/0, Playwright **2 172 bestanden, 1 rot, 2 übersprungen** (Last bis 110): rot `test/metiejo-036.spec.ts:63` [firefox] „page.waitForURL: Target page, context or browser has been closed“ – Rerun (R-8) `metiejo-036.spec.ts --project=firefox`: 2/0. Fremd (Spec 036, kein Bezug zu `fm-sxelo`-Geometrie oder K8) |
+| Determinismus: `pnpm build` zweimal (beide aus dem Cache), dann `turbo run build --force` (0 von 10 aus dem Cache) | `dist` aller 10 Pakete vor und nach dem erzwungenen Build `diff -rq` gleich; `git diff --exit-code -- packages/*/dist packages/projekcioj` Exit 0 |
+
+### Befunde K8I-006
+
+- **B-006-1** Kein neuer Befund an Spec 052: Firefox und WebKit sind für `interspacoj-052.spec.ts` grün, `konto-m1-plena` ist in allen 8 Kombinationen 1 mit genau einem `verteilita`-Paar (`fm-pagxo`). K8I-005 (F-052-1) ist damit als CI-Test festgehalten.
+- **B-006-2** `projekcioj` `src/celoj/figma/figma-cxiuj.test.ts:32` „Hook timed out in 180000ms“ in **beiden** vollen Paketläufen (Last 50–110 durch die eigenen Worker und eine VM auf der Maschine), einzeln 5/0 in 58,5 s. Spec 052 ändert an Figma nichts (`plan.md` › K8I-003 › Projektionen). Last-Befund, keine Grenze geändert; für die CI beobachten.
+- **B-006-4** `pnpm test:betroffen` startet alle betroffenen Paket-Suiten parallel; auf dieser Maschine reißen dabei die kurzen Hook- und Test-Timeouts von nordstelo (10 s bzw. 5 s). Nacheinander ist alles grün bis auf B-006-2 und den fremden Firefox-Abbruch `metiejo-036.spec.ts:63` (Rerun grün).
+- **B-006-3** Die Fixture-Liste von `determinismo.test.ts` und `querschnitt-052.test.ts` kommt aus dem Ordner `test/fixtures/k8`; `querschnitt-052.test.ts` hält Ordner und `NOMOJ` von `generi.mjs` gleich. Ein neues Fixture ohne Eintrag im Generator (oder umgekehrt) wird rot.
+
 ## Geänderte Erwartungen älterer Tests (`testing.md` › „Extending tested pure functions“)
 
 Keine in K8I-001 und K8I-002 (`k8.test.ts` nur um einen `describe` ergänzt, der Typ-Import um `Interspaco` erweitert; keine bestehende Erwartung geändert). Keine in K8I-003: Die sieben bestehenden Eroj-Specs mit `fm-sxelo`/`fm-filtrilo` und alle projekcioj-Tests sind mit dem Fix ohne Änderung grün (keine feste Erwartung hing an der doppelten Lücke nav → main); die neu erzeugten `faktoj.json`/`atendo.json` von `anmelden-m1` und `konto-m1` sind gerenderte Fakten, keine Erwartung eines älteren Tests. K8I-003 und K8I-004 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein (z. B. durch den Marker D-052-05 oder die kleinere Lücke von A).
@@ -306,6 +398,8 @@ Keine in K8I-001 und K8I-002 (`k8.test.ts` nur um einen `describe` ergänzt, der
 | `packages/ekranoj/src/konstruo.test.ts:102` (jetzt 102–104) | `toContain('<link rel="stylesheet" href="../marko/css/fundamento.css">')` | `toContain('<link rel="stylesheet" href="../marko/css/fundamento.css" data-nordstelo>')` | Marker D-052-05 an jedem Rahmen-Link (`MEDIO_ATRIBUTO`) | K8I-004 |
 | `packages/ekranoj/src/konstruo.test.ts:150` (jetzt 152–154) | ``toContain(`<style>body { font-family: var(${BAZA_TIPARO}); }</style>`)`` | ``toContain(`<style data-nordstelo>body { font-family: var(${BAZA_TIPARO}); }</style>`)`` | Marker D-052-05 auch an der Grundschrift-Regel des Rahmens (B-004-5) | K8I-004 |
 | `packages/nordstelo/src/k8/zwilling.test.ts:211` | `expect(NORMIGAJ_KAZOJ.length).toBe(4)` | `expect(NORMIGAJ_KAZOJ.length).toBe(5)` | neuer Normalisierungsfall `VERTEILITA` (AC: mindestens ein Fall mit `verteilita`); `NORMIGAJ_KAZOJ` in `test-doubles/aspekto-kazoj.ts` um ihn ergänzt, die vier alten Fälle unverändert | K8I-004 |
+
+K8I-006: keine bestehende Erwartung geändert. Erweitert: `packages/nordstelo/src/k8/determinismo.test.ts:28` (vorher Z. 24 `const FIKSAJXOJ = ["roh", "sxablono"] as const;`, nachher alle Ordner unter `test/fixtures/k8`, sortiert) – dieselben drei Erwartungen je Fixture, jetzt für 14 statt 2; `zwilling.test.ts`, `interspacoj-052.test.ts` und `eroj/test/interspacoj-052.spec.ts` nur um neue Tests ergänzt; `generi.mjs` nur um den Namen `konto-m1-plena` in `NOMOJ`.
 
 K8I-004b: keine bestehende Erwartung geändert (keine Fixture- oder Fallzahl ist festgeschrieben; `interspacoj-052.test.ts` nur um drei Einträge in `GEGENPROBOJ` ergänzt, `generi.mjs` um drei Namen in `NOMOJ`).
 
