@@ -1,0 +1,5 @@
+Commit: 433b40b4-dirty(packages)
+Node: v24.21.0
+Prüfweg: check_markup (Gvidanto im Prozess, ohne Modell, ohne Rendering)
+Quelle: specs/050-mvp-probelauf/daten/m1 (fragmento.html)
+Basis: specs/052-k8-interspacoj/daten/neubewertung/m1 (fakto.json)

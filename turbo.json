@@ -100,6 +100,9 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/specs/034-nachlese-12/plan.md",
+        "$TURBO_ROOT$/specs/050-mvp-probelauf/daten/**",
+        "$TURBO_ROOT$/specs/052-k8-interspacoj/daten/neubewertung/**",
+        "$TURBO_ROOT$/specs/053-leere-aktion/**",
         "$TURBO_ROOT$/scripts/reporter/**"
       ],
       "env": ["PLAYWRIGHT_ENGINES", "FM_AUSGABE"],
