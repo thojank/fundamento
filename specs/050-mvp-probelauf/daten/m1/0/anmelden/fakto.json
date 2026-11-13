@@ -1,0 +1,638 @@
+{
+  "enigo": {
+    "fakto": {
+      "aria": [
+        {
+          "name": "",
+          "role": "main"
+        },
+        {
+          "level": 1,
+          "name": "Anmelden",
+          "role": "heading"
+        },
+        {
+          "name": "",
+          "role": "paragraph"
+        },
+        {
+          "name": "Anmeldung",
+          "role": "region"
+        },
+        {
+          "name": "E-Mail-Adresse",
+          "role": "textbox"
+        },
+        {
+          "name": "Passwort",
+          "role": "textbox"
+        },
+        {
+          "name": "Anmelden",
+          "role": "button"
+        },
+        {
+          "name": "Weitere Wege",
+          "role": "navigation"
+        },
+        {
+          "name": "Passwort vergessen?",
+          "role": "link"
+        },
+        {
+          "name": "Konto anlegen",
+          "role": "link"
+        },
+        {
+          "name": "Zu Mein Konto",
+          "role": "link"
+        }
+      ],
+      "bytes": 2264,
+      "console": [],
+      "elements": [
+        {
+          "attrs": {
+            "data-nomo": "anmelden",
+            "data-sxablono": "formularo"
+          },
+          "parent": -1,
+          "tag": "main",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-region": "kopf"
+          },
+          "parent": 0,
+          "tag": "header",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "titolo"
+          },
+          "parent": 1,
+          "tag": "h1",
+          "text": "Anmelden"
+        },
+        {
+          "attrs": {
+            "data-ero": "teksto"
+          },
+          "parent": 1,
+          "tag": "p",
+          "text": "Melden Sie sich mit Ihrer E-Mail-Adresse und Ihrem Passwort an."
+        },
+        {
+          "attrs": {
+            "aria-label": "Anmeldung",
+            "data-region": "inhalt"
+          },
+          "parent": 0,
+          "tag": "section",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "mesagxo",
+            "data-tipo": "eraro",
+            "hidden": "",
+            "id": "fehler",
+            "role": "alert"
+          },
+          "parent": 4,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "teksto"
+          },
+          "parent": 5,
+          "tag": "span",
+          "text": "Bitte geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein."
+        },
+        {
+          "attrs": {
+            "action": "konto.html",
+            "data-ero": "formularo",
+            "id": "anmeldeformular",
+            "method": "get",
+            "novalidate": ""
+          },
+          "parent": 4,
+          "tag": "form",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "kampo"
+          },
+          "parent": 7,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "etikedo",
+            "for": "email"
+          },
+          "parent": 8,
+          "tag": "label",
+          "text": "E-Mail-Adresse"
+        },
+        {
+          "attrs": {
+            "autocomplete": "email",
+            "data-ero": "enigo",
+            "id": "email",
+            "name": "email",
+            "required": "",
+            "style": "",
+            "type": "email"
+          },
+          "parent": 8,
+          "tag": "input",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "kampo"
+          },
+          "parent": 7,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "etikedo",
+            "for": "passwort"
+          },
+          "parent": 11,
+          "tag": "label",
+          "text": "Passwort"
+        },
+        {
+          "attrs": {
+            "autocomplete": "current-password",
+            "data-ero": "enigo",
+            "id": "passwort",
+            "name": "passwort",
+            "required": "",
+            "style": "",
+            "type": "password"
+          },
+          "parent": 11,
+          "tag": "input",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "butono",
+            "data-vario": "primara",
+            "type": "submit"
+          },
+          "parent": 7,
+          "tag": "button",
+          "text": "Anmelden"
+        },
+        {
+          "attrs": {
+            "data-region": "fuss"
+          },
+          "parent": 0,
+          "tag": "footer",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "aria-label": "Weitere Wege",
+            "data-ero": "navigado"
+          },
+          "parent": 15,
+          "tag": "nav",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "ligilo",
+            "href": "passwort-vergessen.html"
+          },
+          "parent": 16,
+          "tag": "a",
+          "text": "Passwort vergessen?"
+        },
+        {
+          "attrs": {
+            "data-ero": "ligilo",
+            "href": "registrieren.html"
+          },
+          "parent": 16,
+          "tag": "a",
+          "text": "Konto anlegen"
+        },
+        {
+          "attrs": {
+            "data-ero": "ligilo",
+            "href": "konto.html"
+          },
+          "parent": 16,
+          "tag": "a",
+          "text": "Zu Mein Konto"
+        },
+        {
+          "attrs": {},
+          "parent": -1,
+          "tag": "script",
+          "text": "var form = document.getElementById('anmeldeformular'); var fehler = document.getElementById('fehler'); var email = document.getElementById('email'); var passwort = document.getElementById('passwort'); form.addEventListener('submit', function (e) { var fehlt = !email.value.trim() || !passwort.value; if (fehlt) { e.preventDefault(); fehler.hidden = false; (email.value.trim() ? passwort : email).focus(); } else { fehler.hidden = true; } });"
+        }
+      ],
+      "lingvo": "de",
+      "renders": [
+        {
+          "aspekto": "komuna",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "komuna",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [
+            {
+              "id": "target-size",
+              "nodes": 2
+            }
+          ],
+          "contrast": "default",
+          "scheme": "dark"
+        }
+      ]
+    },
+    "kompleta": true,
+    "malobservoj": [],
+    "taksado": {
+      "k": {
+        "K1": 1,
+        "K2": null,
+        "K3": null,
+        "K4": 0,
+        "K5": 0,
+        "K6": 1
+      },
+      "k8": {
+        "kombinacioj": [
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "6 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "6 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "1 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.2083,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.8333,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "1 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.2083,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.8333,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1667,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.6667,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1667,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.6667,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1667,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.6667,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "8 von 8 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "7 von 7 nativen Elementen roh (Schrift, Abstand), zuerst `main > header > h1`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `main > header > p` (21,44 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1667,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.6667,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          }
+        ],
+        "kvoto": 0.1354,
+        "mankoj": [],
+        "plena": false
+      },
+      "mankoj": [
+        {
+          "key": "target-size",
+          "kind": "a11y"
+        },
+        {
+          "key": "a",
+          "kind": "rebuilt-ero"
+        },
+        {
+          "key": "button",
+          "kind": "rebuilt-ero"
+        },
+        {
+          "key": "h1",
+          "kind": "rebuilt-ero"
+        },
+        {
+          "key": "input",
+          "kind": "rebuilt-ero"
+        },
+        {
+          "key": "role=alert",
+          "kind": "rebuilt-ero"
+        }
+      ],
+      "total": 44.4
+    },
+    "varianto": "0"
+  },
+  "gespeichert": {
+    "verda": false
+  },
+  "herkunft": {
+    "form": "ablauf",
+    "rondo": "anmelden-und-konto/0/1/rondoj/3/anmelden",
+    "tasko": "anmelden-und-konto",
+    "vojo": null
+  },
+  "runde": 3,
+  "slug": "anmelden",
+  "varianto": "0",
+  "verdaEkde": null,
+  "zelle": "m1",
+  "zusatz": []
+}

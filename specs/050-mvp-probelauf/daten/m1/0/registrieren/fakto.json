@@ -1,0 +1,698 @@
+{
+  "enigo": {
+    "fakto": {
+      "aria": [
+        {
+          "level": 1,
+          "name": "Konto anlegen",
+          "role": "heading"
+        },
+        {
+          "name": "Name",
+          "role": "textbox"
+        },
+        {
+          "name": "E-Mail-Adresse",
+          "role": "textbox"
+        },
+        {
+          "name": "Passwort",
+          "role": "textbox"
+        },
+        {
+          "name": "Konto anlegen",
+          "role": "button"
+        },
+        {
+          "name": "Zur Anmeldung",
+          "role": "link"
+        }
+      ],
+      "bytes": 4630,
+      "console": [],
+      "elements": [
+        {
+          "attrs": {
+            "data-sxablono": "formular"
+          },
+          "parent": -1,
+          "tag": "sxablono-formular",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-regiono": "kapo",
+            "slot": "kapo"
+          },
+          "parent": 0,
+          "tag": "regiono-kapo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "supertitolo",
+            "variant": "supertitolo"
+          },
+          "parent": 1,
+          "tag": "ero-teksto",
+          "text": "Team Nord"
+        },
+        {
+          "attrs": {
+            "aria-level": "1",
+            "data-ero": "titolo",
+            "role": "heading"
+          },
+          "parent": 1,
+          "tag": "ero-titolo",
+          "text": "Konto anlegen"
+        },
+        {
+          "attrs": {
+            "data-ero": "enkonduko",
+            "variant": "enkonduko"
+          },
+          "parent": 1,
+          "tag": "ero-teksto",
+          "text": "Legen Sie ein neues Konto mit Ihrem Namen, Ihrer E-Mail-Adresse und einem Passwort an."
+        },
+        {
+          "attrs": {
+            "data-regiono": "enhavo",
+            "slot": "enhavo"
+          },
+          "parent": 0,
+          "tag": "regiono-enhavo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "mesagxo",
+            "hidden": "",
+            "id": "erfolg",
+            "role": "status"
+          },
+          "parent": 5,
+          "tag": "ero-mesagxo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "teksto"
+          },
+          "parent": 6,
+          "tag": "ero-teksto",
+          "text": "Ihr Konto wurde angelegt. Sie können sich jetzt ."
+        },
+        {
+          "attrs": {
+            "data-ero": "ligilo",
+            "href": "anmelden.html",
+            "role": "link",
+            "tabindex": "0"
+          },
+          "parent": 7,
+          "tag": "ero-ligilo",
+          "text": "anmelden"
+        },
+        {
+          "attrs": {
+            "id": "formular",
+            "novalidate": ""
+          },
+          "parent": 5,
+          "tag": "form",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "kampo"
+          },
+          "parent": 9,
+          "tag": "ero-kampo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "etikedo"
+          },
+          "parent": 10,
+          "tag": "ero-etikedo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "for": "name"
+          },
+          "parent": 11,
+          "tag": "label",
+          "text": "Name"
+        },
+        {
+          "attrs": {
+            "data-ero": "enigo"
+          },
+          "parent": 10,
+          "tag": "ero-enigo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "aria-describedby": "name-fehler",
+            "autocomplete": "name",
+            "id": "name",
+            "name": "name",
+            "required": "",
+            "style": "",
+            "type": "text"
+          },
+          "parent": 13,
+          "tag": "input",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "eraro",
+            "hidden": "",
+            "id": "name-fehler",
+            "role": "alert"
+          },
+          "parent": 10,
+          "tag": "ero-eraro",
+          "text": "Bitte geben Sie Ihren Namen ein."
+        },
+        {
+          "attrs": {
+            "data-ero": "kampo"
+          },
+          "parent": 9,
+          "tag": "ero-kampo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "etikedo"
+          },
+          "parent": 16,
+          "tag": "ero-etikedo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "for": "email"
+          },
+          "parent": 17,
+          "tag": "label",
+          "text": "E-Mail-Adresse"
+        },
+        {
+          "attrs": {
+            "data-ero": "enigo"
+          },
+          "parent": 16,
+          "tag": "ero-enigo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "aria-describedby": "email-fehler",
+            "autocomplete": "email",
+            "id": "email",
+            "name": "email",
+            "required": "",
+            "style": "",
+            "type": "email"
+          },
+          "parent": 19,
+          "tag": "input",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "eraro",
+            "hidden": "",
+            "id": "email-fehler",
+            "role": "alert"
+          },
+          "parent": 16,
+          "tag": "ero-eraro",
+          "text": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+        },
+        {
+          "attrs": {
+            "data-ero": "kampo"
+          },
+          "parent": 9,
+          "tag": "ero-kampo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "etikedo"
+          },
+          "parent": 22,
+          "tag": "ero-etikedo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "for": "passwort"
+          },
+          "parent": 23,
+          "tag": "label",
+          "text": "Passwort"
+        },
+        {
+          "attrs": {
+            "data-ero": "enigo"
+          },
+          "parent": 22,
+          "tag": "ero-enigo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "aria-describedby": "passwort-hinweis passwort-fehler",
+            "autocomplete": "new-password",
+            "id": "passwort",
+            "minlength": "8",
+            "name": "passwort",
+            "required": "",
+            "style": "",
+            "type": "password"
+          },
+          "parent": 25,
+          "tag": "input",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "helpo",
+            "id": "passwort-hinweis"
+          },
+          "parent": 22,
+          "tag": "ero-helpo",
+          "text": "Mindestens 8 Zeichen."
+        },
+        {
+          "attrs": {
+            "data-ero": "eraro",
+            "hidden": "",
+            "id": "passwort-fehler",
+            "role": "alert"
+          },
+          "parent": 22,
+          "tag": "ero-eraro",
+          "text": "Das Passwort muss mindestens 8 Zeichen lang sein."
+        },
+        {
+          "attrs": {
+            "data-ero": "butono"
+          },
+          "parent": 9,
+          "tag": "ero-butono",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "type": "submit"
+          },
+          "parent": 29,
+          "tag": "button",
+          "text": "Konto anlegen"
+        },
+        {
+          "attrs": {
+            "data-regiono": "piedo",
+            "slot": "piedo"
+          },
+          "parent": 0,
+          "tag": "regiono-piedo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "teksto"
+          },
+          "parent": 31,
+          "tag": "ero-teksto",
+          "text": "Sie haben schon ein Konto?"
+        },
+        {
+          "attrs": {
+            "data-ero": "ligilo",
+            "href": "anmelden.html",
+            "role": "link",
+            "tabindex": "0"
+          },
+          "parent": 32,
+          "tag": "ero-ligilo",
+          "text": "Zur Anmeldung"
+        },
+        {
+          "attrs": {},
+          "parent": -1,
+          "tag": "script",
+          "text": "(function () { var form = document.getElementById('formular'); var erfolg = document.getElementById('erfolg'); // Links der Eroj navigieren per Klick und Tastatur Array.prototype.forEach.call(document.querySelectorAll('ero-ligilo[href]'), function (l) { function gehe() { window.location.href = l.getAttribute('href'); } l.addEventListener('click', gehe); l.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); gehe(); } }); }); var felder = [ { input: document.getElementById('name'), fehler: document.getElementById('name-fehler'), gueltig: function (v) { return v.trim().length > 0; } }, { input: document.getElementById('email'), fehler: document.getElementById('email-fehler'), gueltig: function (v) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(v.trim()); } }, { input: document.getElementById('passwort'), fehler: document.getElementById('passwort-fehler'), gueltig: function (v) { return v.length >= 8; } } ]; form.addEventListener('submit', function (e) { e.preventDefault(); var erstesUngueltiges = null; felder.forEach(function (f) { var ok = f.gueltig(f.input.value); f.fehler.hidden = ok; f.input.setAttribute('aria-invalid', ok ? 'false' : 'true'); if (!ok && !erstesUngueltiges) erstesUngueltiges = f.input; }); if (erstesUngueltiges) { erfolg.hidden = true; erstesUngueltiges.focus(); return; } form.reset(); erfolg.hidden = false; }); })();"
+        }
+      ],
+      "lingvo": "de",
+      "renders": [
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        }
+      ]
+    },
+    "kompleta": true,
+    "malobservoj": [],
+    "taksado": {
+      "k": {
+        "K1": 1,
+        "K2": null,
+        "K3": null,
+        "K4": 0,
+        "K5": 0,
+        "K6": 1
+      },
+      "k8": {
+        "kombinacioj": [
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "6 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `sxablono-formular > regiono-kapo > ero-titolo` (4 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "6 von 6 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `sxablono-formular > regiono-kapo > ero-titolo` (4 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `sxablono-formular > regiono-kapo > ero-teksto`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "4 von 4 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `ero-kampo > ero-enigo > input`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          }
+        ],
+        "kvoto": 0.1875,
+        "mankoj": [],
+        "plena": false
+      },
+      "mankoj": [
+        {
+          "key": "button",
+          "kind": "rebuilt-ero"
+        },
+        {
+          "key": "input",
+          "kind": "rebuilt-ero"
+        },
+        {
+          "key": "role=alert",
+          "kind": "rebuilt-ero"
+        },
+        {
+          "key": "role=link",
+          "kind": "rebuilt-ero"
+        }
+      ],
+      "total": 44.4
+    },
+    "varianto": "0"
+  },
+  "gespeichert": {
+    "verda": false
+  },
+  "herkunft": {
+    "form": "ablauf",
+    "rondo": "anmelden-und-konto/0/1/rondoj/3/registrieren",
+    "tasko": "anmelden-und-konto",
+    "vojo": null
+  },
+  "runde": 3,
+  "slug": "registrieren",
+  "varianto": "0",
+  "verdaEkde": null,
+  "zelle": "m1",
+  "zusatz": []
+}

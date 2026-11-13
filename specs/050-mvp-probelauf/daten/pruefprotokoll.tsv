@@ -1,0 +1,5 @@
+zeit	lauf_id	zweck	stato	stato_seit	stato_alter_s	treffer_prozesse	treffer_plan	last1	last5	last15	kerne	entscheidung	grund
+2026-11-13T02:42:57Z	probe-sonnet-komuna	M-1 Sonnet komuna	frei	2026-11-13T02:42:49Z	8	0	0	3.59	6.52	13.58	10	frei – Lauf startet	frei seit 2026-11-13T02:42:49Z, keine Treffer
+2026-11-13T02:51:45Z	probe-sonnet-komuna	M-1 Sonnet komuna	frei			58		9.3	8.03	10.88	10	beendet – gestört	Exit 0; fremde Messung: playwright-test, playwright-browser
+2026-11-13T08:20:40Z	vergleich-ministral-komuna	M-2 ministral komuna	frei	2026-11-13T08:18:31Z	10	0	0	8.8	16.38	23.87	10	frei – Lauf startet	frei seit 2026-11-13T08:18:31Z, keine Treffer
+2026-11-13T09:07:49Z	vergleich-ministral-komuna	M-2 ministral komuna	frei			0		5.97	11.02	11.49	10	beendet – nicht gestört	Exit 0

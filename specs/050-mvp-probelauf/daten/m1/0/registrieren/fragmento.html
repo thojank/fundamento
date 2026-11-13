@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Konto anlegen</title>
+</head>
+<body>
+  <sxablono-formular data-sxablono="formular">
+    <regiono-kapo slot="kapo" data-regiono="kapo">
+      <ero-teksto data-ero="supertitolo" variant="supertitolo">Team Nord</ero-teksto>
+      <ero-titolo data-ero="titolo" role="heading" aria-level="1">Konto anlegen</ero-titolo>
+      <ero-teksto data-ero="enkonduko" variant="enkonduko">Legen Sie ein neues Konto mit Ihrem Namen, Ihrer E-Mail-Adresse und einem Passwort an.</ero-teksto>
+    </regiono-kapo>
+
+    <regiono-enhavo slot="enhavo" data-regiono="enhavo">
+      <ero-mesagxo data-ero="mesagxo" id="erfolg" role="status" hidden>
+        <ero-teksto data-ero="teksto">Ihr Konto wurde angelegt. Sie können sich jetzt <ero-ligilo data-ero="ligilo" href="anmelden.html" role="link" tabindex="0">anmelden</ero-ligilo>.</ero-teksto>
+      </ero-mesagxo>
+
+      <form id="formular" novalidate>
+        <ero-kampo data-ero="kampo">
+          <ero-etikedo data-ero="etikedo"><label for="name">Name</label></ero-etikedo>
+          <ero-enigo data-ero="enigo"><input type="text" id="name" name="name" autocomplete="name" required aria-describedby="name-fehler"></ero-enigo>
+          <ero-eraro data-ero="eraro" id="name-fehler" role="alert" hidden>Bitte geben Sie Ihren Namen ein.</ero-eraro>
+        </ero-kampo>
+
+        <ero-kampo data-ero="kampo">
+          <ero-etikedo data-ero="etikedo"><label for="email">E-Mail-Adresse</label></ero-etikedo>
+          <ero-enigo data-ero="enigo"><input type="email" id="email" name="email" autocomplete="email" required aria-describedby="email-fehler"></ero-enigo>
+          <ero-eraro data-ero="eraro" id="email-fehler" role="alert" hidden>Bitte geben Sie eine gültige E-Mail-Adresse ein.</ero-eraro>
+        </ero-kampo>
+
+        <ero-kampo data-ero="kampo">
+          <ero-etikedo data-ero="etikedo"><label for="passwort">Passwort</label></ero-etikedo>
+          <ero-enigo data-ero="enigo"><input type="password" id="passwort" name="passwort" autocomplete="new-password" minlength="8" required aria-describedby="passwort-hinweis passwort-fehler"></ero-enigo>
+          <ero-helpo data-ero="helpo" id="passwort-hinweis">Mindestens 8 Zeichen.</ero-helpo>
+          <ero-eraro data-ero="eraro" id="passwort-fehler" role="alert" hidden>Das Passwort muss mindestens 8 Zeichen lang sein.</ero-eraro>
+        </ero-kampo>
+
+        <ero-butono data-ero="butono"><button type="submit">Konto anlegen</button></ero-butono>
+      </form>
+    </regiono-enhavo>
+
+    <regiono-piedo slot="piedo" data-regiono="piedo">
+      <ero-teksto data-ero="teksto">Sie haben schon ein Konto? <ero-ligilo data-ero="ligilo" href="anmelden.html" role="link" tabindex="0">Zur Anmeldung</ero-ligilo></ero-teksto>
+    </regiono-piedo>
+  </sxablono-formular>
+
+  <script>
+    (function () {
+      var form = document.getElementById('formular');
+      var erfolg = document.getElementById('erfolg');
+
+      // Links der Eroj navigieren per Klick und Tastatur
+      Array.prototype.forEach.call(document.querySelectorAll('ero-ligilo[href]'), function (l) {
+        function gehe() { window.location.href = l.getAttribute('href'); }
+        l.addEventListener('click', gehe);
+        l.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); gehe(); }
+        });
+      });
+
+      var felder = [
+        { input: document.getElementById('name'), fehler: document.getElementById('name-fehler'),
+          gueltig: function (v) { return v.trim().length > 0; } },
+        { input: document.getElementById('email'), fehler: document.getElementById('email-fehler'),
+          gueltig: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); } },
+        { input: document.getElementById('passwort'), fehler: document.getElementById('passwort-fehler'),
+          gueltig: function (v) { return v.length >= 8; } }
+      ];
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var erstesUngueltiges = null;
+
+        felder.forEach(function (f) {
+          var ok = f.gueltig(f.input.value);
+          f.fehler.hidden = ok;
+          f.input.setAttribute('aria-invalid', ok ? 'false' : 'true');
+          if (!ok && !erstesUngueltiges) erstesUngueltiges = f.input;
+        });
+
+        if (erstesUngueltiges) {
+          erfolg.hidden = true;
+          erstesUngueltiges.focus();
+          return;
+        }
+
+        form.reset();
+        erfolg.hidden = false;
+      });
+    })();
+  </script>
+</body>
+</html>

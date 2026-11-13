@@ -1,0 +1,538 @@
+{
+  "enigo": {
+    "fakto": {
+      "aria": [
+        {
+          "name": "",
+          "role": "banner"
+        },
+        {
+          "name": "Mein Konto",
+          "role": "main"
+        },
+        {
+          "level": 1,
+          "name": "Mein Konto",
+          "role": "heading"
+        },
+        {
+          "name": "",
+          "role": "term"
+        },
+        {
+          "name": "",
+          "role": "definition"
+        },
+        {
+          "name": "",
+          "role": "term"
+        },
+        {
+          "name": "",
+          "role": "definition"
+        },
+        {
+          "name": "",
+          "role": "term"
+        },
+        {
+          "name": "",
+          "role": "definition"
+        },
+        {
+          "name": "Abmelden",
+          "role": "button"
+        }
+      ],
+      "bytes": 1928,
+      "console": [],
+      "elements": [
+        {
+          "attrs": {
+            "data-sxablono": "konto-seite"
+          },
+          "parent": -1,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-region": "kopf",
+            "role": "banner"
+          },
+          "parent": 0,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "markenname"
+          },
+          "parent": 1,
+          "tag": "div",
+          "text": "Team Nord"
+        },
+        {
+          "attrs": {
+            "aria-labelledby": "titel",
+            "data-region": "inhalt"
+          },
+          "parent": 0,
+          "tag": "main",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "aria-level": "1",
+            "data-ero": "titel",
+            "id": "titel",
+            "role": "heading"
+          },
+          "parent": 3,
+          "tag": "div",
+          "text": "Mein Konto"
+        },
+        {
+          "attrs": {
+            "data-ero": "text"
+          },
+          "parent": 3,
+          "tag": "div",
+          "text": "Hier sehen Sie die Angaben zu Ihrem Konto."
+        },
+        {
+          "attrs": {
+            "data-ero": "liste"
+          },
+          "parent": 3,
+          "tag": "dl",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "zeile"
+          },
+          "parent": 6,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "beschriftung"
+          },
+          "parent": 7,
+          "tag": "dt",
+          "text": "Kontonummer"
+        },
+        {
+          "attrs": {
+            "data-ero": "wert"
+          },
+          "parent": 7,
+          "tag": "dd",
+          "text": "4711"
+        },
+        {
+          "attrs": {
+            "data-ero": "zeile"
+          },
+          "parent": 6,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "beschriftung"
+          },
+          "parent": 10,
+          "tag": "dt",
+          "text": "Team"
+        },
+        {
+          "attrs": {
+            "data-ero": "wert"
+          },
+          "parent": 10,
+          "tag": "dd",
+          "text": "Team Nord"
+        },
+        {
+          "attrs": {
+            "data-ero": "zeile"
+          },
+          "parent": 6,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "beschriftung"
+          },
+          "parent": 13,
+          "tag": "dt",
+          "text": "Status"
+        },
+        {
+          "attrs": {
+            "data-ero": "wert"
+          },
+          "parent": 13,
+          "tag": "dd",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "marke"
+          },
+          "parent": 15,
+          "tag": "span",
+          "text": "Angemeldet"
+        },
+        {
+          "attrs": {
+            "data-region": "aktionen"
+          },
+          "parent": 0,
+          "tag": "div",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-ero": "knopf",
+            "data-variante": "gefahr",
+            "onclick": "location.href='anmelden.html'",
+            "type": "button"
+          },
+          "parent": 17,
+          "tag": "button",
+          "text": "Abmelden"
+        }
+      ],
+      "lingvo": "de",
+      "renders": [
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        }
+      ]
+    },
+    "kompleta": false,
+    "malobservoj": [],
+    "taksado": {
+      "k": {
+        "K1": 1,
+        "K2": null,
+        "K3": null,
+        "K4": 0,
+        "K5": 0,
+        "K6": 1
+      },
+      "k8": {
+        "kombinacioj": [
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "9 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > main` (24 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "9 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > main` (24 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.25,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 1,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > main` (24 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1389,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.5556,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > main` (24 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1389,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.5556,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > main` (24 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1389,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.5556,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "10 von 10 Textläufen (100 % der Zeichen) in Ersatzschrift, zuerst `div > div > div`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "1 von 1 nativen Elementen roh (Schrift, Farbe, Abstand), zuerst `div > div > button`"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > main` (24 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "keine Sxablono mit erkannter Region im Markup"
+              }
+            ],
+            "kvoto": 0.1389,
+            "merkmaloj": {
+              "ersatzschrift": 0,
+              "interspacoj": 0.5556,
+              "nativaj": 0,
+              "sxablono": 0
+            },
+            "scheme": "light"
+          }
+        ],
+        "kvoto": 0.132,
+        "mankoj": [],
+        "plena": false
+      },
+      "mankoj": [
+        {
+          "key": "button",
+          "kind": "rebuilt-ero"
+        }
+      ],
+      "total": 44.4
+    },
+    "varianto": "0"
+  },
+  "gespeichert": {
+    "verda": false
+  },
+  "herkunft": {
+    "form": "ablauf",
+    "rondo": "anmelden-und-konto/0/1/rondoj/3/konto",
+    "tasko": "anmelden-und-konto",
+    "vojo": null
+  },
+  "runde": 3,
+  "slug": "konto",
+  "varianto": "0",
+  "verdaEkde": null,
+  "zelle": "m1",
+  "zusatz": []
+}

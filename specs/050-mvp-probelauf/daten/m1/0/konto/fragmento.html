@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mein Konto – Team Nord</title>
+  <style>
+    /* Nur Layout auf Abstandsstufen (8 / 16 / 24 px); Schrift und Farben kommen aus der Marke. */
+    :root {
+      --abstand-1: 8px;
+      --abstand-2: 16px;
+      --abstand-3: 24px;
+    }
+    body { margin: 0; font-family: inherit; }
+    [data-sxablono] { display: grid; gap: var(--abstand-3); padding: var(--abstand-2); }
+    [data-region] { display: grid; gap: var(--abstand-2); }
+    [data-ero="liste"] { display: grid; gap: var(--abstand-1); margin: 0; }
+    [data-ero="zeile"] { display: grid; grid-template-columns: 1fr 2fr; gap: var(--abstand-1); }
+    [data-ero="zeile"] > * { margin: 0; }
+    [data-region="aktionen"] { justify-items: end; }
+  </style>
+</head>
+<body>
+  <div data-sxablono="konto-seite">
+
+    <div data-region="kopf" role="banner">
+      <div data-ero="markenname">Team Nord</div>
+    </div>
+
+    <main data-region="inhalt" aria-labelledby="titel">
+      <div data-ero="titel" role="heading" aria-level="1" id="titel">Mein Konto</div>
+      <div data-ero="text">Hier sehen Sie die Angaben zu Ihrem Konto.</div>
+
+      <dl data-ero="liste">
+        <div data-ero="zeile">
+          <dt data-ero="beschriftung">Kontonummer</dt>
+          <dd data-ero="wert">4711</dd>
+        </div>
+        <div data-ero="zeile">
+          <dt data-ero="beschriftung">Team</dt>
+          <dd data-ero="wert">Team Nord</dd>
+        </div>
+        <div data-ero="zeile">
+          <dt data-ero="beschriftung">Status</dt>
+          <dd data-ero="wert"><span data-ero="marke">Angemeldet</span></dd>
+        </div>
+      </dl>
+    </main>
+
+    <div data-region="aktionen">
+      <button type="button" data-ero="knopf" data-variante="gefahr" onclick="location.href='anmelden.html'">Abmelden</button>
+    </div>
+
+  </div>
+</body>
+</html>

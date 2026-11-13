@@ -1,0 +1,19 @@
+<fm-sxelo>
+  <fm-ligilo slot="brand" to="anmelden.html" label="Team Nord"></fm-ligilo>
+  <fm-navigado slot="nav" label="Hauptnavigation" page="registrieren.html">
+    <a href="anmelden.html">Anmelden</a>
+    <a href="registrieren.html">Konto anlegen</a>
+  </fm-navigado>
+  <fm-stako gap="large">
+    <fm-pagxo>
+      <fm-titolo slot="title" focusable level="1">Konto anlegen</fm-titolo>
+      <fm-teksto slot="subtitle">Lege ein neues Konto mit Name, E-Mail und Passwort an.</fm-teksto>
+      <fm-formularo label="Konto anlegen">
+        <fm-kampo slot="fields" name="name" autocomplete="name" required label="Name"></fm-kampo>
+        <fm-kampo slot="fields" kind="email" name="email" autocomplete="email" required label="E-Mail"></fm-kampo>
+        <fm-kampo slot="fields" kind="password" name="password" autocomplete="new-password" required label="Passwort"></fm-kampo>
+        <fm-butono slot="actions" type="submit" emphasis="high" label="Konto speichern"></fm-butono>
+      </fm-formularo>
+    </fm-pagxo>
+  </fm-stako>
+</fm-sxelo>

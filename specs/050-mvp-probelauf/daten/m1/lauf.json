@@ -1,0 +1,23 @@
+{
+  "commit": "de931e40",
+  "kiModelo": "openrouter/anthropic/claude-sonnet-5.5",
+  "lingvo": "de",
+  "maksTokenoj": 1666000,
+  "markoj": [
+    "komuna",
+    "ekzemplo",
+    "provo",
+    "provo-kompakta"
+  ],
+  "ripetoj": 1,
+  "takso": {
+    "tokenoj": 1025100
+  },
+  "taskoj": [
+    "anmelden-und-konto"
+  ],
+  "varianten": [
+    "F",
+    "0"
+  ]
+}
