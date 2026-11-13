@@ -64,6 +64,11 @@ export interface Interspaco {
   akso: "y" | "x";
   /** px, rounded to 0.01, always > 0. */
   px: number;
+  /**
+   * D-052-01 (specs/052-k8-interspacoj/plan.md): distributed free space of an Ero or Sxablono
+   * container, not a set gap; `ero` is the localName of the fm-* host. Counted, never scored.
+   */
+  verteilita?: { ero: string };
 }
 
 /**

@@ -42,7 +42,22 @@ const CXIUJ_CONFIG = fileURLToPath(
     import.meta.url,
   ),
 );
-const NOMOJ = ["roh", "sxablono"];
+// Spec 052 (V-5, D-052-03): the M-1 markup (`anmelden-m1` a byte copy of
+// specs/050-mvp-probelauf/daten/m1/F/anmelden/fragmento.html, `konto-m1` of …/F/konto/fragmento.html
+// without the line `<span slot="heading">Kontoangaben</span>`, Rest C) and the counter-probes of
+// D-052-01. They carry no placeholder and are rendered unchanged, like `roh`.
+const NOMOJ = [
+  "roh",
+  "sxablono",
+  "anmelden-m1",
+  "konto-m1",
+  "gegenprobe-a-eigener-abstand",
+  "gegenprobe-b-doppelte-luecke",
+  "gegenprobe-c-eigener-verteiler",
+  "gegenprobe-d1-eigene-klasse",
+  "gegenprobe-d2-part",
+  "gegenprobe-3c-ero-mit-style",
+];
 
 /** CSS generic family words (CSS Fonts 4), none of them a brand's own family. */
 const GENERIC_FAMILIES = [

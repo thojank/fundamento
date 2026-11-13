@@ -1,0 +1,238 @@
+{
+  "kombinacioj": [
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.75,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.75,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.75,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.75,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 1 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > fm-teksto` (16 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.5,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 1 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > fm-teksto` (16 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.5,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 1 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > fm-teksto` (16 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.5,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 1 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `div > fm-teksto` (16 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.5,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    }
+  ],
+  "kvoto": 0.625,
+  "mankoj": []
+}

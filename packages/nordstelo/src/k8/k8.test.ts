@@ -17,7 +17,15 @@ import {
   sxablonojElElementoj,
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
-import type { Element, Facts, FaktoAspekto, NativaFingrospuro, Render, Sondo } from "../facts.js";
+import type {
+  Element,
+  Facts,
+  FaktoAspekto,
+  Interspaco,
+  NativaFingrospuro,
+  Render,
+  Sondo,
+} from "../facts.js";
 import { facts, h, type Node } from "../test-doubles/facts.js";
 import {
   K8_MERKMALOJ,
@@ -324,6 +332,68 @@ describe("k8 – interspacoj (D-08, D-103)", () => {
   it("gives the share of gaps on a step", () => {
     const [a = 0, b = 0] = KOMUNA.stupoj;
     expect(kun1(KOMUNA, [a, b, a + 0.51, b + 0.5]).merkmaloj.interspacoj).toBe(0.75);
+  });
+});
+
+// Spec 052 (K8I-002, D-052-01, V-2): a `verteilita` pair (free space an Ero or a Sxablono
+// distributes) is counted in the kialo but neither in the numerator nor in the denominator; the
+// sentence gets `, n verteilte Abstände nicht gezählt` for n > 0, and only `verteilita` pairs are
+// „nichts zu prüfen“. Without the field everything stays as before.
+describe("k8 – interspacoj with verteilita (D-052-01, V-2)", () => {
+  const [a = 0, b = 0] = KOMUNA.stupoj;
+  const ekster = a + 0.51;
+  const paro = (post: number, px: number, ero?: string): Interspaco => ({
+    gepatro: 0,
+    antaux: post - 1,
+    post,
+    akso: "x",
+    px,
+    ...(ero === undefined ? {} : { verteilita: { ero } }),
+  });
+  const kunParoj = (paroj: Interspaco[]) =>
+    sola(k8(kun([render("komuna", fakto(KOMUNA, { interspacoj: paroj }))]), modelo));
+  const gxermana = (px: number) => String(Math.round(px * 100) / 100).replace(".", ",");
+
+  it("counts a verteilita pair neither in the numerator nor in the denominator, and names n = 1", () => {
+    // The verteilita pair comes first in the order (post 1) and lies far off every step: it is
+    // neither the first place named nor a miss.
+    const k = kunParoj([paro(1, 930.05, "fm-pagxo"), paro(4, a), paro(4, ekster)]);
+    expect(k.merkmaloj.interspacoj).toBe(0.5);
+    expect(kialoDe(k, "interspacoj")).toEqual([
+      `1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst \`main > button\` (${gxermana(ekster)} px), 1 verteilte Abstände nicht gezählt`,
+    ]);
+  });
+
+  it("is 1 and vollständig with the count when every counted pair is on a step", () => {
+    const k = kunParoj([
+      paro(1, 930.05, "fm-pagxo"),
+      paro(4, a),
+      paro(4, b),
+      paro(2, 817.5, "fm-sxelo"),
+    ]);
+    expect(k.merkmaloj.interspacoj).toBe(1);
+    expect(kialoDe(k, "interspacoj")).toEqual(["vollständig, 2 verteilte Abstände nicht gezählt"]);
+  });
+
+  it("is 1 with „nichts zu prüfen, n verteilte …“ when every pair is verteilita", () => {
+    const k = kunParoj([paro(1, 930.05, "fm-pagxo"), paro(4, ekster, "fm-pagxo")]);
+    expect(k.merkmaloj.interspacoj).toBe(1);
+    expect(kialoDe(k, "interspacoj")).toEqual([
+      "nichts zu prüfen, 2 verteilte Abstände nicht gezählt",
+    ]);
+  });
+
+  it("without the field: the value and the three sentences of today, no count appended", () => {
+    expect(kunParoj([]).merkmaloj.interspacoj).toBe(1);
+    expect(kialoDe(kunParoj([]), "interspacoj")).toEqual(["nichts zu prüfen"]);
+    const plena = kunParoj([paro(4, a), paro(4, b)]);
+    expect(plena.merkmaloj.interspacoj).toBe(1);
+    expect(kialoDe(plena, "interspacoj")).toEqual(["vollständig"]);
+    const parta = kunParoj([paro(1, a), paro(4, ekster)]);
+    expect(parta.merkmaloj.interspacoj).toBe(0.5);
+    expect(kialoDe(parta, "interspacoj")).toEqual([
+      `1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst \`main > button\` (${gxermana(ekster)} px)`,
+    ]);
   });
 });
 
