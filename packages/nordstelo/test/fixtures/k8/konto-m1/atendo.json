@@ -129,17 +129,17 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+          "teksto": "3 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-teksto` (12 px)"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.8889,
+      "kvoto": 0.9167,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.5556,
+        "interspacoj": 0.6667,
         "nativaj": 1,
         "sxablono": 1
       },
@@ -158,17 +158,17 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+          "teksto": "3 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-teksto` (12 px)"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.8889,
+      "kvoto": 0.9167,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.5556,
+        "interspacoj": 0.6667,
         "nativaj": 1,
         "sxablono": 1
       },
@@ -187,17 +187,17 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+          "teksto": "3 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-teksto` (8,88 px)"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.8889,
+      "kvoto": 0.9167,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.5556,
+        "interspacoj": 0.6667,
         "nativaj": 1,
         "sxablono": 1
       },
@@ -216,23 +216,23 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "4 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+          "teksto": "3 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-teksto` (8,88 px)"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.8889,
+      "kvoto": 0.9167,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.5556,
+        "interspacoj": 0.6667,
         "nativaj": 1,
         "sxablono": 1
       },
       "scheme": "light"
     }
   ],
-  "kvoto": 0.9167,
+  "kvoto": 0.9306,
   "mankoj": []
 }

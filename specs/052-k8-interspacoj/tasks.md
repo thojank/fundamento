@@ -8,7 +8,7 @@ Sechs Tickets, ein Strang, streng nacheinander (D-052-08): `K8I-001 → K8I-002 
 |---|---|---|---|---|
 | K8I-001 | 1 Grundlage | Start prüfen (052 frei, Basis-Diff), Spec-Ordner, Jugxo D-052-01, Entscheidungen D-052-02 … -09 | – | erledigt 2026-11-13 |
 | K8I-002 | 2 Rote Tests | Rote Tests A und B, Fixtures aus M-1 (`anmelden-m1`, `konto-m1`), Gegenproben (a)–(d), 3c; Typ `verteilita` (V-1) | K8I-001 | erledigt 2026-11-13 (rot belegt) |
-| K8I-003 | 3 Fixes | Fix A: leere Live-Bereiche im Projektor (`data-fm-leer`), Neubau Eroj, Baselines nach D-052-06 | K8I-002 | offen |
+| K8I-003 | 3 Fixes | Fix A: leere Live-Bereiche im Projektor (`data-fm-leer`), Neubau Eroj, Baselines nach D-052-06 | K8I-002 | erledigt 2026-11-13 (`konto-m1` rot bis K8I-004) |
 | K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | offen |
 | K8I-005 | 4 Nachweis | Neubewertung M-1 (Kontrolle und gerendert) ohne Modell, `neubewertung.md`, Rest C als Befund | K8I-004 | offen |
 | K8I-006 | 5 Tests | Test-Ticket: Gesamtstand, AC-Matrix vollständig, Querschnitt | K8I-005 | offen |
@@ -22,7 +22,7 @@ Geplante Belege. Datei- und Testnamen stehen fest, sobald das Ticket sie anlegt;
 | AC-A1 | `fm-sxelo`, leeres `notices`: nav → main = `spacing.medium` ± 0,5, 4 Marken × hell/dunkel | K8I-002 (rot), K8I-003 | neue Eroj-Spec in `packages/eroj/test/` (Fall 1), Chromium; K8I-006 auch Firefox und WebKit |
 | AC-A2 | Leerer Live-Bereich bleibt im Accessibility-Baum; gefüllt nimmt er Platz ein | K8I-002 (rot), K8I-003 | dieselbe Eroj-Spec (Fälle 2, 3, 4 Sprunglink) |
 | AC-A3 | Regel aus `region.live` der Skemo für jede Sxablono mit `live`, kein Name im Element | K8I-002 (rot), K8I-003, K8I-006 | projekcioj-Unit (Liste der Live-Bereiche, Test-Kopie mit `live` an anderem Bereich); Eroj-Spec Fall 5 (`fm-filtrilo`); K8I-006: Menge aus der Modelo abgeleitet |
-| AC-A4 | Sxablonoj ohne `live` byte-gleich; betroffene Bilder namentlich, alle anderen pixelgleich | K8I-002 (Guard), K8I-003 | projekcioj-Guard (SHA-256 je Sxablono, auch `inline: true`); Inventur und `cmp`-Vergleich nach D-052-06 in `plan.md` |
+| AC-A4 | Sxablonoj ohne `live` byte-gleich; betroffene Bilder namentlich, alle anderen pixelgleich | K8I-002 (Guard), K8I-003 | projekcioj-Guard (SHA-256 je Sxablono, auch `inline: true`); Inventur und `cmp`-Vergleich nach D-052-06 in `plan.md` (K8I-003: Bildreferenzen betroffen: keine; 90 Bilder, 40 namentlich geändert – alle mit leerem `notices` –, 50 byte-gleich) |
 | AC-B1 | Paare wie bisher, Abstand zwischen Flat-Tree-Kästen unter dem nächsten gemeinsamen Vorfahren | K8I-002 (rot), K8I-004 | nordstelo `src/k8/interspacoj-052.test.ts` (`konto-m1`, `anmelden-m1`); `faktoj.test.ts` |
 | AC-B2 | `verteilita` nur für Eroj und Sxablonoj (alle drei Bedingungen von D-052-01) | K8I-002 (rot), K8I-004 | `interspacoj-052.test.ts` Gegenproben (c), (d1), (d2), (3c): kein Paar `verteilita`; `k8.test.ts` (V-2) |
 | AC-B3 | Gegenproben (a)–(d) bleiben rot, jede zuerst rot belegt | K8I-002, K8I-004 | `interspacoj-052.test.ts` mit Selbsttest der gelockerten Fakten (K8I-002); Zwischenstand ohne Bedingung 2 und 3 rot (K8I-004, Build-Log) |
@@ -101,9 +101,42 @@ Werte auf dem roten Stand (`atendo.json`, `interspacoj`): `anmelden-m1` 1 in kom
 - **B-002-4 Fall 5.1 (`fm-filtrilo`, „Punkt 1 sinngemäß“).** Im Fuß mit `space-between` verschiebt ein leerer Status nichts sichtbar. Messbar ist sein Platz, wenn die Leiste genau so schmal ist wie ihre Aktionen: Der Status bricht heute in eine zweite Zeile (Fuß = Aktionen + `gap`). Erwartung: Fuß so hoch wie die Aktionen.
 - **B-002-5 Accessibility-Baum (Fall 3).** Playwrights `ariaSnapshot` zeigt das leere `notices` (generisch, ohne Rolle) nicht. Geprüft wird deshalb in Chromium über CDP (`Accessibility.getFullAXTree`: ein nicht ignorierter Knoten mit `live: polite`) und in jeder Engine über die berechneten Zustände (`aria-live`, nicht `hidden`, nicht `display: none`/`contents`, nicht `visibility: hidden`, kein `aria-hidden`). Für `fm-filtrilo` steht `- status` im `ariaSnapshot`.
 
+## K8I-003 im Einzelnen (Fix A, Neubau, Baselines)
+
+### Commits K8I-003
+
+| SHA | Inhalt |
+|---|---|
+| `71db92e1` | `packages/projekcioj/src/celoj/web-component/sxablono-template.ts`: `LIVE` aus `region.live`, `data-fm-leer` per `toggleAttribute` in `#render` (eigene Schleife nach `HIDEABLE`, nie `.hidden`), Regeln `[part="frame"] { position: relative; }` und `[part][data-fm-leer] { … }` nach D-052-04 – nur für Sxablonoj mit Live-Bereich |
+| (dieser Commit) | neu erzeugte `faktoj.json`/`atendo.json` von `anmelden-m1` und `konto-m1`, `plan.md` (Projektionen, Figma-Beleg, AC-A4), `tasks.md` |
+
+### Grün belegt (knapp)
+
+- **projekcioj** `vitest run src/celoj/web-component/`: 181 bestanden, 0 rot (darin `live-052.test.ts` 9 von 9, Guard byte-gleich). Paket `pnpm --filter @fundamento/projekcioj test`: 1 560 bestanden, 1 rot, 1 übersprungen bei Last 35–37 (fremder Lastlauf): rot nur `src/fonto/komuna-fonto.test.ts:182` „Test timed out in 60000ms“ (Auflösung der Marken, ohne Bezug zu Sxablonoj); Einzellauf derselben Datei bei Last 11: 11 bestanden, 0 rot. Lint grün (nur bestehende Warnungen in fremden Dateien).
+- **eroj** `playwright test test/interspacoj-052.spec.ts --project=chromium`: **48 bestanden, 0 rot** (K8I-002: 8/40).
+- **Bestehende Eroj-Specs**, Chromium, je eine Suite: `sxablonoj` 6/0, `sxablonoj-2` 4/0, `sxablonoj-3` 6/0, `nachlese-8` 6/0, `metiejo` 6/0, `studio-035` 6/0, `buehne-036` 20/0 (bestanden/rot). Keine Erwartung geändert.
+- **Make Kit** `pnpm check:make-kit`: 5 bestanden, 0 rot. **Parität** `pnpm check:parity`: `differences=0 items=45`, 0 Fehler. **Vitrino** `check:vitrino`: zweimal 38 bestanden, 1 rot, 50 übersprungen (Last 9–12 bzw. 11–9): rot nur `vitrino.check.ts:1224` „Ableitung Gegenprobe“ (Zeitmessung der Werkstatt, `Ableitung median 150.0 ms, normiert 150.0 ms`, erwartet rot = über der Grenze); `mode: serial` überspringt danach den Rest. Dieselbe Gegenprobe ist auf dem Stand **vor** dem Fix (`sxablono-template.ts` von `c906fabc`, projekcioj neu gebaut) genauso rot (`median 147.5 ms`), also fremd (B-003-4). Der Rest ohne sie (`--grep-invert "Ableitung Gegenprobe"`): **88 bestanden, 0 rot, 0 übersprungen**.
+- **Determinismus:** `pnpm --filter @fundamento/eroj build` zweimal, `diff -r` auf `dist/` und `src/generated/` leer.
+- **K8-Fixtures:** `pnpm turbo run build --filter=@fundamento/nordstelo...`, `node packages/nordstelo/test/k8/generi.mjs`, `cp -r … /tmp/s052-k8-a`, zweiter Lauf, `diff -r` leer. Geändert nur `anmelden-m1` und `konto-m1` (`faktoj.json`, `atendo.json`); alle Gegenproben, `roh` und `sxablono` byte-gleich (`git diff --exit-code` Exit 0).
+  - `anmelden-m1` `interspacoj`: **1 in allen 8 Kombinationen** (vorher 0,8571 in provo, provo-kompakta). AC-N3 Teil 1 erfüllt.
+  - `konto-m1` `interspacoj`: 0,7778 in komuna/ekzemplo (unverändert), 0,6667 in provo/provo-kompakta (vorher 0,5556; das Paar nav → main ist jetzt auf Stufe). **Bleibt rot bis K8I-004 (B)**: übrig sind 2 bzw. 3 von 9 Paaren im Kopf von `fm-pagxo` (Kialo z. B. „2 von 9 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-butono` (930,05 px)“ bzw. „… `fm-teksto` (11 px)“: subtitle → actions mit `space-between`, badges → subtitle), die erst die Flat-Tree-Messung mit `verteilita` (B) auflöst.
+- **nordstelo** `vitest run src/k8/`: 87 bestanden, 8 rot – alle erwartet:
+  - `k8.test.ts:357`, `:367`, `:378` (V-2, `verteilita` in `k8.ts`) → K8I-004.
+  - `interspacoj-052.test.ts:184` `konto-m1` = 1, `:188` kein Paar > 100 px, `:200` badges → subtitle auf Stufe (6 Kombinationen) → K8I-004 (B).
+  - `interspacoj-052.test.ts:232` Selbsttest (a) und (b) → K8I-004 (B-002-1).
+  - Grün geworden: `anmelden-m1` = 1 in allen Kombinationen. Gegenproben-Erwartungen und Selbsttests (c), (d1), (d2), (3c) unverändert grün.
+
+### Befunde K8I-003
+
+- **B-003-1 Wiederholbarkeit eines Vitrino-Bilds.** `vitrino-light-redaktilo-mittel` war zwischen zwei Läufen auf demselben Stand nicht byte-gleich (sichtbar gleich). `redaktilo` hat keinen Live-Bereich, sein Code ist im Guard byte-gleich; gegen den zweiten Vorher-Lauf ist das Nachher-Bild byte-gleich.
+- **B-003-2 `fm-filtrilo` sichtbar unverändert.** Mit leerem `status` sind beide Bilder in voller Breite byte-gleich; die Wirkung zeigt sich nur in der schmalen Leiste (Fall 5.1 der Eroj-Spec: Fuß eine Zeile).
+- **B-003-3 Metiejo-Startseite.** Sie nutzt `fm-sxelo` ohne Meldung in `notices`; ihr Inhalt rückt um ein `spacing.medium` nach oben. Gewollte Wirkung von A, kein Test hängt daran (`metiejo.spec.ts` grün).
+- **B-003-4 `vitrino.check.ts:1224` „Ableitung Gegenprobe“ rot, auch vor dem Fix.** Die Gegenprobe verlangsamt die Ableitung der Werkstatt um 80 ms × k und erwartet ein rotes Urteil; auf dieser Maschine landet der Median bei 147,5–150,0 ms, also knapp nicht über der Grenze. Ohne Bezug zu Sxablonoj (die Werkstatt leitet Paletten ab). Nicht angefasst (keine Grenze geändert); Befund für K8I-006/den Maintainer. Lokal mit `--grep-invert` umgangen, in der CI läuft die Vitrino in Teilen (`VITRINO_PARTO`).
+- Keine neue Property, `STRUCTURAL_PROPERTIES`, `figma.ts`, `serve.ts`, `turbo.json` unverändert. Kein Handeditieren generierter Ausgabe.
+
 ## Geänderte Erwartungen älterer Tests (`testing.md` › „Extending tested pure functions“)
 
-Keine in K8I-001 und K8I-002 (`k8.test.ts` nur um einen `describe` ergänzt, der Typ-Import um `Interspaco` erweitert; keine bestehende Erwartung geändert). K8I-003 und K8I-004 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein (z. B. durch den Marker D-052-05 oder die kleinere Lücke von A).
+Keine in K8I-001 und K8I-002 (`k8.test.ts` nur um einen `describe` ergänzt, der Typ-Import um `Interspaco` erweitert; keine bestehende Erwartung geändert). Keine in K8I-003: Die sieben bestehenden Eroj-Specs mit `fm-sxelo`/`fm-filtrilo` und alle projekcioj-Tests sind mit dem Fix ohne Änderung grün (keine feste Erwartung hing an der doppelten Lücke nav → main); die neu erzeugten `faktoj.json`/`atendo.json` von `anmelden-m1` und `konto-m1` sind gerenderte Fakten, keine Erwartung eines älteren Tests. K8I-003 und K8I-004 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein (z. B. durch den Marker D-052-05 oder die kleinere Lücke von A).
 
 | Datei:Zeile | vorher | nachher | Grund | Ticket |
 |---|---|---|---|---|

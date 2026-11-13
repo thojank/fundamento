@@ -129,17 +129,17 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "1 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-stako` (16 px)"
+          "teksto": "vollständig"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.9643,
+      "kvoto": 1,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.8571,
+        "interspacoj": 1,
         "nativaj": 1,
         "sxablono": 1
       },
@@ -158,17 +158,17 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "1 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-stako` (16 px)"
+          "teksto": "vollständig"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.9643,
+      "kvoto": 1,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.8571,
+        "interspacoj": 1,
         "nativaj": 1,
         "sxablono": 1
       },
@@ -187,17 +187,17 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "1 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-stako` (16 px)"
+          "teksto": "vollständig"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.9643,
+      "kvoto": 1,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.8571,
+        "interspacoj": 1,
         "nativaj": 1,
         "sxablono": 1
       },
@@ -216,23 +216,23 @@
         },
         {
           "merkmal": "interspacoj",
-          "teksto": "1 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-stako` (16 px)"
+          "teksto": "vollständig"
         },
         {
           "merkmal": "sxablono",
           "teksto": "vollständig: `fm-sxelo`"
         }
       ],
-      "kvoto": 0.9643,
+      "kvoto": 1,
       "merkmaloj": {
         "ersatzschrift": 1,
-        "interspacoj": 0.8571,
+        "interspacoj": 1,
         "nativaj": 1,
         "sxablono": 1
       },
       "scheme": "light"
     }
   ],
-  "kvoto": 0.9821,
+  "kvoto": 1,
   "mankoj": []
 }
