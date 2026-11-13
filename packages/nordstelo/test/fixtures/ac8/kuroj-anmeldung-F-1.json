@@ -4,8 +4,13 @@
   "faktoSha256": "5897eb0f3da0466626842ecda431be74844f14ff2a2d471d513c4fcbf7e35de0",
   "tasko": "anmeldung",
   "expected": {
-    "K3": 1,
-    "reguloGaps": [],
+    "K3": 0.6667,
+    "reguloGaps": [
+      {
+        "kind": "regulo",
+        "key": "label-required"
+      }
+    ],
     "instancoj": [
       {
         "ero": "kampo",
@@ -41,7 +46,7 @@
     ],
     "urteil": {
       "instances": 3,
-      "valid": true,
+      "valid": false,
       "violations": [
         {
           "instance": [
@@ -91,6 +96,23 @@
               "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
               "name": "label-names-action",
               "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess."
+            }
+          }
+        },
+        {
+          "instance": [
+            2
+          ],
+          "issue": {
+            "rule": "label-required",
+            "severity": "error",
+            "path": "instances#/2",
+            "message": "Instance 2 of butono has only the label prop \"Anmelden\", which is never shown, and no icon.",
+            "suggestion": "Write the label as the text of the element: <fm-butono …>Anmelden</fm-butono>. The label prop names an icon-only button next to its icon.",
+            "regulo": {
+              "id": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+              "name": "label-required",
+              "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for. The label prop is never shown: without an icon the butono appears as an empty surface and the ligilo takes 0 × 0 px, and a name nobody sees is no label for sighted people, so the action looks absent although assistive technology announces it (F-052-4, Spec 053)."
             }
           }
         }
