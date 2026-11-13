@@ -8,7 +8,7 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 |---|---|---|---|---|
 | W050-T1 | Diagnose ohne Code: Artefakte, Zeitleisten, Messung, Vorher-Raten, Proben, V-1 | nötig | Auftrag | erledigt: V-1, V-2, Proben (`79a463bc`); V-3 „vorher“ vollständig (2026-11-13, Doku-Commit „before rates complete“) |
 | W050-T2 | Prüfung schneller (rot zuerst, byte-gleich) | **nötig** | V-1: T-A und T-B sind **K4 Prüfung** (erste `/pruefung` eines neuen `rev` lokal 1613 / 2434 ms ≥ 1 s; CI-Unit 1,5–2,8 s; im Eroj-Job ≥ 4,4 bis ≥ 11 s). Messung: Prüfregeln 94 %, `validateModeloFiles` (`packages/modelo`, tabu) 82 %, Ableitung ≈ 100 ms, die zwei `buildModelo` ≈ 16 ms (B-03). T-D ist **nicht** K4 (Prüfung in `festlegen`, Rahmen 1–3 ms). | **erledigt:** Paletten je Anfrage einmal gelöst (`2f6c33a6`), byte-gleich; erste `/pruefung` 1613 → 1491 ms (Median), „unter 1 s“ nicht erreichbar ohne `modelo` (B-11); Zwischenprüfung 150/150 |
-| W050-T3 | Tests an der Ursache (K2, K3) und doppelte Navigation (K4) | **nötig**, alle drei Teile | **K2** als Nebenursache für T-A (`entwurfGespeichert` → `rahmenBereit` rev 2) und T-B (`schrittBereit` → `abrufBeantwortet`), Beleg B-01. **K4 Navigation** für T-C (Firefox holt jeden Rahmen nach dem Neuladen zweimal, Rahmen-Probe 10/10, Spur 42376059543) – rot zuerst im Client (`html.ts`), Q-3. **K3** für T-C (`knopf()` liest im `frameLocator`) und T-D (Erwartung im `frameLocator` nach einer Navigation des Rahmens, Firefox, B-04/B-09). | offen |
+| W050-T3 | Tests an der Ursache (K2, K3) und doppelte Navigation (K4) | **nötig**, alle drei Teile | K2 für T-A/T-B (B-01, B-14), K4 Navigation und K3 für T-C, K3 für T-D (V-1) | **erledigt:** K4 rot `fd90b67b` → grün `de3fd057` (Client legt Kopien der Vorschau-Rahmen an ihre Stelle), K2 `c5147982` (`schrittLaedt`, Antwort der Rahmen-Navigation in `entwurfGespeichert`, Kennung des Dokuments am `window`), K3 `9a51b5cd` (Rahmen von der Seite aus gelesen); byte-gleich; Zwischenprüfung 120/120 und 150/150 |
 | W050-T4 | `achsen-2b2:82` | **nötig, als K5** (nicht als Fehler der Komponente) | Plattform-Probe: macOS-WebKit `Tab` → `BODY`, `Alt+Tab` und `focus()` → `[part="control"]` (`tabIndex` 0); Chromium/Firefox `Tab` fokussiert; Linux-WebKit 11/11 grün; lokal 30/30 rot. Kein Rot-zuerst für `fm-markobutono` (kein Komponentenfehler). | offen |
 | W050-T5 | Schlusslauf lokal (Test-Ticket): 30/30 nach D-13 (beide Stufen), ganze Eroj-Suite, Diff-Suche, `bericht.md` ohne CI | nötig | AC-4 bis AC-8 | offen |
 | W050-T6 | Ein Push, ein PR, genau ein `workflow_dispatch`, Bericht (Orchestrator, nach der QA-Schleife) | nötig | AC-5 | offen |
@@ -41,11 +41,31 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 - `2f6c33a6` Spec 050 T2: solve each palette step once per request, a Zweitfarbe change solves only its own steps
 - (Doku) Spec 050 T2: plan and tasks
 
+## W050-T3 im Einzelnen (Warten an der Ursache, doppelte Navigation)
+
+- [x] **Mechanismus der doppelten Navigation** belegt (Probe `/tmp/s050/t3/zustand.probe.ts`, `plan.md` › „T3“): Firefox gibt beim Neuladen jedem vom Parser angelegten Vorschau-Rahmen sein letztes Dokument zurück (Navigationstyp „reload“, Dokument schon „interactive“, wenn der Client läuft); der Client weist dieselbe URL noch einmal zu. Nicht `vorschauNochmal`.
+- [x] **Roter Test** `buehne-036.spec.ts` „3.4 (Spec 050): after a reload each frame of the stage loads its document once“ (`fd90b67b`): zählt je Rahmen die beantworteten Navigationen nach `location.reload()`; Firefox 3/3 rot, Chromium/WebKit 3/3 grün.
+- [x] **Fix** `packages/metiejo/src/html.ts` (`de3fd057`, D-23), Testdatei unverändert (`git diff fd90b67b..de3fd057 -- packages/eroj/test/buehne-036.spec.ts` leer); 9/9 grün. Kein Timer, `stato`-Takt unverändert.
+- [x] **Regressionen nach dem Fix:** `buehne-036`, `buehne-navigation-042`, `zweitfarbe-036` je Engine 81/81; `metiejo` 670/670 (`FM_MESSUNG_044_N=2`); `dist` 8/8 (`antworten-044`, `stato-044`, `ableitung-050`); Fixtures unverändert.
+- [x] **K2** (`c5147982`): `schrittLaedt` (neu in `geladen-042.ts`) vor `goto`/`reload`/„Keine Zweitfarbe“ angelegt; `entwurfGespeichert` wartet auf die Antwort der Rahmen-Navigation der `rev`; `dokument()` als Marke am `window` (B-14; Probe unter Last: je Dokument ein Wert in allen Engines).
+- [x] **K3** (`9a51b5cd`): `knopf()` und T-D lesen die Rahmen von der Seite aus; vor Hover bestätigt: geladen mit `rev`, Schnitt 100 %, sichtbar, Zeiger trifft (D-24). 3.6 `:711` nicht angefasst.
+- [x] **Zwischenprüfung** (zählt nicht für AC-4): `buehne-036 -g "3\.(4|5)"` 120/120, `zweitfarbe-036` 150/150, je `--repeat-each=10`, drei Engines, `--workers 2`, ohne fremde Last.
+- [x] Diff-Suche über `17eaab0a..9a51b5cd -- packages`: kein `timeout`, `waitForTimeout`, `setTimeout`, `framenavigated`, `frame.url()`, `skip`/`fixme`/`only`, `retries`.
+
+### Commits T3
+
+- `fd90b67b` Spec 050 T3: red test, the frame navigates twice after a reload
+- `de3fd057` Spec 050 T3: the client lays a copy of each preview frame in its place, so Firefox restores no frame on reload
+- `c5147982` Spec 050 T3: wait for the answers behind the check before reading the step, and a document mark that holds in WebKit
+- `9a51b5cd` Spec 050 T3: read the stage's frames from the page, confirm the state before acting in a frame
+- (Doku) Spec 050 T3: plan and tasks
+
 ### Befunde für die nächsten Tickets
 
 - **T2 (erledigt, siehe oben):** Die Zeit steckt zu 82 % in `validateModeloFiles` (`packages/modelo`, tabu) und zu 10 % in `evaluateAlirebleco`; die Ableitung ist mit ≈ 100 ms klein. „Unter 1 s“ verlangt, diese Prüfregeln seltener oder mit wiederverwendeten Teilergebnissen zu rechnen, ohne `packages/modelo` zu ändern und byte-gleich – sonst Befund mit Werten (B-03).
 - **T3:** Drei Teile: K2 bei T-A/T-B (`waitForResponse` vor der Aktion, Q-2), K4 Navigation bei T-C (rot zuerst: „nach dem Neuladen genau eine Navigation je Rahmen und `rev`“ – die Rahmen-Probe zählt in Firefox 2 Anfragen bei 1 Zuweisung; der Test muss die Anfragen bzw. Dokumente zählen, nicht nur die Zuweisungen), K3 bei T-C/T-D (vor jeder Erwartung oder Aktion im Rahmen den Zustand von der Seite aus lesen; nach B-04/B-09 hängt in Firefox gerade die **erste** Erwartung im `frameLocator` nach einer Navigation des Rahmens). **Neu (B-14):** in WebKit ist `dokument()` (`performance.timeOrigin`) keine feste Kennung (dasselbe Dokument +1 ms) – `seiteBereit(…, nicht)` hält dann die alte Seite für neu (T-A `:181`, Stufe (2) 4/30); dieselbe Hilfe tragen `geladen()` (T-C) und `zweitfarbe-036:163`. Für T-B ist K2 nur über die Klassenregel belegt, nicht über den Vergleich der Varianten (B-15).
 - **T4:** K5; Weiche nach Plattform **und** Engine (Q-4), `toBeFocused` bleibt.
+- **T3 → T5:** Der neue Test „3.4 (Spec 050)“ läuft in der Datei-Reihe `buehne-036` mit; `geladen-042.ts` hat neue Exporte (`lesenOder`, `schrittLaedt`), die alten Signaturen sind gleich. T-D-Rest-Risiko (K5) siehe `plan.md` › „Was T3 nicht belegt“.
 - **T5:** Dieselben Reihen und Stufen wie T1 (D-13, Befehle in `plan.md` › „Messanleitung“; Stufe (2) mit `s050-werkzeug/reihe-cpu.sh`), vor jeder Reihe 90 s ohne fremde Test-Prozesse anderer Arbeitsbäume (B-08). Lokal sind T-B/T-C/T-D schon vorher 30/30 – ihr Nachweis ist der Dispatch (AC-5).
 
 ### Commits
@@ -55,7 +75,23 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 
 ## Geänderte Erwartungen älterer Tests (testing.md › „Extending tested pure functions“, AC-7)
 
-Keine in T1 und T2 (T2 ändert keine Erwartung eines älteren Tests). T3/T4 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein.
+Keine in T1 und T2 (T2 ändert keine Erwartung eines älteren Tests). T3/T4 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein. Zeilen = Stand `de931e40` (vor T3); die ausführliche Begründung steht in `plan.md` › „T3 – Begründung jeder ersetzten Erwartung (AC-7)“.
 
 | Datei:Zeile | vorher | nachher | Grund | Ticket |
 |---|---|---|---|---|
+| `packages/eroj/test/geladen-042.ts:17`–`:19` | `dokument()` = `performance.timeOrigin` | Zahl an `window[MARKE]`, beim ersten Lesen gesetzt | B-14: WebKit meldet für dasselbe Dokument +1 ms; Kennung muss in allen Engines fest sein | T3 |
+| `geladen-042.ts:52` | `neu: … performance.timeOrigin !== alt` | `neu: … window[MARKE] !== alt` | wie oben | T3 |
+| `geladen-042.ts:202`–`:230` | `entwurfGespeichert`: `waitForResponse(entwurf)`, dann `rahmenBereit(…, { rev })` (5-s-Poll hinter der Prüfung), Prüfung per `page.on("response")` | Sammlung `antwortenAb` ab dem Aufruf: Entwurfsantwort (Status 200 wie vorher), **Antwort der Rahmen-Navigation `rev`**, dann dasselbe `rahmenBereit`, Prüfung nach der Entwurfsantwort wie vorher | K2 (T-A): kein festes Fenster hinter der Serverrechnung (`testing.md`) | T3 |
+| `geladen-042.ts` (neu) | – | `lesenOder`, `schrittLaedt` (Signaturen der alten Hilfen unverändert) | K2/K3 | T3 |
+| `packages/eroj/test/zweitfarbe-036.spec.ts:139`–`:140` | `goto`, dann `schrittBereit(page, id, merkmal)` | `schrittLaedt` vor `goto`, danach aufgerufen | K2 | T3 |
+| `zweitfarbe-036.spec.ts:162`–`:163` | `reload`, dann `schrittBereit(…, vorDemNeuladen)` | `schrittLaedt(…, vorDemNeuladen)` vor `reload` | K2 | T3 |
+| `zweitfarbe-036.spec.ts:178`–`:181` | `Enter`, dann `schrittBereit(…, vorDemLoeschen)` | `schrittLaedt(…, vorDemLoeschen)` vor `Enter` | K2 (B-14: das Neuladen wartet hinter der Prüfung von rev 3) | T3 |
+| `zweitfarbe-036.spec.ts:212`–`:216` (T-B) | `freigeben()`, dann `schrittBereit` (5-s-Poll auf die erste Prüfung) | `schrittLaedt` vor `goto`, nach `freigeben()` aufgerufen | K2 (T-B) | T3 |
+| `packages/eroj/test/buehne-036.spec.ts:256`–`:266` | `knopf()`: `expect(button).toBeVisible()` und `expect.poll(button.evaluate(…)).not.toBe("rgba(0, 0, 0, 0)")` im Rahmen | ein `expect.poll` über ein Lesen von der Seite aus (`contentDocument`): `{ sichtbar: true, farbe: nicht leer und nicht transparent }` | K3 (T-C: „Execution context was destroyed“ in `knopf`) | T3 |
+| `buehne-036.spec.ts:554` | `expect(jetzt.locator("fm-pagxo").first()).toBeVisible()` | `expect.poll(() => sichtbarIm(page, JETZT, "fm-pagxo")).toBe(true)` | K3 (T-D lokal) | T3 |
+| `buehne-036.spec.ts:555` | `expect(markiert).toHaveCount(0)` | `expect.poll(() => anzahlIm(page, JETZT, MARKIERT)).toBe(0)` | K3 | T3 |
+| `buehne-036.spec.ts:567` | `expect(markiert.first()).toBeVisible()` | neu: Schnitt `100%` bestätigt; dann `expect.poll(() => sichtbarIm(page, JETZT, MARKIERT)).toBe(true)` | K3 (T-D CI) | T3 |
+| `buehne-036.spec.ts:570`–`:581` | `komponente.evaluate(…)` (Warnfarbe/Umriss), `komponente.getAttribute(satz)` | ein Lesen von der Seite aus, dazu `expect(gelesen).not.toBeNull()`; Erwartungen auf `stil`/`farbe`/`satz` unverändert | K3 | T3 |
+| `buehne-036.spec.ts:585` | `komponente.hover()` | `expect.poll(<Zeiger trifft die Komponente>).toBe(true)`, dann `page.mouse.move(Mitte)` | K3: Aktion ohne eigenes Zeitlimit nur nach bestätigtem Zustand | T3 |
+| `buehne-036.spec.ts:591` | `komponente.evaluate(tabIndex)` | `tabIndex` aus dem Lesen von der Seite aus (`toBe(0)` unverändert); `komponente.focus()` (`:592`) bleibt | K3 | T3 |
+| `buehne-036.spec.ts` (neu, nach `:541`) | – | roter Test „3.4 (Spec 050): after a reload each frame of the stage loads its document once“ | K4 Navigation, rot zuerst (`fd90b67b`) | T3 |
