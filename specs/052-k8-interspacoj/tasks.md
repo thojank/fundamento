@@ -7,7 +7,7 @@ Sechs Tickets, ein Strang, streng nacheinander (D-052-08): `K8I-001 → K8I-002 
 | Ticket | Phase | Inhalt | hängt ab von | Stand |
 |---|---|---|---|---|
 | K8I-001 | 1 Grundlage | Start prüfen (052 frei, Basis-Diff), Spec-Ordner, Jugxo D-052-01, Entscheidungen D-052-02 … -09 | – | erledigt 2026-11-13 |
-| K8I-002 | 2 Rote Tests | Rote Tests A und B, Fixtures aus M-1 (`anmelden-m1`, `konto-m1`), Gegenproben (a)–(d), 3c; Typ `verteilita` (V-1) | K8I-001 | offen |
+| K8I-002 | 2 Rote Tests | Rote Tests A und B, Fixtures aus M-1 (`anmelden-m1`, `konto-m1`), Gegenproben (a)–(d), 3c; Typ `verteilita` (V-1) | K8I-001 | erledigt 2026-11-13 (rot belegt) |
 | K8I-003 | 3 Fixes | Fix A: leere Live-Bereiche im Projektor (`data-fm-leer`), Neubau Eroj, Baselines nach D-052-06 | K8I-002 | offen |
 | K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | offen |
 | K8I-005 | 4 Nachweis | Neubewertung M-1 (Kontrolle und gerendert) ohne Modell, `neubewertung.md`, Rest C als Befund | K8I-004 | offen |
@@ -53,9 +53,57 @@ Geplante Belege. Datei- und Testnamen stehen fest, sobald das Ticket sie anlegt;
 
 - Spec 052 K8I-001: spec folder, base check and Jugxo D-052-01 (nur `specs/052-k8-interspacoj/{spec,technische-spec,plan,tasks}.md`)
 
+## K8I-002 im Einzelnen (rote Tests, Fixtures, Gegenproben)
+
+Alles auf dem Stand vor jedem Fix (Basis `662ed28f`, Projektor, Browser-Teil und `k8.ts` unverändert). Rote Ausgaben knapp (`FM_AUSGABE=knapp`), vollständig im Build-Log.
+
+### Commits K8I-002
+
+| SHA | Paket | Inhalt |
+|---|---|---|
+| `9f67d684` | projekcioj | `src/celoj/web-component/live-052.test.ts`: `LIVE` aus `region.live`, `data-fm-leer` in `#render`, Regel `[part][data-fm-leer]` (D-052-04) und `position: relative` am `frame`, Test-Kopie mit `live` an `pagxo.subtitle`, `componentCssIssues`; Guard SHA-256 je Sxablono ohne `live` (Modul, inline, Stylesheet) |
+| `f9a757f7` | eroj | `test/interspacoj-052.spec.ts`: `fm-sxelo` Fälle 1–4, `fm-filtrilo` 5.1 und 5.3, je 4 Marken × hell/dunkel; CSS-Celo der cxiuj-Config in der Datei gebaut (`serve.ts` unverändert) |
+| `e3b938fb` | ekranoj | `Interspaco.verteilita?: { ero: string }` (nur Typ, V-1) |
+| `56267833` | nordstelo | derselbe Typ in `src/facts.ts`; 8 Fixtures (V-5) mit `enigo.html`, `faktoj.json`, `atendo.json`; `generi.mjs` kennt die Namen; `src/k8/interspacoj-052.test.ts`; `src/k8/k8.test.ts` um „interspacoj with verteilita (D-052-01, V-2)“ ergänzt |
+
+### Rot belegt (Fehlzeilen gekürzt)
+
+- **projekcioj** (`vitest run src/celoj/web-component/live-052.test.ts`): 5 bestanden, 4 rot. Rot: `sxelo: LIVE, data-fm-leer …`, `filtrilo: LIVE, data-fm-leer …`, `every Sxablono with a live region gets the rule`, `a test copy with live on another region …`. Grün mit Absicht: Vorbedingung (Live-Bereiche genau `sxelo.notices`, `filtrilo.status`), `componentCssIssues` (heute ohne Befund), „never hidden/display none“, Guard (2 Tests).
+- **eroj** (`playwright test test/interspacoj-052.spec.ts --project=chromium`): 8 bestanden, 40 rot. Rot je Kombination: 1 (z. B. komuna `nav → main 16 px, spacing.medium 8 px`, ekzemplo `12 px` / `6 px`), 3 (`data-fm-leer on the empty notices`), 4 (Lücke 2 × medium bei fokussiertem Sprunglink; die Positionen selbst verschieben sich heute schon nicht), 5.1 (`footer 40 px, actions 32 px`: der leere Status bricht in eine zweite Zeile), 5.3 (`data-fm-leer on the empty status`). Grün mit Absicht: Fall 2 (gefüllt im Markup und per Script: Abstände je `spacing.medium`, kein `data-fm-leer`) in allen 8.
+- **nordstelo** (`vitest run src/k8/`): 86 bestanden, 9 rot. Rot: `k8.test.ts` 3 (V-2: `expected 0.3333 to be 0.5`, `0.5 to be 1`, `+0 to be 1`); `interspacoj-052.test.ts` `anmelden-m1` (4 Kombinationen: provo, provo-kompakta), `konto-m1` = 1 (alle 8), `konto-m1` kein Paar > 100 px (alle 8), badges → subtitle auf Stufe (6: ekzemplo, provo, provo-kompakta), Selbsttest (a) und (b). Grün: alle sechs Gegenproben-Erwartungen, Selbsttests (c), (d1), (d2), (3c), `k8()` = `atendo.json` für alle 8 neuen Fixtures, „without the field“, `zwilling.test.ts`, `gegenprobe.test.ts`, `determinismo.test.ts`, `faktoj.test.ts`, `soloj.test.ts`.
+- **ekranoj**: nur Typ, `pnpm --filter @fundamento/ekranoj lint` grün.
+- Lint `nordstelo`, `ekranoj`, `projekcioj`, `eroj` grün. `pnpm check:privat` grün. Keine `.only`/`.skip`. `git check-ignore -v` auf jeden Fixture-Ordner leer.
+
+### Generator und Determinismus
+
+`pnpm turbo run build --filter=@fundamento/nordstelo...`, dann `node packages/nordstelo/test/k8/generi.mjs` (alle 10 Fixtures: 8 Renders mit K8), `cp -r packages/nordstelo/test/fixtures/k8 /tmp/s052-k8-a`, zweiter Lauf, `diff -r /tmp/s052-k8-a packages/nordstelo/test/fixtures/k8` → leer (Exit 0). `git diff --exit-code -- packages/nordstelo/test/fixtures/k8/roh packages/nordstelo/test/fixtures/k8/sxablono` → Exit 0.
+
+### Herkunft der Fixtures (D-95, V-5)
+
+| Fixture | Quelle | SHA-256 der Quelle | Änderung | SHA-256 von `enigo.html` |
+|---|---|---|---|---|
+| `anmelden-m1` | `specs/050-mvp-probelauf/daten/m1/F/anmelden/fragmento.html` (992 Byte) | `92dea2d4da48ad46dd68c6cc109cd317729bff0c3226623f205186645ad0749e` | keine (`cp`, `cmp` gleich) | `92dea2d4…0749e` |
+| `konto-m1` | `specs/050-mvp-probelauf/daten/m1/F/konto/fragmento.html` (781 Byte) | `8ef028ff58ce939c4597e6be0df6cdeabdfd5fd3561e12fdc53579e988cbd618` | genau die Zeile `      <span slot="heading">Kontoangaben</span>` entfernt (Rest C), sonst byte-gleich (734 Byte, ohne Zeilenende am Schluss wie die Quelle) | `2b36246629a1e399a5eeff80358d8334f936739864f4ec4ce74e3b1e9325c2a4` |
+| `gegenprobe-a-eigener-abstand` | eigenes Markup | – | `fm-stako`, zweites `fm-teksto` mit `style="margin-block-start: 13px"` | – |
+| `gegenprobe-b-doppelte-luecke` | eigenes Markup | – | Spalte `display: flex; flex-direction: column; gap: var(--fm-spacing-medium)`, leeres `<div>` zwischen zwei `fm-teksto` | – |
+| `gegenprobe-c-eigener-verteiler` | eigenes Markup | – | `<div style="display:flex; justify-content: space-between">` mit zwei `fm-teksto` | – |
+| `gegenprobe-d1-eigene-klasse` | eigenes Markup | – | `<style>.verteiler { display: flex; justify-content: space-between; }</style>`, Klasse am eigenen `div` | – |
+| `gegenprobe-d2-part` | eigenes Markup (Kopf wie `konto`) | – | `<style>fm-pagxo::part(head) { justify-content: space-evenly; }</style>`, `fm-pagxo` mit title, badges, subtitle, actions | – |
+| `gegenprobe-3c-ero-mit-style` | eigenes Markup | – | `fm-atributlisto` mit eigenem `style="display: flex; justify-content: space-between"`, darin `span[slot=heading]` und `<dl>` (der Host ist im Flat-Tree der gemeinsame Vorfahre) | – |
+
+Werte auf dem roten Stand (`atendo.json`, `interspacoj`): `anmelden-m1` 1 in komuna/ekzemplo, 0,8571 in provo/provo-kompakta (`fm-sxelo > fm-stako` 16 px). `konto-m1` 0,7778 (komuna, ekzemplo), 0,5556 (provo, provo-kompakta). (a) 0 überall (19 bzw. 21 px). (b) 1 in komuna/ekzemplo, 0 in provo/provo-kompakta (16 px). (c), (d1) 0 überall (1 165–1 180 px). (d2) 0,6667 komuna, 0,3333 sonst. (3c) 0,5 überall (970–1 047 px).
+
+### Befunde und Abweichungen K8I-002
+
+- **B-002-1 Selbsttest (a) und (b) rot bis K8I-004.** Die Lockerung des Tickets (jedes Paar `verteilita`) wirkt nur über `k8()`. Das heutige `k8()` kennt `verteilita` nicht, also bleibt die gelockerte Kopie von (a) und (b) heute < 1, und ihr Selbsttest ist rot. (a) und (b) haben nach Ticket keine Klausel „kein Paar `verteilita`“. Bei (c), (d1), (d2), (3c) schlägt die gelockerte Kopie heute schon über diese Klausel fehl (grün). Mit V-2 in K8I-004 werden alle sechs Selbsttests grün, ohne Änderung am Test.
+- **B-002-2 konto-m1 badges → subtitle in komuna schon heute auf Stufe** (8 px, Tabelle der Produkt-Spec). Diese Erwartung ist rot in ekzemplo, provo, provo-kompakta (6 von 8 Kombinationen), nicht in allen Marken. `konto-m1` `interspacoj` = 1 ist in allen 8 rot.
+- **B-002-3 Form der Erwartungen an den Projektor (für K8I-003).** Der Unit-Test erwartet wörtlich `const LIVE: readonly string[] = <JSON der Liste>;` (wie `HIDEABLE`), eine eigene Schleife `for (const region of LIVE)` in `#render`, darin `toggleAttribute("data-fm-leer", …)` oder `setAttribute`/`removeAttribute`, ohne `.hidden`. Im Stylesheet eine Zeile `[part][data-fm-leer] { … }` mit genau den vier Deklarationen von D-052-04 (Reihenfolge frei) und eine Zeile, die mit `[part="frame"] {` beginnt und `position: relative;` enthält.
+- **B-002-4 Fall 5.1 (`fm-filtrilo`, „Punkt 1 sinngemäß“).** Im Fuß mit `space-between` verschiebt ein leerer Status nichts sichtbar. Messbar ist sein Platz, wenn die Leiste genau so schmal ist wie ihre Aktionen: Der Status bricht heute in eine zweite Zeile (Fuß = Aktionen + `gap`). Erwartung: Fuß so hoch wie die Aktionen.
+- **B-002-5 Accessibility-Baum (Fall 3).** Playwrights `ariaSnapshot` zeigt das leere `notices` (generisch, ohne Rolle) nicht. Geprüft wird deshalb in Chromium über CDP (`Accessibility.getFullAXTree`: ein nicht ignorierter Knoten mit `live: polite`) und in jeder Engine über die berechneten Zustände (`aria-live`, nicht `hidden`, nicht `display: none`/`contents`, nicht `visibility: hidden`, kein `aria-hidden`). Für `fm-filtrilo` steht `- status` im `ariaSnapshot`.
+
 ## Geänderte Erwartungen älterer Tests (`testing.md` › „Extending tested pure functions“)
 
-Keine in K8I-001. K8I-003 und K8I-004 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein (z. B. durch den Marker D-052-05 oder die kleinere Lücke von A).
+Keine in K8I-001 und K8I-002 (`k8.test.ts` nur um einen `describe` ergänzt, der Typ-Import um `Interspaco` erweitert; keine bestehende Erwartung geändert). K8I-003 und K8I-004 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein (z. B. durch den Marker D-052-05 oder die kleinere Lücke von A).
 
 | Datei:Zeile | vorher | nachher | Grund | Ticket |
 |---|---|---|---|---|
