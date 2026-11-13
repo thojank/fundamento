@@ -1,0 +1,7 @@
+lauf_id	zweck	status	modell	anfragen	tokens_ein	tokens_aus	usd	dauer_s	commit	last_vor	last_nach	kerne	fremde_messung	zeit
+probe-sonnet-komuna	M-1 Sonnet komuna F+0	reserviert	openrouter/anthropic/claude-sonnet-5.5				4							2026-11-12T18:32:19Z
+vergleich-ministral-komuna	M-2 ministral komuna F+0	reserviert	ministral-14b-2512				0.25							2026-11-12T18:32:19Z
+marke-sonnet-ekzemplo	M-3 Sonnet ekzemplo F	reserviert	openrouter/anthropic/claude-sonnet-5.5				3.6							2026-11-12T18:32:19Z
+probe-sonnet-komuna	M-1 Sonnet komuna	gebucht	openrouter/anthropic/claude-sonnet-5.5	68	1569626	60470	3.743952	528.7	de931e40	3.59 6.52 13.58	9.30 8.03 10.88	10	ja	2026-11-13T02:51:45Z
+vergleich-ministral-komuna	M-2 ministral komuna	gebucht	ministral-14b-2512	239	1232523	14776	0.24946	2828.9	de931e40	8.80 16.38 23.87	5.97 11.02 11.49	10	nein	2026-11-13T09:07:49Z
+marke-sonnet-ekzemplo	M-3 entfällt (D-050-23): Reservierung 3,60 $ freigegeben, kein Lauf	freigegeben	openrouter/anthropic/claude-sonnet-5.5				0							2026-11-13T12:08:17Z

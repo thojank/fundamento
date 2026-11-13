@@ -1,0 +1,499 @@
+{
+  "enigo": {
+    "fakto": {
+      "aria": [
+        {
+          "name": "Zum Inhalt springen",
+          "role": "link"
+        },
+        {
+          "name": "",
+          "role": "banner"
+        },
+        {
+          "name": "Team Nord",
+          "role": "link"
+        },
+        {
+          "name": "Hauptnavigation",
+          "role": "navigation"
+        },
+        {
+          "name": "Konto anlegen",
+          "role": "link"
+        },
+        {
+          "name": "Passwort vergessen",
+          "role": "link"
+        },
+        {
+          "name": "Mein Konto",
+          "role": "link"
+        },
+        {
+          "name": "",
+          "role": "main"
+        },
+        {
+          "name": "",
+          "role": "main"
+        },
+        {
+          "level": 1,
+          "name": "Anmelden",
+          "role": "heading"
+        },
+        {
+          "name": "",
+          "role": "form"
+        },
+        {
+          "name": "E-Mail",
+          "role": "textbox"
+        },
+        {
+          "name": "Passwort",
+          "role": "textbox"
+        },
+        {
+          "name": "Anmeldung bestätigen",
+          "role": "button"
+        }
+      ],
+      "bytes": 914,
+      "console": [],
+      "elements": [
+        {
+          "attrs": {},
+          "parent": -1,
+          "tag": "fm-sxelo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "slot": "brand",
+            "to": "anmelden.html"
+          },
+          "parent": 0,
+          "tag": "fm-ligilo",
+          "text": "Team Nord"
+        },
+        {
+          "attrs": {
+            "data-orientation": "horizontal",
+            "label": "Hauptnavigation",
+            "orientation": "horizontal",
+            "slot": "nav"
+          },
+          "parent": 0,
+          "tag": "fm-navigado",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "href": "registrieren.html"
+          },
+          "parent": 2,
+          "tag": "a",
+          "text": "Konto anlegen"
+        },
+        {
+          "attrs": {
+            "href": "passwort-vergessen.html"
+          },
+          "parent": 2,
+          "tag": "a",
+          "text": "Passwort vergessen"
+        },
+        {
+          "attrs": {
+            "href": "konto.html"
+          },
+          "parent": 2,
+          "tag": "a",
+          "text": "Mein Konto"
+        },
+        {
+          "attrs": {
+            "slot": "main"
+          },
+          "parent": 0,
+          "tag": "main",
+          "text": ""
+        },
+        {
+          "attrs": {},
+          "parent": 6,
+          "tag": "fm-pagxo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "focusable": "",
+            "level": "1",
+            "slot": "title"
+          },
+          "parent": 7,
+          "tag": "fm-titolo",
+          "text": "Anmelden"
+        },
+        {
+          "attrs": {},
+          "parent": 7,
+          "tag": "fm-formularo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "kind": "email",
+            "label": "E-Mail",
+            "slot": "fields"
+          },
+          "parent": 9,
+          "tag": "fm-kampo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "kind": "password",
+            "label": "Passwort",
+            "slot": "fields"
+          },
+          "parent": 9,
+          "tag": "fm-kampo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "emphasis": "high",
+            "slot": "actions",
+            "type": "submit"
+          },
+          "parent": 9,
+          "tag": "fm-butono",
+          "text": "Anmeldung bestätigen"
+        }
+      ],
+      "lingvo": "de",
+      "renders": [
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        }
+      ]
+    },
+    "kompleta": true,
+    "malobservoj": [],
+    "taksado": {
+      "k": {
+        "K1": 1,
+        "K2": 1,
+        "K3": 1,
+        "K4": 1,
+        "K5": 1,
+        "K6": 1
+      },
+      "k8": {
+        "kombinacioj": [
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (7 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.8997,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.7143,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (7 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.8997,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.7143,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (9 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.8997,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.7143,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "2 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (9 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.8997,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.7143,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (9 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.864,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.5714,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (9 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.864,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.5714,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (9 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.864,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.5714,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "1 von 6 Textläufen (12 % der Zeichen) in Ersatzschrift, zuerst `fm-sxelo > fm-ligilo`"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 7 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-navigado` (9 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.864,
+            "merkmaloj": {
+              "ersatzschrift": 0.8846,
+              "interspacoj": 0.5714,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          }
+        ],
+        "kvoto": 0.8819,
+        "mankoj": [],
+        "plena": false
+      },
+      "mankoj": [],
+      "total": 100
+    },
+    "varianto": "F"
+  },
+  "gespeichert": {
+    "verda": false
+  },
+  "herkunft": {
+    "form": "ablauf",
+    "rondo": "anmelden-und-konto/F/1/rondoj/3/anmelden",
+    "tasko": "anmelden-und-konto",
+    "vojo": "check_markup"
+  },
+  "runde": 3,
+  "slug": "anmelden",
+  "varianto": "F",
+  "verdaEkde": null,
+  "zelle": "m2",
+  "zusatz": []
+}

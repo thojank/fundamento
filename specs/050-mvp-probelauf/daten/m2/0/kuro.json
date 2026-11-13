@@ -1,0 +1,34 @@
+{
+  "faritajRondoj": 0,
+  "haltigo": "max-tokens",
+  "nekomencita": true,
+  "notoj": [
+    "Nicht gestartet: die Tokengrenze 1250000 der Messung ist erreicht (verbraucht: 1247299)."
+  ],
+  "peno": {
+    "bytes": 0,
+    "inputTokens": 0,
+    "ms": 0,
+    "outputTokens": 0,
+    "requests": 0,
+    "toolCalls": 0
+  },
+  "restantaj": 0,
+  "ripeto": 1,
+  "stato": {},
+  "sxargo": {
+    "antaux": {
+      "l1": 5.97,
+      "l15": 11.49,
+      "l5": 11.02
+    },
+    "kernoj": 10,
+    "post": {
+      "l1": 5.97,
+      "l15": 11.49,
+      "l5": 11.02
+    }
+  },
+  "tasko": "anmelden-und-konto",
+  "varianto": "0"
+}

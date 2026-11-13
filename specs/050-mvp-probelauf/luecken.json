@@ -1,0 +1,29 @@
+[
+  {
+    "id": "L50-1",
+    "regel": "k8-interspaco (K8 interspacoj)",
+    "screen": "anmelden, registrieren, passwort-vergessen, konto",
+    "zelle": "m1 F, m2 F",
+    "ursache": "fundamento",
+    "beleg": "F-050-16; packages/ekranoj/src/aspekto-faktoj.ts (walk misst Abstände zwischen Licht-DOM-Kindern jeder Ero und Sxablono), packages/nordstelo/src/k8/k8.ts (interspacoj, k8Plena); daten/m1/F/*/fakto.json und daten/m2/F/*/fakto.json (taksado.k8.kombinacioj[].kialoj); Abweichungen nur unter fm-sxelo, fm-pagxo, fm-atributlisto, fm-karto, keine unter fm-stako, fm-vico, fm-kolumno, fm-navigado, fm-formularo, dl",
+    "vorschlag": "K8 interspacoj zählt nur Abstände, die die Seite über ein Layoutmittel oder ein natives Element setzt. Geschwister, die eine Ero oder Sxablono in Teile ihres Schatten-DOM verteilt (fm-sxelo, fm-pagxo, fm-karto, fm-atributlisto …), zählen nicht, oder sie werden gegen die Ero-Tokenoj dieser Teile geprüft. Test mit den Fakten von daten/m1/F: interspacoj = 1 in allen vier Marken × hell/dunkel."
+  },
+  {
+    "id": "L50-2",
+    "regel": "k8-interspaco (K8 interspacoj)",
+    "screen": "anmelden, registrieren, passwort-vergessen, konto",
+    "zelle": "m1 F, m2 F",
+    "ursache": "fundamento",
+    "beleg": "F-050-16 (a); packages/modelo/data/sxablonoj/sxelo/skemo.json (parts.frame.gap = spacing.medium); erzeugte fm-sxelo blendet nur brand, principal, nav aus (HIDEABLE), der leere Teil notices bleibt: zwischen nav und main 2 × spacing.medium = 16 px, in provo und provo-kompakta keine Stufe; daten/m1/F/anmelden/fakto.json (provo: fm-sxelo > fm-stako, 16 px)",
+    "vorschlag": "fm-sxelo blendet den leeren Teil notices aus wie brand, principal und nav (Skemo bzw. Projektion der Sxablono), damit zwischen nav und main genau ein frame-Abstand liegt. Test: Abstand nav → main = spacing.medium in allen vier Marken."
+  },
+  {
+    "id": "L50-3",
+    "regel": "uzo-slot-accepts / uzo-slot-nesting (fehlt)",
+    "screen": "passwort-vergessen",
+    "zelle": "m2 F",
+    "ursache": "fundamento",
+    "beleg": "F-050-17; daten/m2/F/passwort-vergessen/fragmento.html (<fm-vico slot=\"items\"> mit vier <a> in fm-navigado); packages/modelo/data/eroj/navigado/uzo.json (items: accepts text, nesting 0); check_markup ohne Befund (enigo.malobservoj leer); Folge: axe color-contrast dunkel 4 Knoten, K8 nativa 4/4; Spec 046 plan.md F-B3",
+    "vorschlag": "check_markup prüft ein ausdrücklich in den Standard-Slot gesetztes Kind weiter gegen accepts und nesting des Slots (L5-1 bleibt: es gilt als geslottet, wird aber geprüft). Test: <fm-vico slot=\"items\"> in fm-navigado ergibt uzo-slot-accepts; <a slot=\"items\"> bleibt ohne Befund."
+  }
+]

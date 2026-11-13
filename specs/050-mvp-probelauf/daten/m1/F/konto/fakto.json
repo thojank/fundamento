@@ -1,0 +1,543 @@
+{
+  "enigo": {
+    "fakto": {
+      "aria": [
+        {
+          "name": "Zum Inhalt springen",
+          "role": "link"
+        },
+        {
+          "name": "",
+          "role": "banner"
+        },
+        {
+          "name": "Team Nord",
+          "role": "link"
+        },
+        {
+          "name": "Hauptnavigation",
+          "role": "navigation"
+        },
+        {
+          "name": "Mein Konto",
+          "role": "link"
+        },
+        {
+          "name": "Anmelden",
+          "role": "link"
+        },
+        {
+          "name": "",
+          "role": "main"
+        },
+        {
+          "level": 1,
+          "name": "Mein Konto",
+          "role": "heading"
+        },
+        {
+          "name": "",
+          "role": "paragraph"
+        },
+        {
+          "name": "Abmelden",
+          "role": "button"
+        },
+        {
+          "level": 2,
+          "name": "Kontoangaben",
+          "role": "heading"
+        },
+        {
+          "name": "",
+          "role": "term"
+        },
+        {
+          "name": "",
+          "role": "definition"
+        },
+        {
+          "name": "",
+          "role": "term"
+        },
+        {
+          "name": "",
+          "role": "definition"
+        }
+      ],
+      "bytes": 902,
+      "console": [],
+      "elements": [
+        {
+          "attrs": {},
+          "parent": -1,
+          "tag": "fm-sxelo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "label": "Team Nord",
+            "slot": "brand",
+            "to": "konto.html"
+          },
+          "parent": 0,
+          "tag": "fm-ligilo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "data-orientation": "horizontal",
+            "label": "Hauptnavigation",
+            "page": "konto.html",
+            "slot": "nav"
+          },
+          "parent": 0,
+          "tag": "fm-navigado",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "aria-current": "page",
+            "href": "konto.html"
+          },
+          "parent": 2,
+          "tag": "a",
+          "text": "Mein Konto"
+        },
+        {
+          "attrs": {
+            "href": "anmelden.html"
+          },
+          "parent": 2,
+          "tag": "a",
+          "text": "Anmelden"
+        },
+        {
+          "attrs": {},
+          "parent": 0,
+          "tag": "fm-pagxo",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "focusable": "",
+            "level": "1",
+            "slot": "title"
+          },
+          "parent": 5,
+          "tag": "fm-titolo",
+          "text": "Mein Konto"
+        },
+        {
+          "attrs": {
+            "slot": "badges"
+          },
+          "parent": 5,
+          "tag": "fm-insigno",
+          "text": "Konto 4711"
+        },
+        {
+          "attrs": {
+            "slot": "subtitle"
+          },
+          "parent": 5,
+          "tag": "fm-teksto",
+          "text": "Die Angaben von Konto 4711."
+        },
+        {
+          "attrs": {
+            "emphasis": "high",
+            "slot": "actions",
+            "type": "button"
+          },
+          "parent": 5,
+          "tag": "fm-butono",
+          "text": "Abmelden"
+        },
+        {
+          "attrs": {
+            "data-layout": "columns",
+            "label": "Angaben von Konto 4711"
+          },
+          "parent": 5,
+          "tag": "fm-atributlisto",
+          "text": ""
+        },
+        {
+          "attrs": {
+            "slot": "heading"
+          },
+          "parent": 10,
+          "tag": "span",
+          "text": "Kontoangaben"
+        },
+        {
+          "attrs": {
+            "aria-label": "Angaben von Konto 4711"
+          },
+          "parent": 10,
+          "tag": "dl",
+          "text": ""
+        },
+        {
+          "attrs": {},
+          "parent": 12,
+          "tag": "dt",
+          "text": "Kontonummer"
+        },
+        {
+          "attrs": {},
+          "parent": 12,
+          "tag": "dd",
+          "text": "4711"
+        },
+        {
+          "attrs": {},
+          "parent": 12,
+          "tag": "dt",
+          "text": "Team"
+        },
+        {
+          "attrs": {},
+          "parent": 12,
+          "tag": "dd",
+          "text": "Team Nord"
+        }
+      ],
+      "lingvo": "de",
+      "renders": [
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "komuna",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "ekzemplo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "light"
+        },
+        {
+          "aspekto": "provo-kompakta",
+          "axe": [],
+          "contrast": "default",
+          "scheme": "dark"
+        }
+      ]
+    },
+    "kompleta": true,
+    "malobservoj": [
+      {
+        "loko": "fm-butono „Abmelden“",
+        "message": "Instance 5 of butono says \"Abmelden\" (slot:label): it names no verb of a goal of the Ero (nothing says what happens on activation).",
+        "path": "instances#/5",
+        "regulo": {
+          "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+          "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess.",
+          "name": "label-names-action"
+        },
+        "rule": "label-names-action",
+        "severity": "warning",
+        "suggestion": "Write the text as the approved example does, e.g. \"Speichern\"."
+      }
+    ],
+    "taksado": {
+      "k": {
+        "K1": 1,
+        "K2": 1,
+        "K3": 1,
+        "K4": 1,
+        "K5": 1,
+        "K6": 1
+      },
+      "k8": {
+        "kombinacioj": [
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-teksto` (11 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.925,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.7,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "ekzemplo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-teksto` (11 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.925,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.7,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-butono` (930,05 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.925,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.7,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "komuna",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "3 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo > fm-butono` (930,05 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.925,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.7,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "5 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.875,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.5,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "5 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.875,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.5,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "4 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.9,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.6,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "dark"
+          },
+          {
+            "aspekto": "provo-kompakta",
+            "kialoj": [
+              {
+                "merkmal": "ersatzschrift",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "nativaj",
+                "teksto": "vollständig"
+              },
+              {
+                "merkmal": "interspacoj",
+                "teksto": "4 von 10 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-sxelo > fm-pagxo` (16 px)"
+              },
+              {
+                "merkmal": "sxablono",
+                "teksto": "vollständig: `fm-sxelo`"
+              }
+            ],
+            "kvoto": 0.9,
+            "merkmaloj": {
+              "ersatzschrift": 1,
+              "interspacoj": 0.6,
+              "nativaj": 1,
+              "sxablono": 1
+            },
+            "scheme": "light"
+          }
+        ],
+        "kvoto": 0.9063,
+        "mankoj": [],
+        "plena": false
+      },
+      "mankoj": [],
+      "total": 100
+    },
+    "varianto": "F"
+  },
+  "gespeichert": {
+    "verda": false
+  },
+  "herkunft": {
+    "form": "ablauf",
+    "rondo": "anmelden-und-konto/F/1/rondoj/3/konto",
+    "tasko": "anmelden-und-konto",
+    "vojo": "check_markup"
+  },
+  "runde": 3,
+  "slug": "konto",
+  "varianto": "F",
+  "verdaEkde": null,
+  "zelle": "m1",
+  "zusatz": []
+}

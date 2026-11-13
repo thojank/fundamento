@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anmelden – Team Nord</title>
+</head>
+<body>
+  <main data-sxablono="formularo" data-nomo="anmelden">
+
+    <header data-region="kopf">
+      <h1 data-ero="titolo">Anmelden</h1>
+      <p data-ero="teksto">Melden Sie sich mit Ihrer E-Mail-Adresse und Ihrem Passwort an.</p>
+    </header>
+
+    <section data-region="inhalt" aria-label="Anmeldung">
+      <div data-ero="mesagxo" data-tipo="eraro" id="fehler" role="alert" hidden>
+        <span data-ero="teksto">Bitte geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein.</span>
+      </div>
+
+      <form id="anmeldeformular" action="konto.html" method="get" novalidate data-ero="formularo">
+        <div data-ero="kampo">
+          <label data-ero="etikedo" for="email">E-Mail-Adresse</label>
+          <input data-ero="enigo" type="email" id="email" name="email" autocomplete="email" required>
+        </div>
+        <div data-ero="kampo">
+          <label data-ero="etikedo" for="passwort">Passwort</label>
+          <input data-ero="enigo" type="password" id="passwort" name="passwort" autocomplete="current-password" required>
+        </div>
+        <button data-ero="butono" data-vario="primara" type="submit">Anmelden</button>
+      </form>
+    </section>
+
+    <footer data-region="fuss">
+      <nav data-ero="navigado" aria-label="Weitere Wege">
+        <a data-ero="ligilo" href="passwort-vergessen.html">Passwort vergessen?</a>
+        <a data-ero="ligilo" href="registrieren.html">Konto anlegen</a>
+        <a data-ero="ligilo" href="konto.html">Zu Mein Konto</a>
+      </nav>
+    </footer>
+
+  </main>
+
+  <script>
+    var form = document.getElementById('anmeldeformular');
+    var fehler = document.getElementById('fehler');
+    var email = document.getElementById('email');
+    var passwort = document.getElementById('passwort');
+
+    form.addEventListener('submit', function (e) {
+      var fehlt = !email.value.trim() || !passwort.value;
+      if (fehlt) {
+        e.preventDefault();
+        fehler.hidden = false;
+        (email.value.trim() ? passwort : email).focus();
+      } else {
+        fehler.hidden = true;
+      }
+    });
+  </script>
+</body>
+</html>

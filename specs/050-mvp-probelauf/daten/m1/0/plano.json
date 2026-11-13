@@ -1,0 +1,51 @@
+{
+  "celo": "Mitglieder von Team Nord melden sich an, legen ein Konto an, setzen ein vergessenes Passwort zurück und sehen ihr Konto 4711.",
+  "ekranoj": [
+    {
+      "celo": "Mit E-Mail und Passwort anmelden; Wege zu „Konto anlegen“ und „Passwort vergessen“.",
+      "slug": "anmelden",
+      "titolo": "Anmelden"
+    },
+    {
+      "celo": "Ein neues Konto mit Name, E-Mail und Passwort anlegen.",
+      "slug": "registrieren",
+      "titolo": "Konto anlegen"
+    },
+    {
+      "celo": "Einen Link zum Zurücksetzen des Passworts an die E-Mail-Adresse senden.",
+      "slug": "passwort-vergessen",
+      "titolo": "Passwort zurücksetzen"
+    },
+    {
+      "celo": "Die Angaben von Konto 4711 sehen und sich abmelden.",
+      "slug": "konto",
+      "titolo": "Mein Konto"
+    }
+  ],
+  "kantoj": [
+    {
+      "al": "registrieren",
+      "de": "anmelden"
+    },
+    {
+      "al": "passwort-vergessen",
+      "de": "anmelden"
+    },
+    {
+      "al": "konto",
+      "de": "anmelden"
+    },
+    {
+      "al": "anmelden",
+      "de": "registrieren"
+    },
+    {
+      "al": "anmelden",
+      "de": "passwort-vergessen"
+    },
+    {
+      "al": "anmelden",
+      "de": "konto"
+    }
+  ]
+}

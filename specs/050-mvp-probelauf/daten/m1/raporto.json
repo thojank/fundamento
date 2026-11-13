@@ -1,0 +1,1466 @@
+{
+  "id": "20261113-0243",
+  "k8": [
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.0776,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.3103,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.0776,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.3103,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.1416,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.5664,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.1416,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.5664,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.0829,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.3315,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.0829,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.3315,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.0829,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.3315,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.0829,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.3315,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.2064,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.8254,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.2064,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.8254,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.0942,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.377,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.0942,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.377,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.0942,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.377,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.0942,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.377,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.2188,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.875,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.2188,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.875,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.1493,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.5973,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.1493,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.5973,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.1702,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.6806,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.1702,
+      "merkmaloj": {
+        "ersatzschrift": 0,
+        "interspacoj": 0.6806,
+        "nativaj": 0,
+        "sxablono": 0
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "0"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.8718,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.758,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.8718,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.758,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.8718,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.758,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.8718,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.758,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.8217,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.5578,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.8217,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.5578,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.8217,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.5578,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.8217,
+      "merkmaloj": {
+        "ersatzschrift": 0.854,
+        "interspacoj": 0.5578,
+        "nativaj": 0.875,
+        "sxablono": 1
+      },
+      "rondo": "1",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.9727,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.9091,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.9727,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.9091,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.9727,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.9091,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.9727,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.9091,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.931,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.7422,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.931,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.7422,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.9366,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.7649,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.9366,
+      "merkmaloj": {
+        "ersatzschrift": 0.9816,
+        "interspacoj": 0.7649,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "2",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.9813,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.925,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kvoto": 0.9813,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.925,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.9813,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.925,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "komuna",
+      "kvoto": 0.9813,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.925,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.9384,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.7535,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo",
+      "kvoto": 0.9384,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.7535,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.9447,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.7786,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "dark",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kvoto": 0.9447,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.7786,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "rondo": "3",
+      "scheme": "light",
+      "tasko": "anmelden-und-konto",
+      "varianto": "F"
+    }
+  ],
+  "komparoj": {
+    "ekranoj": [
+      {
+        "0": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "F": {
+          "R1": 100,
+          "R3": 100,
+          "delto": 0
+        },
+        "ekrano": "anmelden",
+        "f0R3": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        },
+        "tasko": "anmelden-und-konto"
+      },
+      {
+        "0": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "F": {
+          "R1": 95.8,
+          "R3": 95.8,
+          "delto": 0
+        },
+        "ekrano": "registrieren",
+        "f0R3": {
+          "0": 44.4,
+          "F": 95.8,
+          "delto": 51.4
+        },
+        "tasko": "anmelden-und-konto"
+      },
+      {
+        "0": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "F": {
+          "R1": 100,
+          "R3": 100,
+          "delto": 0
+        },
+        "ekrano": "passwort-vergessen",
+        "f0R3": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        },
+        "tasko": "anmelden-und-konto"
+      },
+      {
+        "0": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "F": {
+          "R1": 78.3,
+          "R3": 100,
+          "delto": 21.7
+        },
+        "ekrano": "konto",
+        "f0R3": {
+          "0": 44.4,
+          "F": 100,
+          "delto": 55.6
+        },
+        "tasko": "anmelden-und-konto"
+      }
+    ],
+    "f0": [
+      {
+        "enStreuung": false,
+        "navigado": {
+          "0": 0.8333,
+          "F": 1,
+          "delto": 0.1667
+        },
+        "rondo": "1",
+        "sxablonoj": {
+          "0": 0.8,
+          "F": 0.8,
+          "delto": 0
+        },
+        "tasko": "anmelden-und-konto",
+        "total": {
+          "0": 44.4,
+          "F": 93.5,
+          "delto": 49.1
+        }
+      },
+      {
+        "enStreuung": false,
+        "navigado": {
+          "0": 0.8333,
+          "F": 1,
+          "delto": 0.1667
+        },
+        "rondo": "3",
+        "sxablonoj": {
+          "0": 0.6,
+          "F": 1,
+          "delto": 0.4
+        },
+        "tasko": "anmelden-und-konto",
+        "total": {
+          "0": 44.4,
+          "F": 99,
+          "delto": 54.6
+        }
+      }
+    ],
+    "r1r3": [
+      {
+        "enStreuung": true,
+        "navigado": {
+          "R1": 1,
+          "R3": 1,
+          "delto": 0
+        },
+        "sxablonoj": {
+          "R1": 0.8,
+          "R3": 1,
+          "delto": 0.2
+        },
+        "tasko": "anmelden-und-konto",
+        "total": {
+          "R1": 93.5,
+          "R3": 99,
+          "delto": 5.5
+        },
+        "varianto": "F"
+      },
+      {
+        "enStreuung": true,
+        "navigado": {
+          "R1": 0.8333,
+          "R3": 0.8333,
+          "delto": 0
+        },
+        "sxablonoj": {
+          "R1": 0.8,
+          "R3": 0.6,
+          "delto": -0.2
+        },
+        "tasko": "anmelden-und-konto",
+        "total": {
+          "R1": 44.4,
+          "R3": 44.4,
+          "delto": 0
+        },
+        "varianto": "0"
+      }
+    ]
+  },
+  "kuroj": [
+    {
+      "eraro": null,
+      "faritajRondoj": 3,
+      "haltigo": null,
+      "lastoSuperKernoj": false,
+      "nekomencita": false,
+      "notoj": [],
+      "peno": {
+        "bytes": 3579,
+        "inputTokens": 1508026,
+        "ms": 332719,
+        "outputTokens": 38418,
+        "requests": 57,
+        "toolCalls": 86
+      },
+      "restantaj": 21,
+      "ripeto": 1,
+      "rondoj": {
+        "1": {
+          "ekranoj": {
+            "anmelden": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.9346,
+              "kompleta": true,
+              "total": 100,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "konto": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 0,
+                "K5": 0.8,
+                "K6": 1
+              },
+              "k8": 0.6258,
+              "kompleta": true,
+              "total": 78.3,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "passwort-vergessen": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.907,
+              "kompleta": true,
+              "total": 100,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "registrieren": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 0.75
+              },
+              "k8": 0.9196,
+              "kompleta": true,
+              "total": 95.8,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 0.75,
+              "K5": 0.95,
+              "K6": 0.9375
+            },
+            "k8": 0.8468,
+            "konstruitaj": 4,
+            "navigado": 1,
+            "planitaj": 4,
+            "sxablonoj": 0.8,
+            "total": 93.5
+          }
+        },
+        "2": {
+          "ekranoj": {
+            "anmelden": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.9821,
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "konto": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.8736,
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "passwort-vergessen": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.975,
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "registrieren": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.9821,
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 1
+            },
+            "k8": 0.9532,
+            "konstruitaj": 4,
+            "navigado": 1,
+            "planitaj": 4,
+            "sxablonoj": 1,
+            "total": 100
+          }
+        },
+        "3": {
+          "ekranoj": {
+            "anmelden": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.9821,
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "konto": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.9063,
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "passwort-vergessen": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 1
+              },
+              "k8": 0.975,
+              "kompleta": true,
+              "total": 100,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "registrieren": {
+              "k": {
+                "K1": 1,
+                "K2": 1,
+                "K3": 1,
+                "K4": 1,
+                "K5": 1,
+                "K6": 0.75
+              },
+              "k8": 0.9821,
+              "kompleta": true,
+              "total": 95.8,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": 1,
+              "K3": 1,
+              "K4": 1,
+              "K5": 1,
+              "K6": 0.9375
+            },
+            "k8": 0.9614,
+            "konstruitaj": 4,
+            "navigado": 1,
+            "planitaj": 4,
+            "sxablonoj": 1,
+            "total": 99
+          }
+        }
+      },
+      "sxargo": {
+        "antaux": {
+          "l1": 3.88,
+          "l15": 13.48,
+          "l5": 6.48
+        },
+        "kernoj": 10,
+        "post": {
+          "l1": 6.45,
+          "l15": 11.12,
+          "l5": 6.42
+        }
+      },
+      "tasko": "anmelden-und-konto",
+      "usd": null,
+      "varianto": "F"
+    },
+    {
+      "eraro": null,
+      "faritajRondoj": 3,
+      "haltigo": "max-tokens",
+      "lastoSuperKernoj": false,
+      "nekomencita": false,
+      "notoj": [
+        "Kostengrenze von 119556 Tokens erreicht (verbraucht: 83652) in Runde 3 bei konto; Teilergebnis."
+      ],
+      "peno": {
+        "bytes": 12445,
+        "inputTokens": 61600,
+        "ms": 184363,
+        "outputTokens": 22052,
+        "requests": 11,
+        "toolCalls": 0
+      },
+      "restantaj": 143,
+      "ripeto": 1,
+      "rondoj": {
+        "1": {
+          "ekranoj": {
+            "anmelden": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.1111,
+              "kompleta": false,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "konto": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.075,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": true,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "passwort-vergessen": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.125,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "registrieren": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.0739,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": null,
+              "K3": null,
+              "K4": 0,
+              "K5": 0,
+              "K6": 1
+            },
+            "k8": 0.0963,
+            "konstruitaj": 4,
+            "navigado": 0.8333,
+            "planitaj": 4,
+            "sxablonoj": 0.8,
+            "total": 44.4
+          }
+        },
+        "2": {
+          "ekranoj": {
+            "anmelden": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.0893,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "konto": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.132,
+              "kompleta": false,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "passwort-vergessen": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.0833,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "registrieren": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.0903,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": null,
+              "K3": null,
+              "K4": 0,
+              "K5": 0,
+              "K6": 1
+            },
+            "k8": 0.0987,
+            "konstruitaj": 4,
+            "navigado": 0.8333,
+            "planitaj": 4,
+            "sxablonoj": 0.6,
+            "total": 44.4
+          }
+        },
+        "3": {
+          "ekranoj": {
+            "anmelden": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.1354,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "konto": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.132,
+              "kompleta": false,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "passwort-vergessen": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.0834,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            },
+            "registrieren": {
+              "k": {
+                "K1": 1,
+                "K2": null,
+                "K3": null,
+                "K4": 0,
+                "K5": 0,
+                "K6": 1
+              },
+              "k8": 0.1875,
+              "kompleta": true,
+              "total": 44.4,
+              "unueca": false,
+              "verda": false,
+              "verdaEkde": null
+            }
+          },
+          "fluo": {
+            "k": {
+              "K1": 1,
+              "K2": null,
+              "K3": null,
+              "K4": 0,
+              "K5": 0,
+              "K6": 1
+            },
+            "k8": 0.1346,
+            "konstruitaj": 4,
+            "navigado": 0.8333,
+            "planitaj": 4,
+            "sxablonoj": 0.6,
+            "total": 44.4
+          }
+        }
+      },
+      "sxargo": {
+        "antaux": {
+          "l1": 6.45,
+          "l15": 11.12,
+          "l5": 6.42
+        },
+        "kernoj": 10,
+        "post": {
+          "l1": 9.3,
+          "l15": 10.88,
+          "l5": 8.03
+        }
+      },
+      "tasko": "anmelden-und-konto",
+      "usd": null,
+      "varianto": "0"
+    }
+  ],
+  "lauf": {
+    "commit": "de931e40",
+    "kiModelo": "openrouter/anthropic/claude-sonnet-5.5",
+    "lingvo": "de",
+    "maksTokenoj": 1666000,
+    "markoj": [
+      "komuna",
+      "ekzemplo",
+      "provo",
+      "provo-kompakta"
+    ],
+    "ripetoj": 1,
+    "takso": {
+      "tokenoj": 1025100
+    },
+    "taskoj": [
+      "anmelden-und-konto"
+    ],
+    "varianten": [
+      "F",
+      "0"
+    ]
+  },
+  "streuung": {
+    "fonto": "specs/034-nachlese-12/plan.md, „Streuung (H 9,8, K 16,7)“",
+    "reiheK": 16.7
+  },
+  "sumo": {
+    "anfragoj": 68,
+    "haltigoj": [
+      {
+        "haltigo": "max-tokens",
+        "ripeto": 1,
+        "tasko": "anmelden-und-konto",
+        "varianto": "0"
+      }
+    ],
+    "kuroj": 2,
+    "nekomencitaj": 0,
+    "tokenoj": {
+      "eligo": 60470,
+      "enigo": 1569626
+    },
+    "usd": null
+  }
+}
