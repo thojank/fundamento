@@ -14,9 +14,9 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { type APIRequestContext, expect, type Page, type Request, test } from "@playwright/test";
 import { axeViolations } from "./alirebleco.js";
-import { BUEHNE_BEREIT, dokument, rahmenBereit, seiteBereit } from "./geladen-042.js";
+import { BUEHNE_BEREIT, dokument, lesenOder, rahmenBereit, seiteBereit } from "./geladen-042.js";
 import { nachDerAbfrage, nachEinemReset } from "./wackler-040.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
@@ -252,17 +252,107 @@ const sichtbarBei = (page: Page, anteil: number) =>
     return hit.localName;
   }, anteil);
 
+/**
+ * Spec 051 T3 (K3): what a frame of the stage shows is read from the page that holds it – through
+ * the frame's contentDocument, in the page's context, which a navigation of the frame does not
+ * destroy – not in the frame's own context. Run 42376059543 (Firefox): a read in the frame
+ * (`frameLocator(…).evaluate`) died with „Execution context was destroyed“ when the frame's document
+ * was replaced; B-04/B-09: Playwright-Firefox at times had no context of a frame's new document,
+ * and an expectation in a frameLocator never ended. Each read gives `null` while the frame has no
+ * loaded document – none, not "complete", or not yet the document of its src (as `rahmenBereit`) –
+ * and a read the page's own navigation cut short counts the same (`lesenOder`).
+ */
+function imRahmen<T>(
+  page: Page,
+  rahmen: string,
+  lesen: (element: Element, ziel: string) => T | null,
+  ziel: string,
+): Promise<T | null> {
+  return lesenOder(() => page.locator(rahmen).evaluate(lesen, ziel), null);
+}
+
+/**
+ * Visible as Playwright's toBeVisible() says it, for an element of a frame's document: a non-empty
+ * box and no `visibility: hidden`; an element with `display: contents` by its children. Each read
+ * below that needs it carries this rule in itself (a read in the page cannot call the test's code).
+ * Here: whether the first element of `ziel` in a frame's loaded document is visible (`null`: not
+ * loaded).
+ */
+const sichtbarIm = (page: Page, rahmen: string, ziel: string) =>
+  imRahmen(
+    page,
+    rahmen,
+    (element, selector) => {
+      const sichtbar = (ziel: Element): boolean => {
+        const style = (ziel.ownerDocument.defaultView ?? window).getComputedStyle(ziel);
+        if (style.display === "contents")
+          return [...ziel.children, ...(ziel.shadowRoot?.children ?? [])].some(sichtbar);
+        const box = ziel.getBoundingClientRect();
+        return box.width > 0 && box.height > 0 && style.visibility !== "hidden";
+      };
+      const frame = element as HTMLIFrameElement;
+      const doc = frame.contentDocument;
+      if (doc === null || frame.src === "" || doc.URL !== frame.src) return null;
+      if (doc.readyState !== "complete") return null;
+      const gefunden = doc.querySelector(selector);
+      return gefunden !== null && sichtbar(gefunden);
+    },
+    ziel,
+  );
+
+/** How many elements of `ziel` a frame's loaded document has (`null`: not loaded). */
+const anzahlIm = (page: Page, rahmen: string, ziel: string) =>
+  imRahmen(
+    page,
+    rahmen,
+    (element, selector) => {
+      const frame = element as HTMLIFrameElement;
+      const doc = frame.contentDocument;
+      if (doc === null || frame.src === "" || doc.URL !== frame.src) return null;
+      if (doc.readyState !== "complete") return null;
+      return doc.querySelectorAll(selector).length;
+    },
+    ziel,
+  );
+
 /** The fill of the first main button in a frame of the stage, once the frame has painted it. */
 async function knopf(page: Page, selector: string): Promise<string> {
-  const button = page.frameLocator(selector).locator('fm-butono[emphasis="high"]').first();
-  await expect(button).toBeVisible();
-  const read = () =>
-    button.evaluate((host) => {
-      const control = host.shadowRoot?.querySelector("button") ?? host;
-      return getComputedStyle(control).backgroundColor;
-    });
-  await expect.poll(read).not.toBe("rgba(0, 0, 0, 0)");
-  return read();
+  // Spec 051 T3 (K3): before, the button's visibility and fill were read in the frame
+  // (frameLocator: toBeVisible, then evaluate in an expect.poll). Now both in one read from the
+  // page, polled under the default window until the button is visible and painted.
+  let fuellung = "";
+  await expect
+    .poll(async () => {
+      const gelesen = await imRahmen(
+        page,
+        selector,
+        (element, knopfSelektor) => {
+          const sichtbar = (ziel: Element): boolean => {
+            const style = (ziel.ownerDocument.defaultView ?? window).getComputedStyle(ziel);
+            if (style.display === "contents")
+              return [...ziel.children, ...(ziel.shadowRoot?.children ?? [])].some(sichtbar);
+            const box = ziel.getBoundingClientRect();
+            return box.width > 0 && box.height > 0 && style.visibility !== "hidden";
+          };
+          const frame = element as HTMLIFrameElement;
+          const doc = frame.contentDocument;
+          if (doc === null || frame.src === "" || doc.URL !== frame.src) return null;
+          if (doc.readyState !== "complete") return null;
+          const host = doc.querySelector(knopfSelektor);
+          if (host === null) return null;
+          const control = host.shadowRoot?.querySelector("button") ?? host;
+          return {
+            sichtbar: sichtbar(host),
+            farbe: doc.defaultView?.getComputedStyle(control).backgroundColor ?? "",
+          };
+        },
+        'fm-butono[emphasis="high"]',
+      );
+      fuellung = gelesen?.farbe ?? "";
+      return gelesen;
+    }, `the main button in ${selector} is visible and painted`)
+    .toEqual({ sichtbar: true, farbe: expect.not.stringMatching(/^(rgba\(0, 0, 0, 0\))?$/) });
+  return fuellung;
 }
 
 test.describe("Bühne (Spec 036, Befund 3.2)", () => {
@@ -539,6 +629,50 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
     ]);
     await expect(dialog).toContainText("Petrol führt, der Grund ist hell.");
   });
+
+  // Spec 051 T3 (K4 Navigation, run 42376059543, Firefox): closing the dialog after a reading reloads
+  // the screen, and Firefox then fetched each frame of the stage twice with the same URL – it gave
+  // the frame its last document back, and the client sent it there once more. The second document
+  // replaced the first one while the test read in it („Execution context was destroyed“). Counted
+  // as the browser fetches: every navigation of a frame after the reload that the server answered,
+  // per frame; each frame loads the page's rev once, in every engine.
+  test("3.4 (Spec 051): after a reload each frame of the stage loads its document once", async ({
+    page,
+  }) => {
+    const id = await marke(page.request, "Probomarko Neuladen");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const geholt: Request[] = [];
+    page.on("request", (anfrage) => {
+      if (
+        anfrage.isNavigationRequest() &&
+        new URL(anfrage.url()).pathname === `/marko/${id}/vorschau`
+      )
+        geholt.push(anfrage);
+    });
+    // Reloads as „Schließen“ after a reading does (the page's own location.reload(); Playwright's
+    // page.reload() did not show the double fetch). The client sends both frames before it marks
+    // the stage ready, so every navigation of the reload has started once geladen() resolved.
+    const alt = await dokument(page);
+    await page.evaluate(() => location.reload());
+    await geladen(page, alt);
+    const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+    const ziel = (vorschlag: boolean) =>
+      page
+        .locator(vorschlag ? VORSCHLAG : JETZT)
+        .evaluate((element) => (element as HTMLIFrameElement).src);
+    const jetzt = await ziel(false);
+    const vorschlag = await ziel(true);
+    expect(new URL(jetzt).searchParams.get("rev")).toBe(String(rev));
+    expect(new URL(vorschlag).searchParams.get("rev")).toBe(String(rev));
+    // A navigation the browser cut short before the server answered brought no document.
+    const beantwortet: string[] = [];
+    for (const anfrage of geholt)
+      if ((await anfrage.response()) !== null) beantwortet.push(anfrage.url());
+    expect(beantwortet.filter((url) => url === jetzt)).toEqual([jetzt]);
+    expect(beantwortet.filter((url) => url === vorschlag)).toEqual([vorschlag]);
+    expect(beantwortet.sort()).toEqual([jetzt, vorschlag].sort());
+  });
 });
 
 test.describe("Bühne (Spec 036, Befund 3.5)", () => {
@@ -550,9 +684,15 @@ test.describe("Bühne (Spec 036, Befund 3.5)", () => {
     await page.setViewportSize(WIDE);
     await oeffne(page, id);
     const jetzt = page.frameLocator(JETZT);
-    const markiert = jetzt.locator('[data-mt-pruefung="offen"]');
-    await expect(jetzt.locator("fm-pagxo").first()).toBeVisible();
-    await expect(markiert).toHaveCount(0);
+    const MARKIERT = '[data-mt-pruefung="offen"]';
+    const markiert = jetzt.locator(MARKIERT);
+    // Spec 051 T3 (K3, T-D): read from the page that holds the frame, not in the frame (B-04/B-09:
+    // in Firefox the first expectation in a frameLocator after the frame loaded at times never
+    // ended). oeffne() has read both frames loaded with the page's rev (geladen()).
+    await expect
+      .poll(() => sichtbarIm(page, JETZT, "fm-pagxo"), "fm-pagxo in „Jetzt“ is visible")
+      .toBe(true);
+    await expect.poll(() => anzahlIm(page, JETZT, MARKIERT), "„Jetzt“ marks nothing").toBe(0);
     // The quieter text as strong as the default text: an open problem of the check (text-hierarchy).
     const gesetzt = await page.request.post(`${base}/api/marko/${id}/festlegen`, {
       data: { token: "color.text.subtle", alias: "color.palette.neutral.1000" },
@@ -564,31 +704,99 @@ test.describe("Bühne (Spec 036, Befund 3.5)", () => {
     const schieber = page.locator("[data-mt-buehne]").getByRole("slider");
     await schieber.focus();
     await page.keyboard.press("End");
-    await expect(markiert.first()).toBeVisible();
+    // Spec 051 T3 (K3, T-D): before any action in the frame, its state is confirmed by an
+    // expectation under the default window, read from the page: the cut applied (the whole stage
+    // shows „Jetzt“), the marked component visible in „Jetzt“ (which oeffne() read loaded with the
+    // page's rev). Before, `expect(markiert.first()).toBeVisible()` read it in the frame (run
+    // 43174596533, Firefox: it never ended).
+    await expect
+      .poll(
+        () =>
+          page
+            .locator("[data-mt-buehne-rahmen]")
+            .evaluate((rahmen) => (rahmen as HTMLElement).style.getPropertyValue("--mt-schnitt")),
+        "the cut stands at the end",
+      )
+      .toBe("100%");
+    await expect
+      .poll(() => sichtbarIm(page, JETZT, MARKIERT), "a marked component is visible")
+      .toBe(true);
     const komponente = markiert.first();
-    // The frame: the warning colour of the Vortaro, read from its token in the frame itself.
-    const rahmen = await komponente.evaluate((element) => {
-      const probe = document.createElement("span");
-      probe.style.color = "var(--fm-color-status-warning-border)";
-      document.body.append(probe);
-      const warnung = getComputedStyle(probe).color;
-      probe.remove();
-      const style = getComputedStyle(element);
-      return { farbe: style.outlineColor, stil: style.outlineStyle, warnung };
-    });
+    // The frame: the warning colour of the Vortaro, read from its token in the frame's document –
+    // from the page, as above; with the sentence and the tab stop of the component.
+    const gelesen = await imRahmen(
+      page,
+      JETZT,
+      (element, selector) => {
+        const doc = (element as HTMLIFrameElement).contentDocument;
+        const ziel = doc?.querySelector(selector);
+        const fenster = doc?.defaultView;
+        if (doc === null || doc === undefined || ziel === null || ziel === undefined || !fenster)
+          return null;
+        const probe = doc.createElement("span");
+        probe.style.color = "var(--fm-color-status-warning-border)";
+        doc.body.append(probe);
+        const warnung = fenster.getComputedStyle(probe).color;
+        probe.remove();
+        const style = fenster.getComputedStyle(ziel);
+        return {
+          rahmen: { farbe: style.outlineColor, stil: style.outlineStyle, warnung },
+          satz: ziel.getAttribute("data-mt-pruefung-satz"),
+          tabIndex: (ziel as HTMLElement).tabIndex,
+        };
+      },
+      MARKIERT,
+    );
+    expect(gelesen, "the marked component, read from the page").not.toBeNull();
+    const rahmen = gelesen?.rahmen ?? { farbe: "", stil: "", warnung: "-" };
     expect(rahmen.stil).toBe("solid");
     expect(rahmen.farbe).toBe(rahmen.warnung);
-    const satz = (await komponente.getAttribute("data-mt-pruefung-satz")) ?? "";
+    const satz = gelesen?.satz ?? "";
     expect(satz).toMatch(/^[^\n]+\.$/);
     const tooltip = jetzt.getByRole("tooltip");
-    // Hover …
-    await komponente.hover();
+    // Hover … – the mouse to the component's centre, once the page shows „Jetzt“ there and the
+    // frame the component (what locator.hover() waits for: in view, visible, hit by the pointer).
+    let mitte = { x: 0, y: 0 };
+    await expect
+      .poll(async () => {
+        const punkt = await imRahmen(
+          page,
+          JETZT,
+          (element, selector) => {
+            const frame = element as HTMLIFrameElement;
+            const ziel = frame.contentDocument?.querySelector(selector);
+            if (ziel === null || ziel === undefined) return null;
+            ziel.scrollIntoView({ block: "center", inline: "center" });
+            frame.scrollIntoView({ block: "nearest", inline: "nearest" });
+            const aussen = frame.getBoundingClientRect();
+            const innen = ziel.getBoundingClientRect();
+            const x = innen.left + innen.width / 2;
+            const y = innen.top + innen.height / 2;
+            const seite = {
+              x: aussen.left + frame.clientLeft + x,
+              y: aussen.top + frame.clientTop + y,
+            };
+            const trifft =
+              document.elementFromPoint(seite.x, seite.y) === frame &&
+              ziel.contains(frame.contentDocument?.elementFromPoint(x, y) ?? null);
+            return trifft ? seite : null;
+          },
+          MARKIERT,
+        );
+        if (punkt !== null) mitte = punkt;
+        return punkt !== null;
+      }, "the pointer reaches the marked component in „Jetzt“")
+      .toBe(true);
+    await page.mouse.move(mitte.x, mitte.y);
     await expect(tooltip).toBeVisible();
     await expect(tooltip).toHaveText(satz);
     await page.mouse.move(0, 0);
     await expect(tooltip).toBeHidden();
     // … and focus: the component is reached by the keyboard and describes itself with the sentence.
-    expect(await komponente.evaluate((element) => (element as HTMLElement).tabIndex)).toBe(0);
+    expect(gelesen?.tabIndex).toBe(0);
+    // Focused by Playwright, after the states above were confirmed (frame loaded with the page's
+    // rev, cut at the end, component visible and reached by the pointer). An element.focus() from
+    // the page did not focus it in Firefox (the frame's window stays unfocused, no tooltip).
     await komponente.focus();
     await expect(tooltip).toBeVisible();
     await expect(tooltip).toHaveText(satz);

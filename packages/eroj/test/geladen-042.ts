@@ -13,9 +13,23 @@ import { expect, type Page, type Response } from "@playwright/test";
 /** The marker of a usable stage: the client bound every handler (`buehne-klient.ts`). */
 export const BUEHNE_BEREIT = "[data-mt-buehne][data-mt-bereit]";
 
-/** Which document the page shows: its `performance.timeOrigin`, its own for every document. */
+/**
+ * Where `dokument()` keeps its mark: a property of the document's window, which every document has
+ * its own of (a reload or a navigation brings a new window).
+ */
+const MARKE = "__fmDokument050";
+
+/**
+ * Which document the page shows: a number the first read lays on the document's window, its own for
+ * every document. Spec 051 T3 (B-14): not `performance.timeOrigin` any more – WebKit reported a
+ * value 1 ms higher for the same document seconds later, so the old page passed for a new one.
+ */
 export function dokument(page: Page): Promise<number> {
-  return page.evaluate(() => performance.timeOrigin);
+  return page.evaluate((marke) => {
+    const fenster = window as unknown as Record<string, number | undefined>;
+    fenster[marke] ??= Math.random();
+    return fenster[marke];
+  }, MARKE);
 }
 
 /**
@@ -25,6 +39,20 @@ export function dokument(page: Page): Promise<number> {
 function zwischenDokumenten(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error);
   return message.includes("Execution context was destroyed");
+}
+
+/**
+ * Spec 051 T3: a read from the page that the page's navigation cut short (its context destroyed)
+ * gives `sonst`, the value of "not loaded yet"; every other error is thrown. Only for reads, never
+ * for an action (Spec 042 D-15).
+ */
+export async function lesenOder<T>(lesen: () => Promise<T>, sonst: T): Promise<T> {
+  try {
+    return await lesen();
+  } catch (error) {
+    if (zwischenDokumenten(error)) return sonst;
+    throw error;
+  }
 }
 
 /**
@@ -46,12 +74,12 @@ export async function seiteBereit(page: Page, merkmal: string, nicht?: number): 
   const lesen = async () => {
     try {
       return await page.evaluate(
-        ([selector, alt]) => ({
+        ([selector, alt, marke]) => ({
           merkmal: document.querySelector(selector) !== null,
           geladen: document.readyState !== "loading",
-          neu: alt === null || performance.timeOrigin !== alt,
+          neu: alt === null || (window as unknown as Record<string, unknown>)[marke] !== alt,
         }),
-        [merkmal, nicht ?? null] as const,
+        [merkmal, nicht ?? null, MARKE] as const,
       );
     } catch (error) {
       if (zwischenDokumenten(error)) return { merkmal: false, geladen: false, neu: false };
@@ -190,6 +218,112 @@ const post =
     response.request().method() === "POST" &&
     new URL(response.url()).pathname === `/api/marko/${id}/${aktion}`;
 
+/** The navigation of the page's own document (a goto, a reload, a link). */
+const dokumentDer =
+  (page: Page) =>
+  (response: Response): boolean =>
+    response.request().isNavigationRequest() && response.frame() === page.mainFrame();
+
+/**
+ * The navigation of the preview (`VORSCHAU`, not the frame with the proposal) to the document of
+ * `rev`: /marko/<id>/vorschau?…&rev=<rev>, which the server answers only once it checked that rev
+ * (`buehne-*`, Spec 044 D-01).
+ */
+const vorschauVon =
+  (id: string, rev: number) =>
+  (response: Response): boolean => {
+    if (!response.request().isNavigationRequest()) return false;
+    const url = new URL(response.url());
+    return (
+      url.pathname === `/marko/${id}/vorschau` &&
+      url.searchParams.get("rev") === String(rev) &&
+      !url.searchParams.has("propono")
+    );
+  };
+
+/**
+ * Spec 051 T3 (K2, testing.md › „Playwright stability patterns“): the page's responses from now on,
+ * in the order they came. Made before the action whose answers a test waits for. `antwort` waits
+ * for the first response after the index `ab` that `passt` and gives its index; it is bounded by
+ * the test's own time only, never by an expectation's window. The answers it waits for stand behind
+ * a server computation – the check of a rev, the frame of a new rev, a page the server checks before
+ * it writes it – which took 3.9 to more than 11 s on CI runners (Spec 051 plan.md › T-A, T-B),
+ * longer than the window of 5 s that polled for them before. What the page then shows is still
+ * read as a state, under the default expect window.
+ */
+function antwortenAb(page: Page): {
+  antwort: (passt: (response: Response) => boolean, ab?: number) => Promise<number>;
+  bei: (stelle: number) => Response;
+  aufhoeren: () => void;
+} {
+  const antworten: Response[] = [];
+  let weiter = (): void => undefined;
+  const hoeren = (response: Response): void => {
+    antworten.push(response);
+    weiter();
+  };
+  page.on("response", hoeren);
+  return {
+    async antwort(passt, ab = 0) {
+      for (;;) {
+        const index = antworten.findIndex((response, stelle) => stelle >= ab && passt(response));
+        if (index >= 0) return index;
+        await new Promise<void>((done) => {
+          weiter = done;
+        });
+      }
+    },
+    bei: (stelle) => {
+      const response = antworten[stelle];
+      if (response === undefined) throw new Error(`no response at ${stelle}`);
+      return response;
+    },
+    aufhoeren: () => page.off("response", hoeren),
+  };
+}
+
+/**
+ * Spec 051 T3 (K2): `schrittBereit` for a load whose answers stand behind a server computation (T-A,
+ * T-B). Call it **before** the action that loads the step (page.goto, page.reload, a button whose
+ * answer reloads the page) and call what it returns after that action; it resolves with the loaded
+ * document's `dokument()`, once
+ * - the server answered the page's document (the assistant checks a new rev before it writes the
+ *   page: 2.2–2.5 s locally under CPU load after „Keine Zweitfarbe“, Spec 051 B-14), then
+ *   `seiteBereit(page, merkmal, nicht)` as in `schrittBereit`,
+ * - where the step checks: the check of this document answered (POST …/pruefung, after the
+ *   document's answer), then `abrufBeantwortet` as in `schrittBereit`,
+ * - where the step has a preview: the server answered the preview's document of the page's rev,
+ *   then `rahmenBereit(page, VORSCHAU, { rev })` as in `schrittBereit`.
+ * Each wait for an answer is bounded by the test's time only; each state after it is read under
+ * the default expect window, as `schrittBereit` reads it.
+ */
+export function schrittLaedt(
+  page: Page,
+  id: string,
+  merkmal: string,
+  nicht?: number,
+): () => Promise<number> {
+  const gehoert = antwortenAb(page);
+  return async () => {
+    try {
+      const seite = await gehoert.antwort(dokumentDer(page));
+      const geladen = await seiteBereit(page, merkmal, nicht);
+      if (await prueft(page)) {
+        await gehoert.antwort(post(id, "pruefung"), seite + 1);
+        await abrufBeantwortet(page, `/api/marko/${id}/pruefung`);
+      }
+      if ((await page.locator(VORSCHAU).count()) > 0) {
+        const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+        await gehoert.antwort(vorschauVon(id, rev), seite + 1);
+        await rahmenBereit(page, VORSCHAU, { rev });
+      }
+      return geladen;
+    } finally {
+      gehoert.aufhoeren();
+    }
+  };
+}
+
 /**
  * Spec 042 T3: the live save of a step has settled (Spec 040 B-5); call it before the change, await
  * it after. Resolves with the rev of the draft's answer to the sending whose patch `traegt` accepts,
@@ -198,33 +332,33 @@ const post =
  * - the preview, if the step has one, has loaded that rev (`rahmenBereit`, not `framenavigated`),
  * - the check the step Farbe runs after a save (POST /api/marko/<id>/pruefung) answered, if it runs.
  * The page stays the same document meanwhile, so the answers are read as they come.
+ * Spec 051 T3 (K2, T-A): the preview of a new rev is answered only after the server checked that
+ * rev (3.9 to more than 11 s on CI runners), so the server's answer to the preview's navigation is
+ * waited for first, bounded by the test's time only; then `rahmenBereit` reads the loaded frame
+ * under the default window, as before.
  */
 export async function entwurfGespeichert(
   page: Page,
   id: string,
   traegt: (patch: unknown) => boolean,
 ): Promise<number> {
-  // The check follows the draft's answer: only a check answered after it counts.
-  let nachDerAntwort = false;
-  let geprueft = (): void => undefined;
-  const pruefung = new Promise<void>((done) => {
-    geprueft = done;
-  });
-  const hoeren = (response: Response): void => {
-    if (nachDerAntwort && post(id, "pruefung")(response)) geprueft();
-  };
-  page.on("response", hoeren);
+  // Listens from the call on (before the change), as page.waitForResponse did here before.
+  const gehoert = antwortenAb(page);
   try {
-    const antwort = await page.waitForResponse(
+    const gesendet = await gehoert.antwort(
       (response) => post(id, "entwurf")(response) && traegt(response.request().postDataJSON()),
     );
-    nachDerAntwort = true;
+    const antwort = gehoert.bei(gesendet);
     expect(antwort.status()).toBe(200);
     const { rev } = (await antwort.json()) as { rev: number };
-    if ((await page.locator(VORSCHAU).count()) > 0) await rahmenBereit(page, VORSCHAU, { rev });
-    if (await prueft(page)) await pruefung;
+    // The preview and the check follow the draft's answer: only answers after it count.
+    if ((await page.locator(VORSCHAU).count()) > 0) {
+      await gehoert.antwort(vorschauVon(id, rev), gesendet + 1);
+      await rahmenBereit(page, VORSCHAU, { rev });
+    }
+    if (await prueft(page)) await gehoert.antwort(post(id, "pruefung"), gesendet + 1);
     return rev;
   } finally {
-    page.off("response", hoeren);
+    gehoert.aufhoeren();
   }
 }

@@ -14,6 +14,7 @@ import {
   dokument,
   entwurfGespeichert,
   schrittBereit,
+  schrittLaedt,
   seiteBereit,
 } from "./geladen-042.js";
 import { nachDerAbfrage } from "./wackler-040.js";
@@ -135,9 +136,12 @@ for (const [ort, pfad, pollt, merkmal] of [
     // Spec 040 B-5: the test changes the step only once the page it loaded has settled – loaded,
     // its preview of the page's rev loaded, its check on load answered. Spec 042 T3: read as states
     // of the page (`geladen-042.ts`), never as `framenavigated`, which Firefox missed for the preview
-    // in run 42103645313 (the test waited its whole 120 s at the reload below).
+    // in run 42103645313 (the test waited its whole 120 s at the reload below). Spec 051 T3 (K2):
+    // the answers the step's load waits for stand behind a check, so they are waited for from
+    // before the load on, bounded by the test's time only (`schrittLaedt`).
+    const geoeffnet = schrittLaedt(page, id, merkmal);
     await page.goto(`${base}${pfad(id)}`);
-    await schrittBereit(page, id, merkmal);
+    await geoeffnet();
     const block = page.locator("[data-mt-zweitfarbe]");
     await expect(block).toHaveAttribute("data-mt-zweitfarbe", "keine");
     await expect(block.locator("[data-mt-zweitfarbe-stand]")).toHaveText("Keine Zweitfarbe");
@@ -159,8 +163,9 @@ for (const [ort, pfad, pollt, merkmal] of [
 
     // And press „Keine Zweitfarbe“ only once the reloaded page has settled as well (Spec 040 B-5).
     const vorDemNeuladen = await dokument(page);
+    const neuGeladen = schrittLaedt(page, id, merkmal, vorDemNeuladen);
     await page.reload();
-    await schrittBereit(page, id, merkmal, vorDemNeuladen);
+    await neuGeladen();
     await expect(block).toHaveAttribute("data-mt-zweitfarbe", "#0f8f86");
     await expect(page.getByRole("img", { name: "Zweitfarbe #0f8f86" })).toBeVisible();
     await expect(block.locator("[data-mt-zweitfarbe-stand]")).toContainText("Von dir gesetzt");
@@ -175,10 +180,12 @@ for (const [ort, pfad, pollt, merkmal] of [
     // Press it right after the page's poll of the draft answered, not while one is under way: the
     // reload would cut it short (Spec 040 B-8).
     if (pollt) await nachDerAbfrage(page, id);
+    // Spec 051 T3 (K2, B-14): the reload's page is written after the server checked the new rev.
+    const ohneZweitfarbe = schrittLaedt(page, id, merkmal, vorDemLoeschen);
     await page.keyboard.press("Enter");
     expect((await geloescht).status()).toBe(200);
     await expect.poll(() => zweitfarbe(id)).toBeUndefined();
-    await schrittBereit(page, id, merkmal, vorDemLoeschen);
+    await ohneZweitfarbe();
     await expect(page.locator("[data-mt-zweitfarbe]")).toHaveAttribute(
       "data-mt-zweitfarbe",
       "keine",
@@ -209,11 +216,14 @@ for (const [ort, pfad, pollt, merkmal] of [
         await route.fallback();
       },
     );
+    // Spec 051 T3 (K2): the step's first check (POST …/pruefung) is answered after the server checked
+    // the new brand; its answer is waited for from before the load on (`schrittLaedt`).
+    const geladen = schrittLaedt(page, id, merkmal);
     await page.goto(`${base}${pfad(id)}`, { waitUntil: "domcontentloaded" });
     await seiteBereit(page, merkmal);
     freigeben();
     // The client ran (it alone sends the frame) and the preview loaded the page's rev.
-    await schrittBereit(page, id, merkmal);
+    await geladen();
     expect(gehalten, "the preview's answer was held back").not.toEqual([]);
     expect(errors).toEqual([]);
   });
