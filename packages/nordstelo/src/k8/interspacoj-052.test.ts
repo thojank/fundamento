@@ -84,6 +84,20 @@ const GEGENPROBOJ: readonly Gegenprobe[] = [
     markoj: ASPEKTOJ,
     senVerteilita: true,
   },
+  // K8I-004b (B-004-4, D-052-13): a shadow root the agent writes itself (declarative shadow DOM)
+  // is no Ero origin, though its host is an fm-* element and the light document has no style rule.
+  {
+    nomo: "gegenprobe-e1-deklarativa-ombro",
+    kio: "(e1) own open declarative shadow root on an unregistered fm-io distributing its slot",
+    markoj: ASPEKTOJ,
+    senVerteilita: true,
+  },
+  {
+    nomo: "gegenprobe-e2-fermita-ombro",
+    kio: "(e2) own closed declarative shadow root on fm-stako (upgrade fails), :host distributing",
+    markoj: ASPEKTOJ,
+    senVerteilita: true,
+  },
 ];
 
 const M1 = ["anmelden-m1", "konto-m1"] as const;
