@@ -9,7 +9,7 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 | W050-T1 | Diagnose ohne Code: Artefakte, Zeitleisten, Messung, Vorher-Raten, Proben, V-1 | nötig | Auftrag | erledigt: V-1, V-2, Proben (`79a463bc`); V-3 „vorher“ vollständig (2026-11-13, Doku-Commit „before rates complete“) |
 | W050-T2 | Prüfung schneller (rot zuerst, byte-gleich) | **nötig** | V-1: T-A und T-B sind **K4 Prüfung** (erste `/pruefung` eines neuen `rev` lokal 1613 / 2434 ms ≥ 1 s; CI-Unit 1,5–2,8 s; im Eroj-Job ≥ 4,4 bis ≥ 11 s). Messung: Prüfregeln 94 %, `validateModeloFiles` (`packages/modelo`, tabu) 82 %, Ableitung ≈ 100 ms, die zwei `buildModelo` ≈ 16 ms (B-03). T-D ist **nicht** K4 (Prüfung in `festlegen`, Rahmen 1–3 ms). | **erledigt:** Paletten je Anfrage einmal gelöst (`2f6c33a6`), byte-gleich; erste `/pruefung` 1613 → 1491 ms (Median), „unter 1 s“ nicht erreichbar ohne `modelo` (B-11); Zwischenprüfung 150/150 |
 | W050-T3 | Tests an der Ursache (K2, K3) und doppelte Navigation (K4) | **nötig**, alle drei Teile | K2 für T-A/T-B (B-01, B-14), K4 Navigation und K3 für T-C, K3 für T-D (V-1) | **erledigt:** K4 rot `fd90b67b` → grün `de3fd057` (Client legt Kopien der Vorschau-Rahmen an ihre Stelle), K2 `c5147982` (`schrittLaedt`, Antwort der Rahmen-Navigation in `entwurfGespeichert`, Kennung des Dokuments am `window`), K3 `9a51b5cd` (Rahmen von der Seite aus gelesen); byte-gleich; Zwischenprüfung 120/120 und 150/150 |
-| W050-T4 | `achsen-2b2:82` | **nötig, als K5** (nicht als Fehler der Komponente) | Plattform-Probe: macOS-WebKit `Tab` → `BODY`, `Alt+Tab` und `focus()` → `[part="control"]` (`tabIndex` 0); Chromium/Firefox `Tab` fokussiert; Linux-WebKit 11/11 grün; lokal 30/30 rot. Kein Rot-zuerst für `fm-markobutono` (kein Komponentenfehler). | offen |
+| W050-T4 | `achsen-2b2:82` | **nötig, als K5** (nicht als Fehler der Komponente) | Plattform-Probe: macOS-WebKit `Tab` → `BODY`, `Alt+Tab` und `focus()` → `[part="control"]` (`tabIndex` 0); Chromium/Firefox `Tab` fokussiert; Linux-WebKit 11/11 grün; lokal 30/30 rot. Kein Rot-zuerst für `fm-markobutono` (kein Komponentenfehler). | **erledigt:** `8a982bd5` – Taste `Alt+Tab` nur bei WebKit auf macOS, sonst `Tab` (D-25); alle Erwartungen unverändert; Zwischenprüfung WebKit (macOS) 10/10, Chromium/Firefox je 1/1 |
 | W050-T5 | Schlusslauf lokal (Test-Ticket): 30/30 nach D-13 (beide Stufen), ganze Eroj-Suite, Diff-Suche, `bericht.md` ohne CI | nötig | AC-4 bis AC-8 | offen |
 | W050-T6 | Ein Push, ein PR, genau ein `workflow_dispatch`, Bericht (Orchestrator, nach der QA-Schleife) | nötig | AC-5 | offen |
 
@@ -60,6 +60,24 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 - `9a51b5cd` Spec 050 T3: read the stage's frames from the page, confirm the state before acting in a frame
 - (Doku) Spec 050 T3: plan and tasks
 
+## W050-T4 im Einzelnen (`achsen-2b2:82`, K5)
+
+- [x] **Beleg aus T1 übernommen** (Plattform-Probe D-14): macOS-WebKit `Tab` → `BODY`, `Alt+Tab` und `focus()` → `[part="control"]` (`<button role="checkbox">`, `tabIndex` 0); Chromium/Firefox `Tab` fokussiert, Firefox `Alt+Tab` nicht; Linux-WebKit in CI 11/11 grün. Kein Fehler der Komponente → kein roter Test, `packages/eroj/src/**` unberührt.
+- [x] **Änderung** `packages/eroj/test/achsen-2b2.spec.ts` (`8a982bd5`, D-25), Zeilen vorher `ed1670fc` / nachher `8a982bd5`:
+  - `:81`–`:87` (neu): `nextButtonKey(browserName)` = `"Alt+Tab"` bei `browserName === "webkit" && process.platform === "darwin"`, sonst `"Tab"`; lokal in der Datei, **nicht** `TAB()` aus `alirebleco.ts` (das nimmt jedes WebKit, auch Linux).
+  - `:82`–`:84` → `:90`–`:93`: Fixture `browserName` dazu.
+  - `:93` → `:102`: `await page.keyboard.press("Tab");` → `await page.keyboard.press(nextButtonKey(browserName));`
+  - **Grund:** Vorher prüfte der Test auf macOS-WebKit die Tastatureinstellung von macOS (30/30 rot), nicht die Komponente. Nachher erreicht auf jeder Plattform ein Tastendruck der Plattform das Steuerelement; `toBeFocused` und alle Wert-Erwartungen (`aria-readonly`, `checked`, `aria-checked`, Formularwert `on`) stehen unverändert da (AC-7, `plan.md` › „T4“).
+- [x] **Zwischenprüfung** (unter der Sperre, ohne fremde Test-Prozesse, zählt nicht für AC-4): WebKit (macOS) `--repeat-each=10` 460/460, Zieltest 10/10; Chromium + Firefox einmal 92/92, Zieltest je 1/1.
+- [x] **Andere Tests der Datei:** keiner aus demselben Grund rot (`A-elektilo-1` erreicht einen `<select>`, den macOS-WebKit mit `Tab` fokussiert); nicht angefasst.
+- [x] **Für die Diff-Suche in T5:** `browserName` in den hinzugefügten Zeilen `:86`, `:87`, `:92`, `:102` = Tasten-Weiche (Q-4/D-25), keine Engine-Einschränkung. Kein `skip`/`fixme`/`fail`/`only`/`timeout`/`retries`/`waitForTimeout`/`setTimeout`.
+- [ ] **Nicht lokal prüfbar:** Linux-WebKit – Nachweis im Dispatch (T6).
+
+### Commits T4
+
+- `8a982bd5` Spec 050 T4: the read-only checkbox reaches its control with the platform's key, Alt+Tab only in WebKit on macOS
+- (Doku) Spec 050 T4: plan and tasks
+
 ### Befunde für die nächsten Tickets
 
 - **T2 (erledigt, siehe oben):** Die Zeit steckt zu 82 % in `validateModeloFiles` (`packages/modelo`, tabu) und zu 10 % in `evaluateAlirebleco`; die Ableitung ist mit ≈ 100 ms klein. „Unter 1 s“ verlangt, diese Prüfregeln seltener oder mit wiederverwendeten Teilergebnissen zu rechnen, ohne `packages/modelo` zu ändern und byte-gleich – sonst Befund mit Werten (B-03).
@@ -95,3 +113,4 @@ Keine in T1 und T2 (T2 ändert keine Erwartung eines älteren Tests). T3/T4 trag
 | `buehne-036.spec.ts:585` | `komponente.hover()` | `expect.poll(<Zeiger trifft die Komponente>).toBe(true)`, dann `page.mouse.move(Mitte)` | K3: Aktion ohne eigenes Zeitlimit nur nach bestätigtem Zustand | T3 |
 | `buehne-036.spec.ts:591` | `komponente.evaluate(tabIndex)` | `tabIndex` aus dem Lesen von der Seite aus (`toBe(0)` unverändert); `komponente.focus()` (`:592`) bleibt | K3 | T3 |
 | `buehne-036.spec.ts` (neu, nach `:541`) | – | roter Test „3.4 (Spec 050): after a reload each frame of the stage loads its document once“ | K4 Navigation, rot zuerst (`fd90b67b`) | T3 |
+| `packages/eroj/test/achsen-2b2.spec.ts:93` (Stand `ed1670fc`; nachher `:102`) | `await page.keyboard.press("Tab");` | `await page.keyboard.press(nextButtonKey(browserName));` (`Alt+Tab` nur WebKit auf macOS, sonst `Tab`; Hilfe `:86`–`:87`, Fixture `browserName` `:92`). Keine Erwartung geändert. | K5 (T-E): macOS-WebKit erreicht Buttons nur mit `Alt+Tab`; die Weiche nach Engine **und** Plattform hält `Tab` für Linux-WebKit, Chromium, Firefox (D-25) | T4 |
