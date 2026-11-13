@@ -148,6 +148,8 @@ Die Tabelle zeigt je F-Screen das neue Urteil und alle Kriterien, die `decidiVer
 
 K6 von `registrieren` ist 0,75 (wie in M-1). K6 gehört nicht zur Grün-Regel, darum ist der Screen trotzdem grün.
 
+**Befund F-052-4 (aus der Browser-QA, nicht durch diese Spec verursacht): `anmelden` wäre grün, obwohl der Absende-Button leer aussieht.** Das Markup des Agenten schreibt `<fm-butono slot="actions" emphasis="high" type="submit" label="Anmelden"></fm-butono>` ohne Textinhalt. `fm-butono` zeigt das Attribut `label` nicht als Text, der Button erscheint als leere Fläche. Ebenso rendert der Markenlink `<fm-ligilo slot="brand" label="Team Nord">` mit 0 × 0 px und ist ein unsichtbarer Tab-Stopp (alle 4 Screens). Genau das meldet der Hinweis „label-names-action“ bei anmelden und konto. Er hat die Schwere `warning` und hält nach der Grün-Regel nicht vom Grün ab. An der Grün-Regel wurde nichts geändert (AC-G1). Ob ein leerer Button „grün“ sein darf, ist eine Frage für eine Folge-Spec. Beleg: Bildschirmfoto `m1-anmelden-komuna-light.png` der QA (Feature-Ordner `qa-screenshots/`).
+
 **Befund F-052-1: Die Vorhersage der Produkt-Spec (3 von 4) trifft nicht zu, gemessen sind 4 von 4.** Die Produkt-Spec erwartete `konto` in komuna, ekzemplo und provo rot wegen Rest C (Überschrift → Liste in `fm-atributlisto`, 17 / 14 / 21 px) und nur in provo-kompakta grün (12,25 px, 0,25 px Abweichung). Gemessen liegt dieses Paar jetzt in allen vier Marken genau auf `spacing.large` (16 / 12 / 20 / 12 px). Die Ursache ist B, nicht ein Eingriff an der Messung für C oder an den Daten: Mit der Flat-Tree-Messung (D-052-01) werden nicht mehr die Kästen von `span[slot=heading]` und `dl` verglichen, sondern die beiden Kästen, die im gerenderten Baum unter `fm-atributlisto` nebeneinanderstehen. Das sind der Überschrift-Block `fm-titolo[part=heading]` und die Liste `div[part=list]`. Abschnitt 5 belegt das im Browser. Nichts an Messung, Skript, Daten oder Schwelle wurde nachgestellt, um eine Zahl zu erreichen.
 
 Die Paare von `konto`, die sich zwischen M-1 und dem neuen Rendern ändern (Elternteil: vorher → nachher, Achse, px M-1 → px neu; hell und dunkel gleich):
@@ -195,7 +197,7 @@ Die Spalte „Element-Kasten“ stimmt genau mit den Werten der Produkt-Spec und
 **Vorschlag für eine Folge-Spec (klein):**
 
 - Der Element-Kasten eines Inline-Elements bleibt die Messgröße, wenn zwei Light-DOM-Geschwister **ohne** Shadow-DOM dazwischen nebeneinanderstehen (z. B. ein `<span>` direkt vor einem `<div>` im Markup des Agenten, oder Variante 0). Dort kann derselbe Inline-Rest von 0,25 bis 2 px wieder auftauchen. Zu entscheiden ist, ob K8 für Inline-Elemente den Zeilenkasten misst. Das ist eine Jugxo-Frage (D-052-01, Kialo) und gehört nicht in diesen Lauf.
-- Das Fixture `konto-m1` entfernt die Überschrift nur wegen Rest C. Es kann in der Folge-Spec mit Überschrift neu erzeugt werden; nach dieser Messung wäre `interspacoj` = 1 in allen 8 Kombinationen.
+- Das Fixture `konto-m1` entfernt die Überschrift nur wegen Rest C. K8I-006 hat deshalb das Fixture `konto-m1-plena` ergänzt: das unveränderte M-1-Fragment mit Überschrift. Es ergibt `interspacoj` = 1 in allen 8 Kombinationen, mit genau einem `verteilita`-Paar aus `fm-pagxo`, und läuft als reiner Test in der CI (`packages/nordstelo/src/k8/interspacoj-052.test.ts`). Damit ist F-052-1 für `konto` im PR geprüft.
 
 ## 6. `verteilita`-Paare nach Herkunft
 
@@ -261,7 +263,7 @@ Der Befehl folgt dem Muster von M-1 in Spec 050 (`specs/050-mvp-probelauf/plan.m
 | Aufgabe, Varianten | `anmelden-und-konto`, F und 0, 1 Wiederholung |
 | Kostenrahmen | ≈ 3,75 $ |
 | `--max-tokens` | ⌊3,75 $ ÷ 2,40 $ × 10⁶⌋ = 1 562 500, auf 1 000 abgerundet: **1 562 000** (Formel D-050-9, p_eff 2,40 $ je 10⁶ für Sonnet) |
-| Commit | `<<COMMIT-SHA-FINAL: Kopf des Branches nach K8I-006 bzw. nach dem Merge eintragen>>` |
+| Commit | `b890ab36` (K8I-006, letzter Commit dieses Branches mit Änderungen unter `packages/`; spätere Commits ändern nur `specs/052-k8-interspacoj/`). Nach dem Merge den Merge-Commit auf `main` nehmen. |
 | Lastbedingung | Last (1 min) < 10 vor dem Start **und** während des Laufs (Spec 050: ein Lauf mit Last > 10 ist gestört) |
 | Fremde Messung | keine: kein anderer Playwright-, Vitest-Browser- oder Messlauf auf der Maschine (Wächter `gardisto stand` zeigt „frei“) |
 
@@ -270,7 +272,7 @@ W=/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec05
 M=/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds; S=$M/.fundamento/spec050
 R=/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwexax2207lwdhug/repos/fundamento
 
-# Vorher: git -C $R status --porcelain leer; git -C $R rev-parse HEAD = <<COMMIT-SHA-FINAL>>; pnpm -C $R build;
+# Vorher: git -C $R status --porcelain leer; git -C $R rev-parse HEAD = der Commit aus der Tabelle (Kopf des Branches bzw. Merge-Commit); pnpm -C $R build;
 #         uptime (1 min < 10); S050_REPO=$R $W/gardisto stand → „frei“; $W/kosten stand
 S050_REPO=$R $W/mezuri probe-sonnet-komuna "Spec 052 sauberer Probelauf Sonnet komuna" --cwd $R -- \
   pnpm nordstelo --art ablauf --taskoj anmelden-und-konto --varianten F,0 --ripetoj 1 \
@@ -288,13 +290,13 @@ Hinweise für den Start (nur gelesen, nichts geändert):
 
 1. Diesen Bericht lesen, besonders F-052-1 (4 statt 3 grüne F-Screens) und Abschnitt 5 (Rest C durch B erledigt): `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwexax2207lwdhug/repos/fundamento/specs/052-k8-interspacoj/neubewertung.md`.
 2. Die Frage aus Abschnitt 6 beantworten: Layout-Eroj mit `justify` von `verteilita` ausnehmen, ja oder nein (D-052-07 in `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwexax2207lwdhug/repos/fundamento/specs/052-k8-interspacoj/plan.md`).
-3. Entscheiden, ob der Vorschlag aus Abschnitt 5 (Zeilenkasten für Inline-Elemente ohne Shadow-DOM, `konto-m1` mit Überschrift) eine Folge-Spec wird.
+3. Entscheiden, ob zwei Punkte eine Folge-Spec werden: der Vorschlag aus Abschnitt 5 (Zeilenkasten für Inline-Elemente ohne Shadow-DOM) und F-052-4 aus Abschnitt 4 (ein Screen mit leerem Absende-Button gilt als grün).
 4. Den PR prüfen: `<<PR-LINK>>`. CI je Job:
 
    | Job | Ergebnis | Notiz |
    |---|---|---|
    | `<<CI-TABELLE: vom Orchestrator je Job auszufüllen>>` | | |
 
-5. Für den sauberen Probelauf: Ledger bzw. Reservierung für `probe-sonnet-komuna` (≈ 3,75 $) festlegen, den Commit oben eintragen und den Befehl aus Abschnitt 10 erst starten, wenn Last (1 min) < 10 und keine fremde Messung läuft.
+5. Für den sauberen Probelauf: Ledger bzw. Reservierung für `probe-sonnet-komuna` (≈ 3,75 $) festlegen, den Commit aus Abschnitt 10 prüfen und den Befehl aus Abschnitt 10 erst starten, wenn Last (1 min) < 10 und keine fremde Messung läuft.
 6. Optional zum Nachrechnen ohne Modell, im Repo `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwexax2207lwdhug/repos/fundamento` nach `pnpm build`:
    `node specs/052-k8-interspacoj/neubewertung.mjs --roh /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec050/m1/20261113-0243 --out /tmp/s052-nachrechnen` und `diff -r -x last.txt specs/052-k8-interspacoj/daten/neubewertung /tmp/s052-nachrechnen`.

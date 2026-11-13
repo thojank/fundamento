@@ -294,6 +294,7 @@ Bericht: [`neubewertung.md`](neubewertung.md). Kein Modell, kein Netz, keine Än
 - **F-052-1** 4 von 4 statt 3 von 4 grünen F-Screens; Rest C verschwindet durch B (Flat-Tree misst `fm-titolo[part=heading]` → `div[part=list]`). Nicht nachjustiert. Siehe `plan.md` › Befunde K8I-005.
 - **F-052-2** `NAMED_SLOTS = ["heading"]` in `fm-atributlisto` (`[]` gilt für `fm-titolo`); Erklärung „Messung“ trifft zu, „Ero“ nicht. Vorschlag Folge-Spec.
 - **F-052-3** Ledger von Spec 050 trägt den sauberen Probelauf nicht; `S050_REPO` nötig; Rest für Variante 0 bei `--max-tokens 1562000` knapp.
+- **F-052-4** (Browser-QA nach dem Bau, nicht durch Spec 052 verursacht) `anmelden` wäre grün, obwohl der Absende-Button leer aussieht: `fm-butono … label="Anmelden"` ohne Textinhalt zeigt keinen Text; der Markenlink `fm-ligilo label="Team Nord"` rendert 0 × 0 px. Der Hinweis „label-names-action“ (`warning`) hält nach der Grün-Regel nicht vom Grün ab. Nichts geändert; Frage für eine Folge-Spec (`neubewertung.md` Abschnitt 4).
 - **D-052-14** `simplaDokumento` statt `ekranaDokumento` (Weg von M-1), Abweichung vom Wortlaut des Tickets.
 - Die gerenderten `fakto.json` tragen die vollständigen K8-Fakten (`renders[].k8`), anders als der Export von Spec 050; damit lassen sich K8 und die Selbstprüfung aus dem Repo nachrechnen (zusammen ≈ 1,5 MB).
 
