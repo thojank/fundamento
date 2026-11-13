@@ -99,7 +99,9 @@ describe("ekranaDokumento – Variante F (D-24, D-27)", () => {
     const html = F();
     expect(html.startsWith("<!doctype html>\n")).toBe(true);
     expect(html).toContain('<html lang="de" data-fm-aspekto="provo" data-fm-color-scheme="light">');
-    expect(html).toContain('<link rel="stylesheet" href="../marko/css/fundamento.css">');
+    expect(html).toContain(
+      '<link rel="stylesheet" href="../marko/css/fundamento.css" data-nordstelo>',
+    );
     expect(html).toContain(`<script src="../marko/${KLASIKA_SKRIPTO}"></script>`);
     expect(html).not.toContain('type="module"');
     expect(html).toContain("<title>Liste &lt;Team Nord&gt;</title>");
@@ -147,7 +149,9 @@ describe("ekranaDokumento – Variante F (D-24, D-27)", () => {
   it("sets the brand's base font on body only by the variable the build names (C-5)", () => {
     const html = F({ marko: { ...MARKO, bazaTiparo: BAZA_TIPARO } });
     const kapo = html.slice(html.indexOf("<head>"), html.indexOf("</head>"));
-    expect(kapo).toContain(`<style>body { font-family: var(${BAZA_TIPARO}); }</style>`);
+    expect(kapo).toContain(
+      `<style data-nordstelo>body { font-family: var(${BAZA_TIPARO}); }</style>`,
+    );
     // Every font rule of the frame is a var(--…), never a value.
     const reguloj = [...html.matchAll(/font-family\s*:\s*([^;}]+)/g)].map((m) =>
       (m[1] ?? "").trim(),

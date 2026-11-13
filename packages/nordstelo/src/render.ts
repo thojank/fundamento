@@ -34,13 +34,16 @@ const TYPES: Record<string, string> = {
   ".map": "application/json",
 };
 
+// Spec 052 V-4 (Q-4): every stylesheet and script the renderer inserts carries `data-nordstelo`, so
+// the K8 facts tell them from style rules of the agent's own (D-052-01, condition 3).
+
 /** The path of the probe document of K8 (D-S038-12-3): only the stylesheet, no Eroj, no page. */
 const SONDO_PATH = "/k8-sondo";
 const SONDO_DOKUMENTO =
-  '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Sondo</title><link rel="stylesheet" href="/css/fundamento.css"></head><body></body></html>';
+  '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Sondo</title><link rel="stylesheet" href="/css/fundamento.css" data-nordstelo></head><body></body></html>';
 
 const HEAD =
-  '<link rel="stylesheet" href="/css/fundamento.css"><script type="module" data-nordstelo>import "/eroj/define.js";</script>';
+  '<link rel="stylesheet" href="/css/fundamento.css" data-nordstelo><script type="module" data-nordstelo>import "/eroj/define.js";</script>';
 
 /** The document the browser gets: Variante F with the Celo of all Aspektoj, Variante 0 as written. */
 export function documentOf(html: string, variant: Variant): string {
