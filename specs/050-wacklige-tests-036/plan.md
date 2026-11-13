@@ -2,6 +2,8 @@
 
 **Spec:** [`spec.md`](spec.md) (unverändert mit `cp` kopiert; SHA-256 `386f6db80c0e99edd5813b22b67d8481e59098ca96d48fdee3fdc7a329e3d8c5`, 16 031 Byte) · **Aufgaben:** [`tasks.md`](tasks.md) · **Basis:** `main` `de931e40` (Merge #163) · **Branch:** `261112-wacklige-browser-tests--9197f6` · **Regel 0** gilt. Keine Grenze, kein Zeitlimit, keine Toleranz, kein Takt angehoben. Nichts gemergt, nichts gepusht. Kein Sprachmodell (0 $).
 
+**Stand T5 (2026-11-13, 09:10):** Schlusslauf lokal auf `91c2a9a1` (siehe „T5 – Schlusslauf“). V-3 „nachher“ vollständig: jeder Zieltest 30/30 je Engine in Stufe (1) und (2), T-D im Shard 2/4 1/1, T-E 30/30 (vorher 0/30); T-A Chromium (1) 29 → 30, T-A WebKit (2) 26 → 30. Ein Rot außerhalb der Zieltests: `buehne-036:414` 3.2 WebKit 29/30 in Stufe (2) an einer unveränderten 5-s-Wartestelle (B-17). Ganze Eroj-Suite 2026 grün, 0 rot. Diff-Suche ohne Verstoß gegen Regel 0. `bericht.md` bis auf CI.
+
 **Stand T4 (2026-11-13, 04:35):** `achsen-2b2:82` (T-E, K5) drückt auf macOS-WebKit `Alt+Tab`, überall sonst `Tab` (`8a982bd5`, D-25); alle Erwartungen stehen noch da, die Komponente ist unverändert. Zwischenprüfung WebKit (macOS) 10/10, Chromium und Firefox je 1/1 (siehe „T4“).
 
 **Datum:** 2026-11-12 · **Stand T3 (2026-11-13, 04:30):** K4 Navigation behoben, rot zuerst (`fd90b67b` → `de3fd057`): Firefox gab beim Neuladen jedem vom Parser angelegten Vorschau-Rahmen sein letztes Dokument zurück, der Client schickte ihn noch einmal hin; der Client legt jetzt Kopien der Rahmen an ihre Stelle. K2 (T-A, T-B, B-14) und K3 (T-C, T-D) in den Tests umgestellt (`c5147982`, `9a51b5cd`), byte-gleich, Zwischenprüfung 120/120 und 150/150 (siehe „T3“). · **Stand:** T1 – Diagnose ohne Code-Änderung: CI-Artefakte gesichert, Zeitleisten je Test, Messung lokal und aus CI, Plattform- und Rahmen-Probe und die Tabelle „Ursache je Test“ (V-1) sind fertig. **Fortsetzung 2026-11-13, 00:34–03:38:** Die offenen Vorher-Reihen liefen auf dem unveränderten Produktcode (`79a463bc` = `de931e40`, D-22) ohne fremde Test-Last: `buehne-036` Stufe (1) neu, Shard 2/4, Stufe (2) für `zweitfarbe-036` und `buehne-036`, Extra-Reihe mit Spuren. **V-3 „vorher“ ist vollständig.** Neue Befunde B-14 (WebKit: `dokument()` ist keine feste Kennung) und B-15 (B-01 für T-B teilweise widerlegt); V-1 entsprechend ergänzt.
@@ -70,6 +72,7 @@ Der Lauf ist unbeaufsichtigt. Wo die Spec offen ließ, gilt die Annahme. „ange
 | D-23 | T3 | Wie verhindert der Client die zweite Navigation, ohne Markup, Antworten oder Takt zu ändern? (Verworfen nach Probe bzw. Lesen: „nicht zuweisen, wenn der Rahmen das Dokument schon hat“ – dann bliebe `src` leer, und `rahmenBereit` sowie jede andere Zuweisung derselben URL mit Absicht (Lingvo-Wahl, `refreshNachher()` nach dem Lesen von Material) hingen an derselben Weiche; `location.reload()` ersetzen – lässt F5 und die anderen Neuladungen unberührt; `src` ins Markup – ändert die Seite des Servers und lädt in Chromium/WebKit zweimal.) | Der Client ersetzt vor seiner ersten Zuweisung jeden `iframe[data-mt-src]` durch eine Kopie (`replaceWith(cloneNode(true))`). Firefox stellt nur vom Parser angelegte Rahmen beim Neuladen wieder her; eine Kopie ist vom Skript angelegt und hinterlässt nichts für das nächste Neuladen. Probe vor dem Commit: Firefox, Chromium, WebKit je 3/3 eine Anfrage je Rahmen. Server-Markup, Antworten (`antworten-044`) und `stato`-Takt unverändert. | angewandt (`de3fd057`) |
 | D-24 | T3 | Welche Schritte von 3.5 (T-D) gehen von der Seite aus, welche bleiben im `frameLocator`? | Von der Seite aus (`contentDocument`, nur bei geladenem Dokument, `lesenOder`): jede Sichtbarkeit, jede Zählung, Rahmenfarbe, Satz, `tabIndex`, der Zustand „Zeiger trifft die Komponente“ und die Mausbewegung (`page.mouse`). Im `frameLocator` bleiben `komponente.focus()`, die Tooltip-Erwartungen und `toHaveAccessibleDescription`: Ein `element.focus()` aus dem Kontext der Seite fokussierte in Firefox nicht (Tooltip fehlte, 1/1 rot), und Rolle/Beschreibung lassen sich von der Seite aus nicht gleich stark prüfen (AC-7). Sie folgen erst auf die bestätigten Zustände. | angewandt (`9a51b5cd`) |
 | D-25 | T4 | Wie wählt `achsen-2b2:82` (T-E) die Taste nach Plattform **und** Engine (Q-4/D-04), und wie wird erkannt? | Eine lokale Funktion in `achsen-2b2.spec.ts` (`:86`–`:87`): `nextButtonKey(browserName)` = `"Alt+Tab"`, wenn `browserName === "webkit" && process.platform === "darwin"`, sonst `"Tab"`. Die Engine kommt aus der Fixture `browserName` (wie `felder-2b.spec.ts:249` und `alirebleco.ts:7`), die Plattform aus `process.platform` des Testläufers. Das passt, weil Playwright den Browser hier auf derselben Maschine startet wie den Testläufer (lokal macOS, CI-Runner Linux; kein entfernter Browser in `playwright.config.ts`). Kein Import von `TAB()` (nähme für Linux-WebKit `Alt+Tab`). Verworfen: Variante „`focus()` statt Taste“ der Spec – nicht nötig, weil `Alt+Tab` belegt den Fokus mit der Tastatur erreicht (Plattform-Probe). Der Test läuft weiter in allen Engines und Plattformen; die Weiche wählt nur die Taste, sie schränkt nichts ein. | angewandt (`8a982bd5`) |
+| D-26 | T5 | Wie laufen die Nachher-Reihen, damit sie mit den Vorher-Reihen vergleichbar sind und nie neben fremden Tests? | Dieselben Befehle wie T1 („Messanleitung“), unverändert, über dieselben Skripte `s050-werkzeug/reihe.sh` und `reihe-cpu.sh` (sie schreiben weiter „W050-T1“ in `besitzer.txt`; die Sperre selbst nahm T5 mit „W050-T5“ und hielt sie von 04:37 bis zum Ende). Ein Treiber außerhalb des Repos (`s050-werkzeug/ablauf.sh`, mit `nohup` gelöst, damit kein Zeitlimit des Werkzeugs eine Reihe beendet) startet die Schritte nacheinander und wartet vor **jedem** auf 90 s ohne Test-Prozesse anderer Arbeitsbäume (`ruhe-max.sh` = `warte-ruhe.sh` mit Abbruch nach 60 min). Reihenfolge: Stufe (1) `zweitfarbe-036`, `buehne-036`, Shard 2/4, `achsen-2b2`; Stufe (2) `zweitfarbe-036`, `buehne-036`; ganze Suite; `modelo`; `test:betroffen` (bei Rot derselbe Paketsatz nacheinander wie T2); `lint`. Höchstens 30 Wiederholungen je Test und Engine je Reihe; keine Reihe wiederholt. | angewandt (04:37–09:05) |
 
 ## Ursache je Test (V-1, T1)
 
@@ -83,6 +86,7 @@ Eingeordnet nach den Klassenregeln (Implementierungs-Spec §2.4, D-10): genau ei
 | T-D `buehne-036.spec.ts:545` 3.5, Wartestelle `expect(markiert.first()).toBeVisible()` (`:567`, CI) bzw. `expect(jetzt.locator("fm-pagxo").first()).toBeVisible()` (`:554`, lokal) im `frameLocator` von „Jetzt“ | Firefox | **K3** | Die Erwartung im `frameLocator` startet nach einer Navigation des Rahmens und **endet nie** (Protokoll `with timeout 5000ms`, danach nur `waiting for …`; Test-Timeout 120 s). Von den neuen Rahmendokumenten gibt es **keinen** `frame-snapshot`: Playwright-Firefox hat ihren Kontext nicht. Im Weg steht keine Anfrage: Das Produkt navigiert jeden Rahmen genau **einmal** (CI: je eine Anfrage rev 2, 1/3 ms; Rahmen-Probe (G): 1 Anfrage, 1 Zuweisung, 10/10). Die Prüfung liegt in `festlegen` (2842 ms), nicht im Rahmen. Lokal reproduziert (Firefox, Wiederholung 22): dasselbe schon beim ersten `oeffne()`. Dasselbe Muster bei `buehne-036:711` 3.6 (CI 42459842953 und lokal 4×, je nach dem Wechsel auf `scheme=dark`; B-04). | CI 43174596533 (`962eebe0…zip`, Shard 2); lokal Reihe `buehne-vorher` (`de931e40`, nur zur Information, B-08) | **K5:** Playwright-Firefox hält das eigene Fenster (5000 ms) nicht ein und bekommt den Kontext des neu geladenen Rahmens nicht; nur Firefox (CI 2 Spuren, lokal 5 Spuren, 0 in Chromium/WebKit). **K1:** Alle lokalen Treffer lagen in der Zeit fremder Test-Last (20:40–21:33, Load bis 50), der CI-Treffer im Dispatch mit drei Engines je Shard; ohne fremde Last 0 Treffer: T-D Firefox 30/30 in Stufe (1) und (2) und 1/1 im Shard 2/4, ebenso 3.6 ohne Hänger. Die frühen Hypothesen K4/K1 (kalte Prüfung im Rahmen) und „intercepts pointer events“ sind verworfen (keine Aktion hängt, Rahmen 1–3 ms). | **T3 (K3) umgestellt** (`9a51b5cd`): Erwartungen und Lesungen im Rahmen von der Seite aus, Schnitt und Sichtbarkeit vor jeder Aktion bestätigt, Hover über die Seite; `focus()`, Tooltip und `toHaveAccessibleDescription` bleiben im `frameLocator` (Rest-Risiko K5, siehe „T3“). Lokal ohne fremde Last nie rot – nicht nachgewiesen, dass der Hänger verschwindet |
 | T-E `achsen-2b2.spec.ts:82` A-markobutono-1, `page.keyboard.press("Tab")`, dann `toBeFocused` (`:94`) | WebKit unter macOS | **K5** | macOS-WebKit fokussiert `[part="control"]` (`<button role="checkbox">`, `tabIndex` 0) mit `Tab` nicht (`activeElement` bleibt `BODY`), wohl mit `Alt+Tab` und `focus()`; den `<select>` erreicht es mit `Tab`. Chromium/Firefox auf macOS: `Tab` fokussiert. Linux-WebKit (CI): 11/11 grün. Lokal 30/30 rot, immer „Received: inactive“ (`:94`). Die Komponente ist auf jeder Plattform gleich (kein fehlendes `tabindex`). | Plattform-Probe 21:38 (`de931e40`); Reihe `achsen-vorher`; CI-JUnit 11 Läufe | – | **T4 erledigt** (K5, Q-4, D-25, `8a982bd5`): Taste `Alt+Tab` nur auf macOS-WebKit, sonst `Tab`; `toBeFocused` und alle Wert-Erwartungen unverändert; Zwischenprüfung WebKit (macOS) 10/10, Chromium/Firefox 1/1. Linux-WebKit lokal nicht prüfbar (Dispatch) |
 
+**Stand T5:** Zeilen der Tests jetzt (`91c2a9a1`): T-A `zweitfarbe-036:130`, T-B `:203`, T-C `buehne-036:553`, T-D `buehne-036:679`, T-E `achsen-2b2:90`. Nachher 30/30 je Engine in beiden Stufen (T-E 30/30, T-D im Shard 1/1), siehe „30/30 vorher“ › Tabelle (V-3). Für T-B, T-C und T-D ist das nur „keine Regression“ (vorher schon 30/30); ihr Nachweis ist der Dispatch (AC-5).
 
 ## Zeitleisten aus den CI-Traces (T1, gelesen am 2026-11-12)
 
@@ -462,6 +466,137 @@ Aus `packages/eroj`, unter der Sperre (`besitzer.txt` „W050-T4“), nach `wart
 | `8a982bd5` | Spec 050 T4: the read-only checkbox reaches its control with the platform's key, Alt+Tab only in WebKit on macOS (nur `achsen-2b2.spec.ts`) |
 | (Doku) | Spec 050 T4: plan and tasks |
 
+## T5 – Schlusslauf lokal (Test-Ticket)
+
+**Stand:** 2026-11-13, 04:36–09:30, Code `91c2a9a1` (T1–T4, sauberer Baum), gebaut mit `pnpm turbo run build --filter=@fundamento/cli...` (04:37, 10/10, 9 aus dem Cache; `dist` mit `solvedStep` und `cloneNode` geprüft). Sperre `besitzer.txt` „W050-T5“ von 04:37 bis zum Ende, Ablauf nach D-26. Vor jedem Schritt 90 s ohne Test-Prozesse anderer Arbeitsbäume (jedes Mal nach 90 s erreicht; die Sitzung `fundamento-wt-mwdq3k9mtj0jstz2` lief in der ganzen Zeit nicht). T5 schreibt keine Fixes: kein Code, kein Test, keine Grenze geändert, kein `skip`/`fixme`/`only`. Protokoll des Treibers: `/tmp/s050/t5/ablauf.log`; Reihen und Läufe unter `…/fundamento-wt-mwdq3cluiyydrirx/s050-lokal/<name>/`.
+
+### Nachher-Reihen (V-3)
+
+Siehe „30/30 vorher“ › „Reihen“ (Zeilen `*-nachher*`) und › „Tabelle (V-3)“. Kurz: Stufe (1) `zweitfarbe-036` 450/450, `buehne-036` 1800/1800, Shard 2/4 506 grün + 1 übersprungen (T-D Firefox 1/1), `achsen-2b2` WebKit 1380/1380 (T-E 30/30); Stufe (2) `zweitfarbe-036` 450/450, `buehne-036` 1799/1800. **Jeder Zieltest T-A bis T-E 30/30 in jeder Engine und Stufe.** Das eine Rot liegt außerhalb der Zieltests (B-17).
+
+**`--list`-Nachweis für den Shard:** `grep 'buehne-036.spec.ts:545'` ist leer, weil T3 Zeilen eingefügt hat. Nach dem Titel gesucht: `[firefox] › buehne-036.spec.ts:679:3 › Bühne (Spec 036, Befund 3.5) › 3.5: a component with an open problem has a frame in the warning colour and its sentence on hover and on focus` steht in Shard 2/4 (507 Tests in 47 Dateien, 169 Chromium, 338 Firefox; `s050-lokal/shard2-nachher/list.txt`).
+
+**Rot in `buehne-nachher-cpu` (B-17):** `buehne-036.spec.ts:414` „3.2: the material's proposal stands right first; „Übernehmen“ brings it to the left frame“, WebKit, Stufe (2), Wiederholung 9, 07:54. Fehler `the frame [data-mt-buehne] iframe[data-mt-vorschau] is loaded ({"rev":1,"scheme":"light"})`, gelesen `geladen: false, rev: 1, scheme: "light"`, `Timeout 5000ms exceeded while waiting on the predicate`, bei `rahmenBereit` (`geladen-042.ts:139`) ← `geladen()` (`buehne-036.spec.ts:131`) ← `oeffne()` (`:138`) ← zweites `oeffne()` im Test (`:422`). Zeitleiste aus dem Trace (s ab Testbeginn): zweites `goto` 5,86 s; je Rahmen **eine** Anfrage `vorschau?…rev=1&scheme=light` bei 6,67 s (4 ms); `vorschau.css` 830 ms („Jetzt“) bzw. 3230 ms („Mit dem Vorschlag“); `rahmenBereit` ab 6,91 s; ein `evaluate` der Lesung dauerte allein 3,99 s (6,92 → 10,91 s); die letzte Unterressource von „Jetzt“ (`plenstato.styles.js`) kam bei 11,35 s – das Dokument war bis dahin nicht „complete“; rot bei ≈ 11,9 s. Load 1 min zu der Zeit 64–80 (`fremdlast.txt`), keine fremden Test-Prozesse. Trace: `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwdq3cluiyydrirx/s050-lokal/buehne-nachher-cpu/test-results/buehne-036-Bühne-Spec-036--858ee-brings-it-to-the-left-frame-webkit-repeat9/trace.zip`. **Einordnung:** Die Wartestelle (`rahmenBereit`, 5-s-Poll auf „Rahmen geladen“) und `geladen()`/`oeffne()` sind seit Spec 042/043 unverändert; die T3-Änderung am Client (Kopie der Rahmen) zeigt sich hier nicht als doppelte Navigation (eine Anfrage je Rahmen). Derselbe Test war schon auf der Basis einmal rot in WebKit (`buehne-vorher`, Wiederholung 11, unter fremder Last, B-10: `dokument()` in `geladen()`). Er war in den Vorher-Reihen ohne fremde Last 30/30 in beiden Stufen; die Nachher-Reihe der Stufe (2) lief deutlich härter (B-18). Lesart: K1 an einem festen 5-s-Fenster (K2) in einer nicht geänderten Wartestelle – **nicht** durch die Änderungen dieses Laufs erklärt, aber auch nicht durch eine zweite Reihe gegengeprüft (keine Wiederholung, R0-f). Nicht repariert (Regel 0, kein Ziel der Spec).
+
+### Ganze Eroj-Suite (Regressionen)
+
+`FM_AUSGABE=knapp PLAYWRIGHT_ENGINES="chromium firefox webkit" pnpm exec playwright test --workers 4` aus `packages/eroj` (Reihe `eroj-suite-nachher`), 08:21–08:35, 834 s, `uptime` 16,69 → 90,16 (Max 178), fremd: 0. **2026 grün, 0 rot, 2 übersprungen, 0 wackelig:** Chromium 676/676, Firefox 675 + 1 übersprungen, WebKit 675 + 1 übersprungen. Übersprungen sind die beiden älteren, absichtlich nur in Chromium laufenden Tests (`forced-colors.spec.ts:14`, `quickstart.spec.ts:47`, beide unverändert seit der Basis). `buehne-navigation-042.spec.ts:439` ist in WebKit mit Absicht `test.fail` (Spec 043, Befund) und schlug dort wie erwartet fehl (die `error-context.md` in `test-results/` stammt daher); in der JUnit grün. **Kein Rot, also auch kein vorbestehendes Rot zu erklären.**
+
+### Pakete und Lint
+
+| Lauf | Zeit, `uptime` 1 min | Ergebnis |
+|---|---|---|
+| `FM_AUSGABE=knapp pnpm turbo run test --filter=@fundamento/modelo --output-logs=errors-only` (allein zuerst) | 08:37–08:38, 33,2 → 49,8 | **grün, 4954 Tests** (`modelo` selbst lief, 87 s; 10 von 11 Aufgaben aus dem Cache) |
+| `FM_AUSGABE=knapp pnpm test:betroffen` (9 Pakete parallel, Eroj in drei Engines) | 08:40–08:44, 18,3 → 83,7 (Max 99) | **rot nur in `nordstelo`, nur Zeitfenster** (wie B-13): 249 grün, 15 rot, 8 übersprungen; 13× „Test timed out in 5000ms“, 2× „Hook timed out in 10000ms“ (`k8/soloj.test.ts:108/161/255`, `k8/gegenprobe.test.ts:81`, `ablauf/kuro.test.ts:203`, `ablauf/cli-ablauf.test.ts:535`, `ablauf/raporto.test.ts:70/84/105/125/212/225/236`, `ac8.test.ts`, `ablauf/integra.test.ts`); keine fehlgeschlagene Erwartung. Turbo brach danach ab |
+| Derselbe Paketsatz nacheinander: `FM_AUSGABE=knapp PLAYWRIGHT_ENGINES=chromium pnpm turbo run test --concurrency=1 --continue --output-logs=errors-only --filter=@fundamento/{agordilo,cli,ekranoj,eroj,mcp,metiejo,modelo,nordstelo,projekcioj}` (wie T2) | 08:46–09:09, 23,3 → 20,1 (Max 58) | **18/19 Aufgaben grün**, 12 davon aus dem Turbo-Cache (dieselben Eingaben wie im grünen Lauf von T2: `agordilo` 150, `ekranoj` 301, `mcp` 508, `nordstelo` 270). Neu gelaufen: `metiejo` 686/686, `eroj` 43 + **Playwright Chromium 676/676**, `modelo` 4954/4954, `cli` 120/120 – je 0 rot. **`projekcioj` 1547 grün, 1 rot:** `src/celoj/figma/figma-cxiuj.test.ts:32` „all example brands in one build (Spec 026 ①)“, „Hook timed out in 180000ms“ (Zeitfenster des Hooks, keine Erwartung) | |
+| Nachprüfung allein: `FM_AUSGABE=knapp pnpm turbo run test --filter=@fundamento/nordstelo --force --output-logs=errors-only` (ohne Cache) und `FM_AUSGABE=knapp pnpm --filter @fundamento/projekcioj exec vitest run src/celoj/figma/figma-cxiuj.test.ts` | 09:11–09:13, 10,5 → 10,1 | **`nordstelo` 270/270 grün in 6,9 s; `figma-cxiuj` 5/5 grün in 64,7 s** |
+| `pnpm lint` | 09:11 und 09:14 | **grün** (22/22, aus dem Turbo-Cache). Ohne Cache: `pnpm turbo run lint --force` brach einmal ab, weil `eroj:build` und `eroj:lint` zugleich `src/generated/` neu schrieben (`ENOTEMPTY` in `scripts/generate.mjs`, kein Befund im Code); `pnpm turbo run lint --force --concurrency=1` **grün, 22/22, 0 aus dem Cache**, Warnungen nur in unveränderten Dateien (`modelo` 29, `projekcioj` 2, `eroj` `test/menuo.spec.ts:17`/`test/alirebleco.check.ts:1905`, `metiejo` `src/komponentoj.ts:42`); Root-`biome check` grün |
+| `grep -rn "\.only(\|\.skip(" packages/metiejo/src packages/agordilo/src packages/eroj/test` | 08:40 | nur vorbestehend: `packages/eroj/test/forced-colors.spec.ts:14` und `packages/eroj/test/quickstart.spec.ts:47` (je `test.skip` für Nicht-Chromium; beide Dateien nicht im Diff) |
+
+Gewertet: Kein Paket-Test ist durch diesen Lauf rot. `nordstelo` und `projekcioj` sind tabu bzw. nicht berührt; ihre Rote sind Zeitfenster unter Last, kein Fenster wurde angehoben.
+
+### Diff-Suche (AC-6, AC-8), Ausgabe wörtlich
+
+Gelaufen am 2026-11-13 um 09:15 auf dem Arbeitsbaum vor dem T5-Commit (Code = `91c2a9a1`; die Zeilen für `specs/050-wacklige-tests-036/*` in `--stat` enthalten die ungespeicherte T5-Doku vor dem Einfügen dieses Blocks; `bericht.md` ist dort noch nicht verfolgt).
+
+```text
+$ git diff de931e40 --stat
+ packages/agordilo/src/paletten-050.test.ts         |  80 +++
+ packages/agordilo/src/palettes.ts                  |  32 +-
+ packages/eroj/test/achsen-2b2.spec.ts              |  11 +-
+ packages/eroj/test/buehne-036.spec.ts              | 266 ++++++-
+ packages/eroj/test/geladen-042.ts                  | 174 ++++-
+ packages/eroj/test/zweitfarbe-036.spec.ts          |  20 +-
+ packages/metiejo/src/ableitung-050.test.ts         | 132 ++++
+ packages/metiejo/src/html.ts                       |   6 +
+ .../metiejo/src/test-doubles/ableitung-050.json    | 761 +++++++++++++++++++++
+ specs/050-wacklige-tests-036/plan.md               | 693 +++++++++++++++++++
+ specs/050-wacklige-tests-036/spec.md               | 153 +++++
+ specs/050-wacklige-tests-036/tasks.md              | 132 ++++
+ 12 files changed, 2399 insertions(+), 61 deletions(-)
+
+$ git diff de931e40 -- . ':!specs/050-wacklige-tests-036' | grep -nE '^\+.*(timeout|Timeout|retries|waitForTimeout|timeout-minutes|actionTimeout|navigationTimeout|setTimeout|setInterval|toleran|threshold|maxDiffPixel|\.skip\(|\.fixme\(|\.fail\(|\.only\(|browserName|PLAYWRIGHT_ENGINES|framenavigated)' || echo "keine Treffer"
+150:+const nextButtonKey = (browserName: string) =>
+151:+  browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab";
+156:+    browserName,
+165:+    await page.keyboard.press(nextButtonKey(browserName));
+
+$ git diff de931e40 --name-only | grep -vE '^(packages/eroj/test/(zweitfarbe-036\.spec|buehne-036\.spec|achsen-2b2\.spec|geladen-042|wackler-040)\.ts|packages/metiejo/src/|packages/agordilo/src/|packages/eroj/src/|specs/050-wacklige-tests-036/)' || echo "nur Zone"
+nur Zone
+
+$ git diff de931e40 --name-only | grep -E '(package\.json|pnpm-lock\.yaml|playwright[^/]*\.config\.ts|^\.github/|-snapshots/|\.png$)' || echo "keine Tabu-Datei, keine Baseline"
+keine Tabu-Datei, keine Baseline
+
+$ git diff de931e40 -- packages/metiejo/src/html.ts | grep -nE '^[-+].*3000' || echo "stato-Takt unverändert"
+stato-Takt unverändert
+
+$ git diff de931e40 -- packages/metiejo/src/test-doubles/antworten-044.json
+
+$ git log --oneline de931e40..HEAD
+91c2a9a1 Spec 050 T4: plan and tasks (platform key for the read-only checkbox, D-25, intermediate check)
+8a982bd5 Spec 050 T4: the read-only checkbox reaches its control with the platform's key, Alt+Tab only in WebKit on macOS
+ed1670fc Spec 050 T3: plan and tasks (mechanism of the double frame navigation, waits, replaced expectations, intermediate check)
+9a51b5cd Spec 050 T3: read the stage's frames from the page, confirm the state before acting in a frame
+c5147982 Spec 050 T3: wait for the answers behind the check before reading the step, and a document mark that holds in WebKit
+de3fd057 Spec 050 T3: the client lays a copy of each preview frame in its place, so Firefox restores no frame on reload
+fd90b67b Spec 050 T3: red test, the frame navigates twice after a reload
+17eaab0a Spec 050 T1: before rates complete (buehne-036, shard 2/4, CPU-limited)
+060b8e3c Spec 050 T2: plan and tasks (measurement after, byte equality, finding on modelo)
+2f6c33a6 Spec 050 T2: solve each palette step once per request, a Zweitfarbe change solves only its own steps
+af045d7e Spec 050 T2: red test, a Zweitfarbe change solves every palette step again
+a9ecfa40 Spec 050 T2: byte fixture of the derivation on 79a463bc (palettes, deriveAspekto files)
+79a463bc Spec 050 T1: cause per test (plan.md), before rates, measurement
+```
+
+**Jeder Treffer der ersten Suche** (Zeilennummern = Zeile in der Ausgabe von `git diff`, alle in `packages/eroj/test/achsen-2b2.spec.ts`, Commit `8a982bd5`):
+
+| Treffer | Zeile in der Datei | Was es ist | Regel 0 |
+|---|---|---|---|
+| `150:+const nextButtonKey = (browserName: string) =>` | `:86` | Kopf der lokalen Hilfe, die die Taste wählt (D-25) | kein Verstoß: wählt eine Taste, schränkt keine Engine ein |
+| `151:+  browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab";` | `:87` | `Alt+Tab` nur auf macOS-WebKit, sonst `Tab` (Q-4) | kein Verstoß: kein `skip`, der Test läuft in jeder Engine und prüft dort alles |
+| `156:+    browserName,` | `:92` | Fixture `browserName` in der Parameterliste des Tests | kein Verstoß |
+| `165:+    await page.keyboard.press(nextButtonKey(browserName));` | `:102` | der Tastendruck, vorher `press("Tab")` | kein Verstoß: weiter ein Tastendruck, `toBeFocused` unverändert |
+
+Kein `timeout`, `retries`, `waitForTimeout`, `setTimeout`, `setInterval`, keine Toleranz, kein `skip`/`fixme`/`fail`/`only`, kein `PLAYWRIGHT_ENGINES`, kein `framenavigated`. Alle Dateien liegen in der freien Zone; keine Tabu-Datei, keine Baseline, kein Snapshot (AC-8); `stato`-Takt unverändert; `antworten-044.json` unverändert. **Kein Treffer verstößt gegen Regel 0.**
+
+**Rot vor Fix (AC-2), geprüft am selben Stand:**
+
+```text
+$ git diff af045d7e..2f6c33a6 --stat
+ packages/agordilo/src/palettes.ts | 32 ++++++++++++++++++++++++++------
+ 1 file changed, 26 insertions(+), 6 deletions(-)
+$ git diff af045d7e..2f6c33a6 -- packages/agordilo/src/paletten-050.test.ts | wc -l
+       0
+$ git diff fd90b67b..de3fd057 --stat
+ packages/metiejo/src/html.ts | 6 ++++++
+ 1 file changed, 6 insertions(+)
+$ git diff fd90b67b..de3fd057 -- packages/eroj/test/buehne-036.spec.ts | wc -l
+       0
+$ git diff a9ecfa40 -- packages/metiejo/src/test-doubles/ableitung-050.json | wc -l
+       0
+```
+
+Reihenfolge im `git log` (oben): T2 Fixture `a9ecfa40` → rot `af045d7e` → Fix `2f6c33a6`; T3 rot `fd90b67b` → Fix `de3fd057`. Der rote Commit enthält nur die Testdatei, der Fix-Commit nur den Produktcode.
+
+### AC-Abgleich (Produkt-Spec AC-1 … AC-8)
+
+| AC | Stand | Beleg (Datei › Abschnitt, Commit) |
+|---|---|---|
+| AC-1 Ursache je Test | **erfüllt** | `plan.md` › „Ursache je Test (V-1, T1)“: T-A, T-B K4 Prüfung; T-C K4 Navigation; T-D K3; T-E K5, je mit Beleg und Quelle (CI-Lauf-ID + Artefakt bzw. lokale Reihe); Zeitleisten › „Zeitleisten aus den CI-Traces“; `79a463bc`, `17eaab0a` |
+| AC-2 Rot zuerst | **erfüllt** | K4 Prüfung: rot `af045d7e` → Fix `2f6c33a6`, Testdatei unverändert (D-19, „Rot vor Fix“ oben); K4 Navigation: rot `fd90b67b` → Fix `de3fd057`, Testdatei unverändert (› „T3“ › „Rot → grün“) |
+| AC-3 Produkt schneller | **erfüllt als Befund** (unter 1 s nicht erreicht) | › „Lokal nach T2 (V-2, AC-3)“: erste `/pruefung` 1613 / 2434 → 1491 / 2103 ms, je Schritt Ableitung/Prüfregeln/Rahmen/`stato`; Befund B-11 mit Werten; Byte-Gleichheit (`antworten-044`, `ableitung-050`, beide Fixtures unverändert); `2f6c33a6`. Werte aus dem Dispatch: offen (T6) |
+| AC-4 30/30 | **erfüllt für alle Zieltests**; ein Rot außerhalb (B-17) | › „30/30 vorher“ › „Tabelle (V-3)“: vorher/nachher je Test, Engine und Stufe; nachher jeder Zieltest 30/30, T-E 30/30, T-D im Shard 1/1. Für T-B/T-C/T-D nur „keine Regression“ |
+| AC-5 CI | **offen (T6)** | genau ein Dispatch nach dem Push; `bericht.md` › Platzhalter `<!-- PLATZHALTER CI je Job -->` |
+| AC-6 Diff-Suche | **erfüllt** | › „Diff-Suche“ oben: nur die Tasten-Weiche aus T4, jeder Treffer erklärt; `stato`-Takt unverändert; kein `skip`/`fixme`/`fail`, keine Engine eingeschränkt |
+| AC-7 Keine Abschwächung | **erfüllt** | Liste aller ersetzten Erwartungen: `tasks.md` › „Geänderte Erwartungen älterer Tests“; Begründung: `plan.md` › „T3“ › „Begründung jeder ersetzten Erwartung (AC-7)“ und › „T4“ › „Begründung des Ersatzes (AC-7)“; keine Erwartung entfernt (`c5147982`, `9a51b5cd`, `8a982bd5`) |
+| AC-8 Keine Pixeländerung | **erfüllt** | Diff-Suche: keine `-snapshots/`, keine `.png`, keine `playwright*.config.ts`; ganze Eroj-Suite grün (die visuellen Tests eingeschlossen) |
+
+### Was T5 nicht belegt
+
+- Die Wirkung der Fixes für T-B, T-C und T-D auf die CI-Raten (lokal vorher schon 30/30). Das ist AC-5 (Dispatch).
+- Ob B-17 eine Folge dieses Laufs ist: Die Spur spricht für Last an einer unveränderten Wartestelle; eine Gegenprobe (zweite Reihe) ist nach R0-f in diesem Ticket nicht vorgesehen.
+- Linux-WebKit für T-E (Dispatch).
+
 ## 30/30 vorher (V-3, AC-4)
 
 Alle Reihen aus `packages/eroj` auf dem Produktcode von `de931e40` (2026-11-12 gebaut, D-09; 2026-11-13 als `79a463bc` ausgecheckt und gebaut, D-22), unter der Sperre, allein (keine fremde Test-Last), mit dem Skript `/tmp/s050/reihe.sh` (Kopf mit `uptime`, fremden Test-Prozessen, Top-CPU; Stichproben `fremdlast.sh` alle 30 s). Ausgabe, `test-reports/` und `test-results/` jeder Reihe außerhalb des Repos unter `…/fundamento-wt-mwdq3cluiyydrirx/s050-lokal/<reihe>/` (kopiert, bevor die nächste Reihe `test-results/` leert). Stufen nach D-13: **(1) CI-ähnlich**, **(2) CPU begrenzt** (6 Busy-Loops).
@@ -478,27 +613,38 @@ Alle Reihen aus `packages/eroj` auf dem Produktcode von `de931e40` (2026-11-12 g
 | `zweitfarbe-vorher-cpu` | (2) | wie `zweitfarbe-vorher`; davor 6 Busy-Loops (PIDs 23108–23113, 01:43:33 gestartet, 02:11:42 beendet) | 01:43–02:12 | 1689 s | 5,88 → 21,88 | 0,65 / 1,79 Kerne | **446 grün, 4 rot** (alle T-A Assistent WebKit); fremd: 0 |
 | `buehne-vorher-cpu` | (2) | wie `buehne-vorher`; davor 6 Busy-Loops (PIDs 45932–45937, 02:14:29 gestartet, 03:32:46 beendet) | 02:14–03:33 | 4696 s | 5,64 → 16,63 | 0,73 / 2,21 Kerne | **1710 grün, 0 rot**; fremd: 0 |
 | `zweitfarbe-spuren` (Extra-Reihe, D-16, zählt **nicht** für V-3) | (1) | `FM_AUSGABE=knapp PLAYWRIGHT_ENGINES="chromium firefox webkit" pnpm exec playwright test test/zweitfarbe-036.spec.ts --workers 2 --repeat-each=5 --trace on` | 03:34–03:38 | 232 s | 7,07 → 6,38 | – | 75 grün; Spuren `s050-lokal/zweitfarbe-spuren/test-results/` (B-15) |
+| **`zweitfarbe-nachher`** (T5) | (1) | wie `zweitfarbe-vorher` | 2026-11-13 04:39–04:59 | 1207 s | 8,80 → 16,48 (Max 16,48) | 1,08 / 2,42 Kerne | **450 grün, 0 rot**; fremd: 0 (41 Stichproben) |
+| **`buehne-nachher`** (T5) | (1) | wie `buehne-vorher` (60 Tests je Wiederholung, mit „3.4 (Spec 050)“) | 05:01–06:01 | 3650 s | 6,66 → 5,79 (Max 20,32) | 0,73 / 2,71 Kerne | **1800 grün, 0 rot**; fremd: 0 (122) |
+| **`shard2-nachher`** (T5, einmal) | (1) | `--list` (507 Tests in 47 Dateien: 169 Chromium, 338 Firefox; `grep 'buehne-036.spec.ts:545'` jetzt **leer**, weil die Zeile wanderte; nach Titel: `[firefox] › buehne-036.spec.ts:679:3 › Bühne (Spec 036, Befund 3.5) › 3.5: …` ist in Shard 2/4), dann wie `shard2-vorher` (Reihe `shard2-nachher-lauf`) | 06:03–06:07 | 238 s | 4,35 → 24,29 (Max 27,94) | 1,02 / 1,64 Kerne | **506 grün, 0 rot, 1 übersprungen** (`forced-colors` Firefox, wie vorher); fremd: 0 |
+| **`achsen-nachher`** (T5) | (1) | wie `achsen-vorher` | 06:08–06:19 | 656 s | 9,48 → 6,99 (Max 27,34) | 0,30 / 1,09 Kerne | **1380 grün, 0 rot**; fremd: 0 (22) |
+| **`zweitfarbe-nachher-cpu`** (T5) | (2) | wie `zweitfarbe-vorher-cpu`; 6 Busy-Loops PIDs 12768–12773, 06:21:20 gestartet, 06:46:28 beendet | 06:21–06:46 | 1508 s | 4,82 → 20,90 (Max 41,90) | 0,74 / 2,29 Kerne | **450 grün, 0 rot**; fremd: 0 (51) |
+| **`buehne-nachher-cpu`** (T5) | (2) | wie `buehne-vorher-cpu`; 6 Busy-Loops PIDs 31745–31750, 06:47:58 gestartet, 08:20:12 beendet | 06:47–08:20 | 5534 s | 7,21 → 26,17 (**Max 122,32** um 07:34, 64–80 um 07:52–07:55) | 0,85 / 2,31 Kerne | **1799 grün, 1 rot** (`buehne-036:414` 3.2 WebKit, B-17); fremd: 0 (184). Härter als vorher (T1: 4696 s, Load-Max 34,16), ohne fremde Test-Prozesse; die CPU außerhalb dieses Arbeitsbaums lag bei 4,2–8,3 Kernen (davon ≈ 6 die Busy-Loops; T1: 4,8–7,8) – die Spitze kam nicht aus fremder Rechenlast; woher genau, ist nicht ermittelt (B-18) |
 
 ### Tabelle (V-3)
 
-| Test | Engine | vorher x/30, Stufe (1) CI-ähnlich (`de931e40`) | vorher x/30, Stufe (2) CPU begrenzt (`de931e40`) | nachher x/30 (T5, gleiche Stufen) | Befund / Trace |
-|---|---|---|---|---|---|
-| T-A `zweitfarbe-036:129` Assistent | Chromium | **29/30** | 30/30 | offen | (1) 1 rot (Wiederholung 17): `rahmenBereit` rev 2 an `:157`, Rahmen rev 2 nach 4113 ms (hinter der Prüfung), `s050-lokal/zweitfarbe-vorher/test-results/zweitfarbe-036-the-assista-ccadb-h-the-keyboard-then-cleared-chromium-repeat17/trace.zip` |
-| | Firefox | 30/30 | 30/30 | offen | – |
-| | WebKit | 30/30 | **26/30** | offen | (2) 4 rot (Wiederholungen 12, 23, 24, 25), alle an `:181` (`schrittBereit` nach „Keine Zweitfarbe“, B-14), `s050-lokal/zweitfarbe-vorher-cpu/test-results/…-webkit-repeat{12,23,24,25}/trace.zip` |
-| T-A `:129` Schnellstart | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | offen | nie rot (CI 0/11) |
-| T-B `zweitfarbe-036:196` Schnellstart | Chromium | 30/30 | 30/30 | offen | lokal nicht reproduziert; CI 5/11 rot |
-| | Firefox | 30/30 | 30/30 | offen | lokal nicht reproduziert; CI 7/11 rot |
-| | WebKit | 30/30 | 30/30 | offen | lokal nicht reproduziert; CI 6/11 rot |
-| T-B `:196` Assistent | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | offen | nie rot (CI 0/11) |
-| T-C `buehne-036:463` 3.4 | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 (`buehne-vorher-2`); dazu `buehne-vorher` 30/30 je Engine, nur zur Information | 30/30 / 30/30 / 30/30 | offen | lokal nicht reproduziert; Ursache aus der CI-Spur und der Rahmen-Probe (V-1) |
-| T-D `buehne-036:545` 3.5 | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 (`buehne-vorher-2`); dazu `buehne-vorher` Firefox **29/30** unter fremder Last, nur zur Information | 30/30 / 30/30 / 30/30 | offen | ohne fremde Last nicht reproduziert; der eine lokale Hänger (Firefox, Wiederholung 22, ≈ 20:41, fremde Last): `s050-lokal/buehne-vorher/test-results/buehne-036-Bühne-Spec-036--a962f-tence-on-hover-and-on-focus-firefox-repeat22/trace.zip` |
-| T-D im Shard 2/4 | Firefox (Shard: Chromium + Firefox) | **1/1** (`shard2-vorher`, einmal, Q-5) | – (D-13) | offen | Shard 505 grün, 1 übersprungen |
-| T-E `achsen-2b2:82` | WebKit (macOS) | **0/30** (30/30 rot, deterministisch) | – (Stufe (2) nicht nötig, D-13) | offen | jedes Rot `toBeFocused` → „inactive“ (`:94`); Traces `s050-lokal/achsen-vorher/test-results/achsen-2b2-②b-2-A-markobut-0b614-r-its-label-sends-its-value-webkit*/` |
+| Test | Engine | vorher x/30, Stufe (1) CI-ähnlich (`de931e40`) | vorher x/30, Stufe (2) CPU begrenzt (`de931e40`) | **nachher x/30, Stufe (1)** (`91c2a9a1`, T5) | **nachher x/30, Stufe (2)** (`91c2a9a1`, T5) | Befund / Trace |
+|---|---|---|---|---|---|---|
+| T-A `zweitfarbe-036:129` (jetzt `:130`) Assistent | Chromium | **29/30** | 30/30 | **30/30** | 30/30 | nachher kein Rot. Vorher: (1) 1 rot (Wiederholung 17): `rahmenBereit` rev 2 an `:157`, Rahmen rev 2 nach 4113 ms (hinter der Prüfung), `s050-lokal/zweitfarbe-vorher/test-results/zweitfarbe-036-the-assista-ccadb-h-the-keyboard-then-cleared-chromium-repeat17/trace.zip` |
+| | Firefox | 30/30 | 30/30 | 30/30 | 30/30 | – |
+| | WebKit | 30/30 | **26/30** | 30/30 | **30/30** | nachher kein Rot. Vorher: (2) 4 rot (Wiederholungen 12, 23, 24, 25), alle an `:181` (`schrittBereit` nach „Keine Zweitfarbe“, B-14), `s050-lokal/zweitfarbe-vorher-cpu/test-results/…-webkit-repeat{12,23,24,25}/trace.zip` |
+| T-A `:129` (jetzt `:130`) Schnellstart | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | nie rot (CI 0/11) |
+| T-B `zweitfarbe-036:196` (jetzt `:203`) Schnellstart | Chromium | 30/30 | 30/30 | 30/30 | 30/30 | lokal nie rot; CI 5/11 rot. Nachher = keine Regression, kein Nachweis der Wirkung |
+| | Firefox | 30/30 | 30/30 | 30/30 | 30/30 | wie oben; CI 7/11 rot |
+| | WebKit | 30/30 | 30/30 | 30/30 | 30/30 | wie oben; CI 6/11 rot |
+| T-B `:196` (jetzt `:203`) Assistent | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | nie rot (CI 0/11) |
+| T-C `buehne-036:463` (jetzt `:553`) 3.4 | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 (`buehne-vorher-2`); dazu `buehne-vorher` 30/30 je Engine, nur zur Information | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | lokal nie rot; nachher = keine Regression. Wirkung belegt durch den roten Test „3.4 (Spec 050)“ (Firefox 3/3 rot → grün; nachher 30/30 je Engine in (1) und (2)) |
+| T-D `buehne-036:545` (jetzt `:679`) 3.5 | Chromium / Firefox / WebKit | 30/30 / 30/30 / 30/30 (`buehne-vorher-2`); dazu `buehne-vorher` Firefox **29/30** unter fremder Last, nur zur Information | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | ohne fremde Last nie rot; nachher = keine Regression, kein Nachweis der Wirkung. Der eine lokale Hänger vorher (Firefox, Wiederholung 22, fremde Last): `s050-lokal/buehne-vorher/test-results/buehne-036-Bühne-Spec-036--a962f-tence-on-hover-and-on-focus-firefox-repeat22/trace.zip` |
+| T-D im Shard 2/4 | Firefox (Shard: Chromium + Firefox) | **1/1** (`shard2-vorher`, einmal, Q-5) | – (D-13) | **1/1** (`shard2-nachher-lauf`) | – (D-13) | Shard nachher 506 grün, 1 übersprungen (vorher 505 + 1; ein Test mehr: „3.4 (Spec 050)“ Chromium) |
+| T-E `achsen-2b2:82` (jetzt `:90`) | WebKit (macOS) | **0/30** (30/30 rot, deterministisch) | – (Stufe (2) nicht nötig, D-13) | **30/30** (`achsen-nachher`) | – (D-13) | vorher jedes Rot `toBeFocused` → „inactive“ (`:94`); Traces `s050-lokal/achsen-vorher/test-results/achsen-2b2-②b-2-A-markobut-0b614-r-its-label-sends-its-value-webkit*/`. Nachher kein Rot |
+| *(neu, kein Zieltest)* „3.4 (Spec 050)“ `buehne-036:639` | Chromium / Firefox / WebKit | – | – | 30/30 / 30/30 / 30/30 | 30/30 / 30/30 / 30/30 | roter Test aus T3 (`fd90b67b`) |
+
+**Was die Nachher-Reihen beweisen:** Nur T-A (Chromium Stufe (1) 29/30, WebKit Stufe (2) 26/30) und T-E (0/30) hatten lokal eine Vorher-Rate, die besser werden konnte; bei beiden ist sie es (30/30). **T-B, T-C und T-D waren schon vorher 30/30** – ihr 30/30 nachher belegt nur, dass die Fixes nichts rot machen, nicht, dass sie die CI-Wackler beheben. Das zeigt erst der Dispatch (AC-5).
+
+**Mitgezählt, nicht Ziel der Spec, nachher:** In `buehne-nachher` (Stufe (1)) alle 60 Tests 30/30 je Engine, auch 3.6 dunkel (vorher in `buehne-vorher` unter fremder Last 27/30 bzw. 29/30). In `buehne-nachher-cpu` (Stufe (2)) alle 30/30 außer **`buehne-036:414` 3.2 „the material's proposal stands right first …“ WebKit 29/30** (Wiederholung 9, B-17); `zweitfarbe-*-nachher*` alle 30/30; `achsen-nachher` alle 46 Tests 30/30.
 
 **Mitgezählt, nicht Ziel der Spec** (`buehne-vorher`, nur Information): `buehne-036:711` 3.6 dunkel/schmal Firefox 27/30, dunkel/breit Firefox 29/30 (B-09); `buehne-036:324` 3.2 WebKit 29/30 (B-10). Alle anderen Tests der drei Dateien 30/30 in jeder Engine.
 
-**Gezählt für AC-4:** `zweitfarbe-vorher`, `zweitfarbe-vorher-cpu`, `buehne-vorher-2`, `buehne-vorher-cpu`, `shard2-vorher`, `achsen-vorher` (Zieltest vor der fremden Last fertig, B-08). **Nur zur Information:** `buehne-vorher` (fremde Test-Last ab 20:40). **Nicht für V-3:** `zweitfarbe-spuren` (Extra-Reihe mit Spuren).
+**Gezählt für AC-4:** `zweitfarbe-vorher`, `zweitfarbe-vorher-cpu`, `buehne-vorher-2`, `buehne-vorher-cpu`, `shard2-vorher`, `achsen-vorher` (Zieltest vor der fremden Last fertig, B-08). **Nur zur Information:** `buehne-vorher` (fremde Test-Last ab 20:40). **Nicht für V-3:** `zweitfarbe-spuren` (Extra-Reihe mit Spuren). **Nachher gezählt (T5):** `zweitfarbe-nachher`, `buehne-nachher`, `shard2-nachher-lauf`, `achsen-nachher`, `zweitfarbe-nachher-cpu`, `buehne-nachher-cpu` – alle unter der Sperre, ohne fremde Test-Prozesse (`fremdtest.sh`: 0 Treffer in 428 Stichproben), keine „nur zur Information“, keine wiederholt.
 
 **Was die Vorher-Raten sagen:** Lokal sind die CI-Raten (T-A, T-B in 11/11 Läufen rot) auch mit CPU-Begrenzung nicht zu erreichen: Der Rahmen rev 2 hinter der Prüfung braucht in Stufe (2) 1,9–2,1 s (CI 3,9 bis > 11 s). Stufe (1) zeigt T-A einmal (Chromium, Wartestelle der CI), Stufe (2) viermal in WebKit an einer **zweiten** Wartestelle (B-14). T-B, T-C und T-D sind ohne fremde Last in beiden Stufen 30/30; ihre Ursachen kommen aus den CI-Spuren, der Rahmen-Probe und den Hängern unter fremder Last (V-1). T5 wiederholt dieselben Reihen mit denselben Stufen; ein grünes „nachher“ für T-B/T-C/T-D ist lokal kein Nachweis der Wirkung – den liefert erst der Dispatch (AC-5).
 
@@ -551,6 +697,8 @@ Lesart: Auf `de931e40` navigiert jeder Rahmen der Bühne in Firefox **nach jedem
 | B-14 | **WebKit: `dokument()` (`performance.timeOrigin`) ist keine feste Kennung eines Dokuments.** In allen 4 roten T-A-Läufen der Stufe (2) (WebKit, Wiederholungen 12, 23, 24, 25) liefert dasselbe Dokument zuerst `…390/…506/…514/…879` und Sekunden später `…391/…507/…515/…880` (+1 ms). `seiteBereit(page, merkmal, vorDemLoeschen)` meldet deshalb `neu: true` für die **alte** Seite, während deren Neuladen noch hinter der Prüfung von rev 3 wartet (`GET /asistanto/…` 2207–2514 ms); `schrittBereit` liest `data-mt-rev="2"` und wartet mit `rahmenBereit` auf rev 2, der Rahmen zeigt danach rev 3 → rot nach 5 s (`geladen-042.ts:111` über `:181`, `zweitfarbe-036.spec.ts:181`). Spuren `s050-lokal/zweitfarbe-vorher-cpu/test-results/zweitfarbe-036-the-assista-ccadb-h-the-keyboard-then-cleared-webkit-repeat{12,23,24,25}/trace.zip`; Werte aus den `evaluateExpression`-Ergebnissen (`/tmp/s050/ergebnis.py`). | Zweite K2-Wartestelle von T-A (V-1). T3: die Kennung „anderes Dokument“ ohne `timeOrigin`-Gleichheit lesen (z. B. eine Marke, die nur das neue Dokument trägt); dieselbe Hilfe nutzen `geladen()` in `buehne-036` (T-C nach „Schließen“) und `zweitfarbe-036:163`. Kein Fenster, keine Toleranz (R0-a). |
 | B-15 | **B-01 für T-B teilweise widerlegt** (Extra-Reihe `zweitfarbe-spuren`, 75/75 grün, `--trace on`): Der Poll von `abrufBeantwortet` beginnt nach dem Senden von `POST /pruefung` in Schnellstart `:129` 0,03–0,34 s, in T-B (`:196`) 0,03–0,20 s – gleich früh. Die erste Prüfung dauert in T-B 1716–1868 ms (Median 1786), in `:129` 1500–1667 ms (Median 1568), also ≈ 14 % länger; Rahmen `buehne-farbe` rev 2 (T-A) 1573–1700 ms. | Für T-B bleibt K2 nur durch die Klassenregel belegt (fester Poll hinter der Serverrechnung), nicht durch den Vergleich der Varianten; warum T-B in CI 11/11 und `:129` 0/11 rot ist, ist **nicht belegt** (Kandidat: die zurückgehaltene Vorschau in T-B, `page.route`, lässt die Prüfung mit `vorschau.css` zusammenfallen – nicht gemessen). Für T-A bleibt B-01 gültig (dort wartet die Schwester nach dem Tippen auf ein Ereignis). |
 | B-16 | **Playwrights `page.reload()` zeigt die doppelte Anfrage in Firefox nicht**, `location.reload()` der Seite schon (roter Test erst mit `page.reload()`: 9/9 grün ohne Fix; mit `location.reload()` Firefox 3/3 rot). Die Rahmen-Probe (D-15) und das Produkt („Schließen“) laden über `location.reload()`. | Der rote Test lädt wie das Produkt. Für T5: Ob Tests, die mit `page.reload()` laden (`zweitfarbe-036:162`), die doppelte Navigation je sahen, ist nicht geprüft. |
+| B-17 | **`buehne-036:414` 3.2 „the material's proposal stands right first …“ einmal rot in WebKit, Stufe (2) nachher** (`buehne-nachher-cpu`, Wiederholung 9, 07:54): `rahmenBereit` (`geladen-042.ts:139`, unverändert seit Spec 042/043) über `geladen()` (`buehne-036.spec.ts:131`) nach dem zweiten `oeffne()` (`:422`) – das Dokument von „Jetzt“ war 5 s nach Beginn des Polls nicht „complete“ (letzte Unterressource 5,3 s nach der einen Anfrage des Rahmens; ein `evaluate` von WebKit brauchte allein 4 s; Load 64–80). Je Rahmen eine Anfrage, keine doppelte Navigation. Derselbe Test war auf der Basis schon einmal rot in WebKit (B-10, unter fremder Last, an `dokument()` in `geladen()`); in den Vorher-Reihen ohne fremde Last 30/30. Trace `s050-lokal/buehne-nachher-cpu/test-results/buehne-036-Bühne-Spec-036--858ee-brings-it-to-the-left-frame-webkit-repeat9/trace.zip`. | Kein Zieltest der Spec; nicht repariert (Regel 0). Lesart K1 an einem festen 5-s-Fenster (K2) in einer Wartestelle, die dieser Lauf nicht geändert hat – nicht durch die Änderungen erklärt, aber ohne Gegenprobe (R0-f). Für den Bericht und den Orchestrator: kein Grund aus der Spur, den Weg zum PR zu stoppen; die Entscheidung liegt beim Orchestrator. Kandidat für eine eigene Spec: `geladen()`/`rahmenBereit` nach `goto` wie T-A an der Antwort der Rahmen-Navigation warten lassen. |
+| B-18 | **Die Nachher-Reihe `buehne-nachher-cpu` lief härter als ihre Vorher-Reihe:** Load 1 min bis 122 (07:31–07:38) und 64–80 (07:52–07:55), Dauer 5534 s gegen T1 `buehne-vorher-cpu` Load-Max 34, 4696 s. Ohne fremde Test-Prozesse (184 Stichproben, 0 Treffer); die CPU außerhalb dieses Arbeitsbaums (`fremd_gesamt`, davon ≈ 6 Kerne Busy-Loops) lag bei 4,2–8,3 Kernen (T1 `buehne-vorher-cpu`: 4,8–7,8), die VM bei 0,85 / 2,31 Kernen (T1: 0,73 / 2,21). Woher die Spitze kam, ist nicht ermittelt. Auch die ganze Suite (`--workers 4`, drei Engines) erreichte Load 178. | Die Reihe zählt (keine fremde Test-Last nach §2.8), ist aber eher strenger als vorher. Für AC-4 ändert das nichts: alle Zieltests 30/30. |
 
 ## Gesicherte Spuren und Berichte (außerhalb des Repos)
 

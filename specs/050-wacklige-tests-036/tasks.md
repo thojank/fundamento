@@ -10,7 +10,7 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 | W050-T2 | Prüfung schneller (rot zuerst, byte-gleich) | **nötig** | V-1: T-A und T-B sind **K4 Prüfung** (erste `/pruefung` eines neuen `rev` lokal 1613 / 2434 ms ≥ 1 s; CI-Unit 1,5–2,8 s; im Eroj-Job ≥ 4,4 bis ≥ 11 s). Messung: Prüfregeln 94 %, `validateModeloFiles` (`packages/modelo`, tabu) 82 %, Ableitung ≈ 100 ms, die zwei `buildModelo` ≈ 16 ms (B-03). T-D ist **nicht** K4 (Prüfung in `festlegen`, Rahmen 1–3 ms). | **erledigt:** Paletten je Anfrage einmal gelöst (`2f6c33a6`), byte-gleich; erste `/pruefung` 1613 → 1491 ms (Median), „unter 1 s“ nicht erreichbar ohne `modelo` (B-11); Zwischenprüfung 150/150 |
 | W050-T3 | Tests an der Ursache (K2, K3) und doppelte Navigation (K4) | **nötig**, alle drei Teile | K2 für T-A/T-B (B-01, B-14), K4 Navigation und K3 für T-C, K3 für T-D (V-1) | **erledigt:** K4 rot `fd90b67b` → grün `de3fd057` (Client legt Kopien der Vorschau-Rahmen an ihre Stelle), K2 `c5147982` (`schrittLaedt`, Antwort der Rahmen-Navigation in `entwurfGespeichert`, Kennung des Dokuments am `window`), K3 `9a51b5cd` (Rahmen von der Seite aus gelesen); byte-gleich; Zwischenprüfung 120/120 und 150/150 |
 | W050-T4 | `achsen-2b2:82` | **nötig, als K5** (nicht als Fehler der Komponente) | Plattform-Probe: macOS-WebKit `Tab` → `BODY`, `Alt+Tab` und `focus()` → `[part="control"]` (`tabIndex` 0); Chromium/Firefox `Tab` fokussiert; Linux-WebKit 11/11 grün; lokal 30/30 rot. Kein Rot-zuerst für `fm-markobutono` (kein Komponentenfehler). | **erledigt:** `8a982bd5` – Taste `Alt+Tab` nur bei WebKit auf macOS, sonst `Tab` (D-25); alle Erwartungen unverändert; Zwischenprüfung WebKit (macOS) 10/10, Chromium/Firefox je 1/1 |
-| W050-T5 | Schlusslauf lokal (Test-Ticket): 30/30 nach D-13 (beide Stufen), ganze Eroj-Suite, Diff-Suche, `bericht.md` ohne CI | nötig | AC-4 bis AC-8 | offen |
+| W050-T5 | Schlusslauf lokal (Test-Ticket): 30/30 nach D-13 (beide Stufen), ganze Eroj-Suite, Diff-Suche, `bericht.md` ohne CI | nötig | AC-4 bis AC-8 | **erledigt:** jeder Zieltest 30/30 je Engine in beiden Stufen (T-A Chromium (1) 29 → 30, WebKit (2) 26 → 30; T-E 0 → 30; T-D im Shard 1/1); ein Rot außerhalb der Zieltests (`buehne-036:414` 3.2 WebKit 29/30 in Stufe (2), B-17); ganze Eroj-Suite 2026 grün, 0 rot; Diff-Suche ohne Verstoß; `bericht.md` mit Platzhaltern V-4 |
 | W050-T6 | Ein Push, ein PR, genau ein `workflow_dispatch`, Bericht (Orchestrator, nach der QA-Schleife) | nötig | AC-5 | offen |
 
 ## W050-T1 im Einzelnen (Diagnose, kein Code)
@@ -77,6 +77,22 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 
 - `8a982bd5` Spec 050 T4: the read-only checkbox reaches its control with the platform's key, Alt+Tab only in WebKit on macOS
 - (Doku) Spec 050 T4: plan and tasks
+
+## W050-T5 im Einzelnen (Schlusslauf lokal, Test-Ticket, keine Fixes)
+
+- [x] **Bau** unter der Sperre (`besitzer.txt` „W050-T5“, 04:37): `pnpm turbo run build --filter=@fundamento/cli...`, `dist` mit `solvedStep` (T2) und `cloneNode` (T3).
+- [x] **Nachher-Reihen (V-3) nach D-13/D-26**, unverändert dieselben Befehle wie T1, je Reihe erst nach 90 s Ruhe, ohne fremde Test-Prozesse (0 Treffer in 428 Stichproben): Stufe (1) `zweitfarbe-nachher` 450/450, `buehne-nachher` 1800/1800, `shard2-nachher-lauf` 506 + 1 übersprungen (T-D Firefox 1/1; `--list`: T-D steht jetzt an `:679`, `grep ':545'` leer), `achsen-nachher` 1380/1380 (T-E 30/30); Stufe (2) `zweitfarbe-nachher-cpu` 450/450, `buehne-nachher-cpu` 1799/1800. Busy-Loops nach jeder Reihe beendet, keine übrig. Tabelle: `plan.md` › „30/30 vorher“ › „Tabelle (V-3)“.
+- [x] **Rot als Befund, nicht repariert:** `buehne-036:414` 3.2 WebKit, Stufe (2), Wiederholung 9 – `rahmenBereit` (unverändert) nach dem zweiten `oeffne()`, Rahmen nach 5 s nicht „complete“ unter Load 64–80 (B-17, B-18). Trace unter `s050-lokal/buehne-nachher-cpu/test-results/`.
+- [x] **Ganze Eroj-Suite** drei Engines, `--workers 4`: 2026 grün, 0 rot, 2 übersprungen (vorbestehend nur Chromium), `buehne-navigation-042:439` WebKit erwartet rot (`test.fail`, Spec 043).
+- [x] **Pakete und Lint:** `modelo` allein 4954 grün; `test:betroffen` rot nur `nordstelo` (15 Zeitfenster, B-13); nacheinander 18/19 grün, `projekcioj` `figma-cxiuj.test.ts:32` Hook-Zeitfenster 180 s; allein `nordstelo` 270/270 (ohne Cache), `figma-cxiuj` 5/5; `pnpm lint` grün (auch ohne Cache mit `--concurrency=1`). `.only`/`.skip`: nur vorbestehend (`forced-colors.spec.ts:14`, `quickstart.spec.ts:47`).
+- [x] **Diff-Suche** (sieben Befehle, Ausgabe wörtlich in `plan.md` › „T5“ › „Diff-Suche“): einziger Treffer der ersten Suche ist die Tasten-Weiche aus T4 (`browserName`, vier Zeilen), jede erklärt; nur Zone, keine Tabu-Datei, keine Baseline, `stato`-Takt und `antworten-044` unverändert; rote Commits vor ihren Fixes. **Kein Verstoß gegen Regel 0.**
+- [x] **AC-Abgleich** AC-1 … AC-8: `plan.md` › „T5“ › „AC-Abgleich“; AC-5 offen für T6.
+- [x] **`bericht.md`** (Deutsch, kurz): Platzhalter `<!-- PLATZHALTER PR -->` und `<!-- PLATZHALTER CI je Job -->` (Tabelle `Job | Ergebnis | Notiz` in T6), Ursache je Test, Messung, 30/30, Diff-Suche, offene Befunde, fremde Wackler, „Was der Maintainer tut“.
+- [x] Kein Push, kein PR, kein Dispatch, kein Rerun. Sperre am Ende entfernt.
+
+### Commits T5
+
+- Spec 050 T5: final local run, report without CI (nur `specs/050-wacklige-tests-036/{plan,tasks,bericht}.md`)
 
 ### Befunde für die nächsten Tickets
 
