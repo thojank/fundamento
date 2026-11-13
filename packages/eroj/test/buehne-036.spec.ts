@@ -14,7 +14,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import { type APIRequestContext, expect, type Page, type Request, test } from "@playwright/test";
 import { axeViolations } from "./alirebleco.js";
 import { BUEHNE_BEREIT, dokument, rahmenBereit, seiteBereit } from "./geladen-042.js";
 import { nachDerAbfrage, nachEinemReset } from "./wackler-040.js";
@@ -538,6 +538,50 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
       { farbe: "rgb(244, 244, 242)", name: "Farbfläche #f4f4f2", text: "#f4f4f2 Anteil 38 %" },
     ]);
     await expect(dialog).toContainText("Petrol führt, der Grund ist hell.");
+  });
+
+  // Spec 050 T3 (K4 Navigation, run 42376059543, Firefox): closing the dialog after a reading reloads
+  // the screen, and Firefox then fetched each frame of the stage twice with the same URL – it gave
+  // the frame its last document back, and the client sent it there once more. The second document
+  // replaced the first one while the test read in it („Execution context was destroyed“). Counted
+  // as the browser fetches: every navigation of a frame after the reload that the server answered,
+  // per frame; each frame loads the page's rev once, in every engine.
+  test("3.4 (Spec 050): after a reload each frame of the stage loads its document once", async ({
+    page,
+  }) => {
+    const id = await marke(page.request, "Probomarko Neuladen");
+    await page.setViewportSize(WIDE);
+    await oeffne(page, id);
+    const geholt: Request[] = [];
+    page.on("request", (anfrage) => {
+      if (
+        anfrage.isNavigationRequest() &&
+        new URL(anfrage.url()).pathname === `/marko/${id}/vorschau`
+      )
+        geholt.push(anfrage);
+    });
+    // Reloads as „Schließen“ after a reading does (the page's own location.reload(); Playwright's
+    // page.reload() did not show the double fetch). The client sends both frames before it marks
+    // the stage ready, so every navigation of the reload has started once geladen() resolved.
+    const alt = await dokument(page);
+    await page.evaluate(() => location.reload());
+    await geladen(page, alt);
+    const rev = Number(await page.locator("html").getAttribute("data-mt-rev"));
+    const ziel = (vorschlag: boolean) =>
+      page
+        .locator(vorschlag ? VORSCHLAG : JETZT)
+        .evaluate((element) => (element as HTMLIFrameElement).src);
+    const jetzt = await ziel(false);
+    const vorschlag = await ziel(true);
+    expect(new URL(jetzt).searchParams.get("rev")).toBe(String(rev));
+    expect(new URL(vorschlag).searchParams.get("rev")).toBe(String(rev));
+    // A navigation the browser cut short before the server answered brought no document.
+    const beantwortet: string[] = [];
+    for (const anfrage of geholt)
+      if ((await anfrage.response()) !== null) beantwortet.push(anfrage.url());
+    expect(beantwortet.filter((url) => url === jetzt)).toEqual([jetzt]);
+    expect(beantwortet.filter((url) => url === vorschlag)).toEqual([vorschlag]);
+    expect(beantwortet.sort()).toEqual([jetzt, vorschlag].sort());
   });
 });
 
