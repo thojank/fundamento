@@ -218,8 +218,15 @@ function referenco(facts, modelo) {
         t: `${krudaj.length} von ${nativaj.length} nativen Elementen roh (${krudaj[0].kio.join(", ")}), zuerst \`${loko(elementoj, krudaj[0].n.elemento)}\``,
       };
 
-    // interspacoj (D-08, D-103)
-    const paroj = [...f.interspacoj].sort(
+    // interspacoj (D-08, D-103; Spec 052 D-052-01, V-2): a pair with `verteilita` is counted
+    // apart, never scored; the sentence names their number when there is one.
+    const paroj = [];
+    let verteilitaj = 0;
+    for (const p of f.interspacoj) {
+      if (p.verteilita === undefined) paroj.push(p);
+      else verteilitaj += 1;
+    }
+    paroj.sort(
       (a, b) =>
         a.post - b.post ||
         a.antaux - b.antaux ||
@@ -236,6 +243,7 @@ function referenco(facts, modelo) {
         v: (paroj.length - eksterStupoj.length) / paroj.length,
         t: `${eksterStupoj.length} von ${paroj.length} Geschwisterabständen nicht auf einer Abstandsstufe, zuerst \`${loko(elementoj, eksterStupoj[0].post)}\` (${String(eksterStupoj[0].px).replace(".", ",")} px)`,
       };
+    if (verteilitaj > 0) interspaco.t += `, ${verteilitaj} verteilte Abstände nicht gezählt`;
 
     const merkmaloj = {
       ersatzschrift: r4(ersatzschrift.v),
