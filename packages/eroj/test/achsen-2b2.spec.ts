@@ -78,9 +78,18 @@ test.describe("②b-2 A-elektilo-1: a read-only select", () => {
   });
 });
 
+/**
+ * The key that moves focus to the next button. WebKit on macOS reaches buttons only with Alt+Tab
+ * (the system's keyboard setting); WebKit on Linux, Chromium and Firefox reach them with Tab.
+ * Platform and engine together, not `TAB()` of alirebleco.ts (every WebKit): Spec 050 D-25.
+ */
+const nextButtonKey = (browserName: string) =>
+  browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab";
+
 test.describe("②b-2 A-markobutono-1: a read-only checkbox", () => {
   test("is focusable and read-only, does not turn by pointer, Space or its label, sends its value", async ({
     page,
+    browserName,
   }) => {
     await serve(
       page,
@@ -90,7 +99,7 @@ test.describe("②b-2 A-markobutono-1: a read-only checkbox", () => {
     const host = page.locator("fm-markobutono");
     const control = host.locator('[part="control"]');
     await expect(control).toHaveAttribute("aria-readonly", "true");
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(nextButtonKey(browserName));
     await expect(control).toBeFocused();
     await page.keyboard.press("Space");
     await control.click();
