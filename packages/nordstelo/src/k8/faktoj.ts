@@ -149,21 +149,34 @@ export function aspektoFaktojEnPagxo(): FaktoAspektoKruda {
   // Condition 3: no style rules of the agent's own; the measurement setup marks its stylesheets
   // like its scripts (`data-nordstelo`, Spec 052 V-4). In doubt the pair is measured. (The Eroj
   // adopt their own light-DOM sheets into the document, so adopted sheets are no sign here.)
-  const eigenajReguloj = Array.from(document.querySelectorAll("style, link")).some(
+  // D-052-13: also inside every open shadow root – the Eroj adopt their shadow sheets and carry no
+  // <style>/<link>, but an agent-written declarative one can (e.g. `fm-vico::part(control)`).
+  const stilajElementoj = (radiko: Document | ShadowRoot): globalThis.Element[] => {
+    const trovitaj = Array.from(radiko.querySelectorAll("style, link"));
+    for (const el of Array.from(radiko.querySelectorAll("*")))
+      if (el.shadowRoot !== null) trovitaj.push(...stilajElementoj(el.shadowRoot));
+    return trovitaj;
+  };
+  const eigenajReguloj = stilajElementoj(document).some(
     (stilo) =>
       (stilo.localName === "style" ||
         (stilo.getAttribute("rel") ?? "").toLowerCase().split(/\s+/).includes("stylesheet")) &&
       stilo.getAttribute("data-nordstelo") === null,
   );
+  // D-052-13: an fm-* element is an Ero only once upgraded (`:defined`). An unregistered name, or a
+  // registered one whose upgrade failed (the agent's own closed declarative shadow root makes the
+  // Ero's attachShadow throw), keeps whatever shadow root the agent wrote: measured.
+  const estasEro = (el: globalThis.Element): boolean =>
+    el.localName.startsWith("fm-") && el.matches(":defined");
   /** Condition 2: the Ero or Sxablono `V` belongs to, by its host's localName; else undefined. */
   const eroDe = (v: globalThis.Element): string | undefined => {
     const radiko = v.getRootNode();
     if (radiko.nodeType === 11 && "host" in radiko) {
-      const gastiganto = (radiko as ShadowRoot).host.localName;
-      return gastiganto.startsWith("fm-") ? gastiganto : undefined;
+      const gastiganto = (radiko as ShadowRoot).host;
+      return estasEro(gastiganto) ? gastiganto.localName : undefined;
     }
     if (radiko !== document) return undefined;
-    if (!v.localName.startsWith("fm-")) return undefined;
+    if (!estasEro(v)) return undefined;
     if (v.hasAttribute("style") || v.hasAttribute("class")) return undefined;
     return v.localName;
   };

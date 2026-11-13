@@ -9,7 +9,7 @@ Sechs Tickets, ein Strang, streng nacheinander (D-052-08): `K8I-001 → K8I-002 
 | K8I-001 | 1 Grundlage | Start prüfen (052 frei, Basis-Diff), Spec-Ordner, Jugxo D-052-01, Entscheidungen D-052-02 … -09 | – | erledigt 2026-11-13 |
 | K8I-002 | 2 Rote Tests | Rote Tests A und B, Fixtures aus M-1 (`anmelden-m1`, `konto-m1`), Gegenproben (a)–(d), 3c; Typ `verteilita` (V-1) | K8I-001 | erledigt 2026-11-13 (rot belegt) |
 | K8I-003 | 3 Fixes | Fix A: leere Live-Bereiche im Projektor (`data-fm-leer`), Neubau Eroj, Baselines nach D-052-06 | K8I-002 | erledigt 2026-11-13 (`konto-m1` rot bis K8I-004) |
-| K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | erledigt 2026-11-13 (`konto-m1`, `anmelden-m1` = 1 in allen 8 Kombinationen) |
+| K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | erledigt 2026-11-13 (`konto-m1`, `anmelden-m1` = 1 in allen 8 Kombinationen); Folge K8I-004b (B-004-4, D-052-13) erledigt 2026-11-13 |
 | K8I-005 | 4 Nachweis | Neubewertung M-1 (Kontrolle und gerendert) ohne Modell, `neubewertung.md`, Rest C als Befund | K8I-004 | offen |
 | K8I-006 | 5 Tests | Test-Ticket: Gesamtstand, AC-Matrix vollständig, Querschnitt | K8I-005 | offen |
 
@@ -24,8 +24,8 @@ Geplante Belege. Datei- und Testnamen stehen fest, sobald das Ticket sie anlegt;
 | AC-A3 | Regel aus `region.live` der Skemo für jede Sxablono mit `live`, kein Name im Element | K8I-002 (rot), K8I-003, K8I-006 | projekcioj-Unit (Liste der Live-Bereiche, Test-Kopie mit `live` an anderem Bereich); Eroj-Spec Fall 5 (`fm-filtrilo`); K8I-006: Menge aus der Modelo abgeleitet |
 | AC-A4 | Sxablonoj ohne `live` byte-gleich; betroffene Bilder namentlich, alle anderen pixelgleich | K8I-002 (Guard), K8I-003 | projekcioj-Guard (SHA-256 je Sxablono, auch `inline: true`); Inventur und `cmp`-Vergleich nach D-052-06 in `plan.md` (K8I-003: Bildreferenzen betroffen: keine; 90 Bilder, 40 namentlich geändert – alle mit leerem `notices` –, 50 byte-gleich) |
 | AC-B1 | Paare wie bisher, Abstand zwischen Flat-Tree-Kästen unter dem nächsten gemeinsamen Vorfahren | K8I-002 (rot), K8I-004 | nordstelo `src/k8/interspacoj-052.test.ts` (`konto-m1`, `anmelden-m1`); `faktoj.test.ts` |
-| AC-B2 | `verteilita` nur für Eroj und Sxablonoj (alle drei Bedingungen von D-052-01) | K8I-002 (rot), K8I-004 | `interspacoj-052.test.ts` Gegenproben (c), (d1), (d2), (3c): kein Paar `verteilita`; `k8.test.ts` (V-2) |
-| AC-B3 | Gegenproben (a)–(d) bleiben rot, jede zuerst rot belegt | K8I-002, K8I-004 | `interspacoj-052.test.ts` mit Selbsttest der gelockerten Fakten (K8I-002); Zwischenstand ohne Bedingung 2 und 3 rot (K8I-004, Build-Log) |
+| AC-B2 | `verteilita` nur für Eroj und Sxablonoj (alle drei Bedingungen von D-052-01) | K8I-002 (rot), K8I-004 | `interspacoj-052.test.ts` Gegenproben (c), (d1), (d2), (3c), (e1)–(e3) (K8I-004b, D-052-13): kein Paar `verteilita`; `k8.test.ts` (V-2) |
+| AC-B3 | Gegenproben (a)–(d) bleiben rot, jede zuerst rot belegt | K8I-002, K8I-004 | `interspacoj-052.test.ts` mit Selbsttest der gelockerten Fakten (K8I-002); Zwischenstand ohne Bedingung 2 und 3 rot (K8I-004, Build-Log); (e1)–(e3) rot vor D-052-13 (K8I-004b, `81d51d05`, `906e835b`) |
 | AC-B4 | Jugxo mit Kialo vor dem Code | **K8I-001** | `plan.md` › D-052-01; Commit K8I-001 liegt vor jedem Code-Commit |
 | AC-B5 | Zwilling identisch; gespeicherte Fakten ohne Feld wie bisher | K8I-004, K8I-006 | `zwilling.test.ts` (Fall mit `verteilita`), `gegenprobe.test.ts`, `determinismo.test.ts`; `roh`/`sxablono` byte-gleich (`git diff --exit-code`) |
 | AC-C1 | Rest C nur Befund, nichts an `fm-atributlisto` oder Inline-Messung | K8I-005 | `neubewertung.md` › Rest C; Diff-Beleg in K8I-006 |
@@ -194,9 +194,79 @@ Die 16 Einträge je Gegenprobe sind 8 × „interspacoj 1, not < 1“ und 8 × �
 - **B-004-1 Zwilling und Spread mit Bedingung.** `...(ero === undefined ? {} : { verteilita: { ero } })` im Browser-Teil machte `zwilling.test.ts` (1) rot: tsc behält die Klammern, die Vitest-Transformation lässt sie weg (1722 gegen 1720 Tokens). Die Normalisierung bleibt unverändert (R-6); der Browser-Teil setzt das Feld stattdessen per Zuweisung (`if (ero !== undefined) paro.verteilita = { ero };`), in beiden Zwillingen gleich.
 - **B-004-2 Auslegung der Mechanik.** Grid-Achse, Querachse, `writing-mode`, `display: contents` und Dedupe-Schlüssel: D-052-10 und D-052-11 in `plan.md`, jeweils die strengere Lesart.
 - **B-004-3 `adoptedStyleSheets` kein Merkmal** (D-052-12): Eroj hängen eigene Folien an das Dokument.
-- **B-004-4 Rest-Lücke Bedingung 3 (nur Befund).** Erkannt werden `<style>` und `<link rel=stylesheet>` im Dokument. Nicht erkannt würde ein deklaratives Shadow-DOM (`<template shadowrootmode>`) mit eigenem `<style>` **an einem `fm-*`-Element**; dessen Shadow-Root hätte einen `fm-*`-Host. Die Gegenproben decken das nicht ab. Vorschlag für eine Folge-Spec, nicht in diesem Lauf.
+- **B-004-4 Rest-Lücke Bedingung 3 – geschlossen durch K8I-004b (D-052-13).** Erkannt werden `<style>` und `<link rel=stylesheet>` im Dokument. Nicht erkannt würde ein deklaratives Shadow-DOM (`<template shadowrootmode>`) mit eigenem `<style>` **an einem `fm-*`-Element**; dessen Shadow-Root hätte einen `fm-*`-Host. Die Gegenproben decken das nicht ab. Vorschlag für eine Folge-Spec, nicht in diesem Lauf. → Im selben Lauf als K8I-004b geschlossen, siehe unten.
 - **B-004-5 Marker an der Grundschrift-Regel von ekranoj.** Auch `<style>body { font-family: var(…) }</style>` des Rahmens setzt die Umgebung ein; ohne Marker wäre auf jedem F-Screen mit `bazaTiparo` kein Paar `verteilita`. Er trägt deshalb ebenfalls `data-nordstelo`.
 - **B-004-6 `rondoj.test.ts:733`** war in diesem Lauf grün (nicht angefasst).
+
+## K8I-004b im Einzelnen (Folge zu K8I-004: vom Agenten geschriebene Shadow-Roots, B-004-4)
+
+Bedingung 2 von D-052-01 konnte den Shadow-Root einer Ero nicht von einem unterscheiden, den der Agent per deklarativem Shadow-DOM selbst schreibt. Geschlossen nach D-052-13 (`plan.md`): Herkunft nur bei einem hochgestuften registrierten `fm-*`-Element (`:defined`); dazu zählen `<style>`/`<link>` auch in offenen Shadow-Roots als eigene Stilregeln (Bedingung 3). K8 wird nur strenger.
+
+### Commits K8I-004b
+
+| SHA | Inhalt |
+|---|---|
+| `81d51d05` | rot: Gegenproben (e1), (e2) mit `enigo.html`, `faktoj.json`, `atendo.json` (Stand `f733d020`), `generi.mjs` kennt die Namen, Tests in `interspacoj-052.test.ts` |
+| `906e835b` | rot: Gegenprobe (e3) (Fakten unabhängig vom Teil `:defined`, siehe unten) |
+| (dieser Commit) | `estasEro` (`:defined`) in Bedingung 2 und `stilajElementoj` (offene Shadow-Roots) in Bedingung 3, `faktoj.ts` und Zwilling `aspekto-faktoj.ts` textgleich; neu erzeugte Fakten von (e1)–(e3); `plan.md` D-052-13, `tasks.md` |
+
+### Neue Gegenproben
+
+| Fixture | Markup | vorher (rot) | nachher |
+|---|---|---|---|
+| (e1) `gegenprobe-e1-deklarativa-ombro` | unregistriertes `fm-io` mit `<template shadowrootmode="open">`, darin `<style>div { display: flex; justify-content: space-between; }</style><div><slot></slot></div>`; zwei `fm-teksto` im Light-DOM. Kein `<style>` im Light-Dokument, kein `style`/`class` | 1 in allen 8, Paar `1→2` `x` 1 165,33–1 179,98 px `verteilita` (`fm-io`) | 0 in allen 8, kein Paar `verteilita` |
+| (e2) `gegenprobe-e2-fermita-ombro` | registriertes `fm-stako` mit `<template shadowrootmode="closed">`, darin `<style>:host { display: flex !important; justify-content: space-between !important; }</style><slot></slot>`; zwei `fm-teksto` | 1 in allen 8, Paar `1→2` `verteilita` (`fm-stako`) | 0 in allen 8, kein Paar `verteilita` |
+| (e3) `gegenprobe-e3-ombro-part` | `div` mit `<template shadowrootmode="open">`, darin `<style>fm-vico::part(control) { justify-content: space-between; }</style><fm-vico><slot></slot></fm-vico>`; zwei `fm-teksto` | 1 in allen 8, Paar `1→2` `verteilita` (`fm-vico`), auch mit `:defined` allein | 0 in allen 8, kein Paar `verteilita` |
+
+Zu (e2): Beim geschlossenen Root liefert `assignedSlot` `null`, der Flat-Tree-Weg endet am Host; `V` ist `fm-stako` im Light-DOM (Zweig „selbst ein `fm-*`-Element“). Ein Root nur mit `div { … }` (wie e1) wäre deshalb schon vorher gemessen worden; `:host` macht den Host selbst zum Verteiler (`!important`, weil `fundamento.css` den Host sonst überschreibt). Die Hochstufung von `fm-stako` schlägt fehl (`attachShadow({ mode: "open" })` wirft), `:defined` passt nicht.
+
+Zu (e3): Nach dem Teil `:defined` allein (Zwischenstand, Browser-Skizze und Fakten von `906e835b`) blieb dieses Paar `verteilita` – der Host von `V` ist die echte, hochgestufte `fm-vico`, nur ihre Verteilung kommt aus dem `<style>` im Root des Agenten. Deshalb die Ergänzung in Bedingung 3.
+
+### Rot belegt (`FM_AUSGABE=knapp`, `vitest run src/k8/interspacoj-052.test.ts`)
+
+Stand `f733d020` + (e1), (e2):
+
+```
+✘ packages/nordstelo/src/k8/interspacoj-052.test.ts:242 › … › (e1) own open declarative shadow root on an unregistered fm-io distributing its slot: interspacoj < 1 in komuna, ekzemplo, provo, provo-kompakta; no pair verteilita
+  AssertionError: expected [ …(16) ] to deeply equal []
+✘ packages/nordstelo/src/k8/interspacoj-052.test.ts:242 › … › (e2) own closed declarative shadow root on fm-stako (upgrade fails), :host distributing: interspacoj < 1 in komuna, ekzemplo, provo, provo-kompakta; no pair verteilita
+  AssertionError: expected [ …(16) ] to deeply equal []
+28 bestanden, 2 rot, 0 übersprungen, 0 wackelig
+```
+
+Zwischenstand nur mit `:defined` + (e3): (e1), (e2) grün, rot nur
+
+```
+✘ packages/nordstelo/src/k8/interspacoj-052.test.ts:248 › … › (e3) own open declarative shadow root on a div, its <style> fm-vico::part(control) distributing: interspacoj < 1 in komuna, ekzemplo, provo, provo-kompakta; no pair verteilita
+  AssertionError: expected [ …(16) ] to deeply equal []
+32 bestanden, 1 rot, 0 übersprungen, 0 wackelig
+```
+
+Die 16 Einträge je Gegenprobe: 8 × „interspacoj 1, not < 1“ und 8 × „pair 1 → 2 verteilita (…)“. Die Selbsttests (gelockerte Kopie) der drei sind auf jedem Stand grün.
+
+### Browser-Skizze (nicht eingecheckt, Renderer aus `dist`, ekzemplo hell)
+
+| Markup | Ergebnis mit `:defined` |
+|---|---|
+| offener Root an registriertem `fm-stako` mit `div { flex; space-between }` bzw. `:host { … !important }` | Root des Agenten von `attachShadow` geleert; Paar in der Spalte von `fm-stako`, `y` 6 px, nicht `verteilita` |
+| geschlossener Root an `div`, `::slotted(fm-vico) { display:flex !important; justify-content: space-between !important }` | `V` ist der `control`-Teil von `fm-vico`, `x` 6 px, nicht `verteilita` |
+| offener bzw. geschlossener Root an `div`, `::slotted(fm-vico)::part(control) { … }` | wirkt nicht, `x` 6 px |
+| geschlossener Root an `div` mit `fm-vico::part(control)` und `<fm-vico><slot></slot></fm-vico>` | Flat-Tree-Weg endet am `div`, gemessen 1 165,33 px, nicht `verteilita` |
+| offener Root an `div` (wie e3), auch zweifach geschachtelt (`section` mit eigenem offenen Root darin) | `verteilita` (`fm-vico`) nur mit `:defined`; mit der Ergänzung in Bedingung 3 gemessen |
+
+### Grün belegt (knapp)
+
+- `pnpm turbo run build --filter=@fundamento/nordstelo...`, `node packages/nordstelo/test/k8/generi.mjs` zweimal, `cp -r packages/nordstelo/test/fixtures/k8 /tmp/s052-k8-b` dazwischen: `diff -r` leer. Last 6–10.
+- `git diff --exit-code f733d020 --` auf alle 10 anderen Fixture-Ordner (`roh`, `sxablono`, `anmelden-m1`, `konto-m1`, (a), (b), (c), (d1), (d2), (3c)): Exit 0, byte-gleich. `konto-m1` `8→9` weiter `verteilita` (`fm-pagxo`, alle 8).
+- nordstelo `vitest run src/k8/`: 105 bestanden, 0 rot (vorher 96; + 3 × 3 Tests). Paket `pnpm --filter @fundamento/nordstelo test`: 308 bestanden, 0 rot. Lint grün.
+- ekranoj `pnpm --filter @fundamento/ekranoj test`: 301 bestanden, 0 rot (`rondoj.test.ts:733` grün). `test:browser`: 3 bestanden, 0 rot. Lint grün. `zwilling.test.ts` grün ohne Änderung (keine neue Normalisierung nötig: das Feld `verteilita` bleibt gleich).
+- `pnpm check:privat`: grün.
+
+### Befunde K8I-004b
+
+- **B-004b-1 Ergänzung in Bedingung 3 über den Auftrag hinaus.** Der Auftrag nannte Bedingung 2 (`:defined`). (e3) zeigt einen Weg, den `:defined` nicht schließt (Root des Agenten an einem Nicht-`fm-*`-Host färbt eine echte Ero per `::part`). Geschlossen mit dem strengeren Merkmal in Bedingung 3, zuerst rot belegt. Keine Namensliste der Eroj.
+- **B-004b-2 Geschlossene Roots an Nicht-`fm-*`-Hosts** sind von außen nicht lesbar; ein `<style>` darin bleibt unerkannt. Sie ergeben aber kein `verteilita`: Ohne `assignedSlot` endet der Flat-Tree-Weg am Light-DOM-Host, und die Wege aus einem solchen Root auf ein Light-DOM-`fm-*`-`V` (`::slotted`, `::slotted()::part()`) wirken im Browser nicht auf die Verteilung (Skizze oben). Kein offener Weg bekannt; bei Änderungen am Flat-Tree-Weg neu prüfen.
+- **B-004b-3 Eroj ohne `<style>` im Shadow-Root.** Die Ergänzung setzt voraus, dass keine Ero ein `<style>`/`<link>` in ihren Root schreibt (heute: alle per `adoptedStyleSheets`, kein Treffer in `packages/eroj/src/generated/`). Schriebe eine Ero künftig eines, wäre auf solchen Screens kein Paar mehr `verteilita` (strenger, nicht lockerer).
 
 ## Geänderte Erwartungen älterer Tests (`testing.md` › „Extending tested pure functions“)
 
@@ -207,5 +277,7 @@ Keine in K8I-001 und K8I-002 (`k8.test.ts` nur um einen `describe` ergänzt, der
 | `packages/ekranoj/src/konstruo.test.ts:102` (jetzt 102–104) | `toContain('<link rel="stylesheet" href="../marko/css/fundamento.css">')` | `toContain('<link rel="stylesheet" href="../marko/css/fundamento.css" data-nordstelo>')` | Marker D-052-05 an jedem Rahmen-Link (`MEDIO_ATRIBUTO`) | K8I-004 |
 | `packages/ekranoj/src/konstruo.test.ts:150` (jetzt 152–154) | ``toContain(`<style>body { font-family: var(${BAZA_TIPARO}); }</style>`)`` | ``toContain(`<style data-nordstelo>body { font-family: var(${BAZA_TIPARO}); }</style>`)`` | Marker D-052-05 auch an der Grundschrift-Regel des Rahmens (B-004-5) | K8I-004 |
 | `packages/nordstelo/src/k8/zwilling.test.ts:211` | `expect(NORMIGAJ_KAZOJ.length).toBe(4)` | `expect(NORMIGAJ_KAZOJ.length).toBe(5)` | neuer Normalisierungsfall `VERTEILITA` (AC: mindestens ein Fall mit `verteilita`); `NORMIGAJ_KAZOJ` in `test-doubles/aspekto-kazoj.ts` um ihn ergänzt, die vier alten Fälle unverändert | K8I-004 |
+
+K8I-004b: keine bestehende Erwartung geändert (keine Fixture- oder Fallzahl ist festgeschrieben; `interspacoj-052.test.ts` nur um drei Einträge in `GEGENPROBOJ` ergänzt, `generi.mjs` um drei Namen in `NOMOJ`).
 
 Ergänzt, keine bestehende Erwartung geändert: `faktoj.test.ts` (ein `it` „carries verteilita through …“, Import um `VERTEILITA`, `ATENDO_VERTEILITA`). `documentOf` (nordstelo) hat keinen Test mit festem `<link>`-Text; `render.ts` `HEAD`/`SONDO_DOKUMENTO` ändern keine Erwartung.
