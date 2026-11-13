@@ -57,9 +57,10 @@ const NOMOJ = [
   "gegenprobe-d1-eigene-klasse",
   "gegenprobe-d2-part",
   "gegenprobe-3c-ero-mit-style",
-  // K8I-004b (D-052-13): agent-written declarative shadow roots on fm-* hosts.
+  // K8I-004b (D-052-13): agent-written declarative shadow roots (on fm-* hosts; with an own <style>).
   "gegenprobe-e1-deklarativa-ombro",
   "gegenprobe-e2-fermita-ombro",
+  "gegenprobe-e3-ombro-part",
 ];
 
 /** CSS generic family words (CSS Fonts 4), none of them a brand's own family. */

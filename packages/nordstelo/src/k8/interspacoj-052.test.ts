@@ -98,6 +98,12 @@ const GEGENPROBOJ: readonly Gegenprobe[] = [
     markoj: ASPEKTOJ,
     senVerteilita: true,
   },
+  {
+    nomo: "gegenprobe-e3-ombro-part",
+    kio: "(e3) own open declarative shadow root on a div, its <style> fm-vico::part(control) distributing",
+    markoj: ASPEKTOJ,
+    senVerteilita: true,
+  },
 ];
 
 const M1 = ["anmelden-m1", "konto-m1"] as const;
