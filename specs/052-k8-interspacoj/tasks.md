@@ -9,7 +9,7 @@ Sechs Tickets, ein Strang, streng nacheinander (D-052-08): `K8I-001 → K8I-002 
 | K8I-001 | 1 Grundlage | Start prüfen (052 frei, Basis-Diff), Spec-Ordner, Jugxo D-052-01, Entscheidungen D-052-02 … -09 | – | erledigt 2026-11-13 |
 | K8I-002 | 2 Rote Tests | Rote Tests A und B, Fixtures aus M-1 (`anmelden-m1`, `konto-m1`), Gegenproben (a)–(d), 3c; Typ `verteilita` (V-1) | K8I-001 | erledigt 2026-11-13 (rot belegt) |
 | K8I-003 | 3 Fixes | Fix A: leere Live-Bereiche im Projektor (`data-fm-leer`), Neubau Eroj, Baselines nach D-052-06 | K8I-002 | erledigt 2026-11-13 (`konto-m1` rot bis K8I-004) |
-| K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | offen |
+| K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | erledigt 2026-11-13 (`konto-m1`, `anmelden-m1` = 1 in allen 8 Kombinationen) |
 | K8I-005 | 4 Nachweis | Neubewertung M-1 (Kontrolle und gerendert) ohne Modell, `neubewertung.md`, Rest C als Befund | K8I-004 | offen |
 | K8I-006 | 5 Tests | Test-Ticket: Gesamtstand, AC-Matrix vollständig, Querschnitt | K8I-005 | offen |
 
@@ -134,9 +134,78 @@ Werte auf dem roten Stand (`atendo.json`, `interspacoj`): `anmelden-m1` 1 in kom
 - **B-003-4 `vitrino.check.ts:1224` „Ableitung Gegenprobe“ rot, auch vor dem Fix.** Die Gegenprobe verlangsamt die Ableitung der Werkstatt um 80 ms × k und erwartet ein rotes Urteil; auf dieser Maschine landet der Median bei 147,5–150,0 ms, also knapp nicht über der Grenze. Ohne Bezug zu Sxablonoj (die Werkstatt leitet Paletten ab). Nicht angefasst (keine Grenze geändert); Befund für K8I-006/den Maintainer. Lokal mit `--grep-invert` umgangen, in der CI läuft die Vitrino in Teilen (`VITRINO_PARTO`).
 - Keine neue Property, `STRUCTURAL_PROPERTIES`, `figma.ts`, `serve.ts`, `turbo.json` unverändert. Kein Handeditieren generierter Ausgabe.
 
+## K8I-004 im Einzelnen (Fix B: Flat-Tree, `verteilita`, Zwilling, `k8.ts`, Marker)
+
+### Commits K8I-004
+
+| SHA | Inhalt |
+|---|---|
+| `961455e2` | Browser-Teil `aspektoFaktojEnPagxo` (nordstelo `src/k8/faktoj.ts`) nach der Mechanik der technischen Spec und D-052-10 bis D-052-12; `normigiAspektoFaktojn` trägt `verteilita` (Sortier- und Dedupe-Schlüssel); Zwilling `ekranoj/src/aspekto-faktoj.ts` textgleich; Normalisierungsfall `VERTEILITA` (`test-doubles/aspekto-kazoj.ts`), Test in `faktoj.test.ts`, Fallzahl in `zwilling.test.ts` |
+| `e6fee974` | `k8.ts` `interspacoj()` nach V-2; Referenzrechnung in `test/k8/generi.mjs` unabhängig dazu |
+| `929fa854` | Marker D-052-05: `data-nordstelo` in `render.ts` (`HEAD`, `SONDO_DOKUMENTO`) und `konstruo.ts` (`MEDIO_ATRIBUTO`, Rahmen-Links und Grundschrift-Regel); zwei Erwartungen in `konstruo.test.ts` |
+| (dieser Commit) | neu erzeugte Fixtures (`konto-m1`, `gegenprobe-d2-part` geändert, alle anderen byte-gleich), `plan.md` (D-052-01/-05 Stand, D-052-10 bis D-052-12), `tasks.md` |
+
+### Rot belegt: Herkunftsprüfung (AC-B3, Zwischenstand nicht committet)
+
+Zwischenstand: in `faktoj.ts` `const ero = !distribuas(v, akso) ? undefined : v.localName;` (nur Bedingung 1, ohne 2 und 3), nordstelo gebaut, `generi.mjs` gelaufen. `vitest run src/k8/interspacoj-052.test.ts`:
+
+```
+✘ interspacoj-052.test.ts:228 › (c) own <div style=display:flex; justify-content: space-between>: interspacoj < 1 in komuna, ekzemplo, provo, provo-kompakta; no pair verteilita
+  AssertionError: expected [ …(16) ] to deeply equal []
+✘ interspacoj-052.test.ts:228 › (d1) own <style> with a class on an own div: … no pair verteilita
+  AssertionError: expected [ …(16) ] to deeply equal []
+✘ interspacoj-052.test.ts:228 › (d2) own <style> fm-pagxo::part(head) { justify-content: space-evenly }: … no pair verteilita
+  AssertionError: expected [ …(16) ] to deeply equal []
+✘ interspacoj-052.test.ts:228 › (3c) an fm-* element with own style justify-content: space-between, itself the container: … no pair verteilita
+  AssertionError: expected [ …(16) ] to deeply equal []
+20 bestanden, 4 rot, 0 übersprungen, 0 wackelig
+```
+
+Die 16 Einträge je Gegenprobe sind 8 × „interspacoj 1, not < 1“ und 8 × „pair … verteilita“, z. B. für (c) `komuna/light: pair 1 → 2 verteilita (div)`. `verteilita` im Zwischenstand: (c) `1→2` (`div`), (d1) `2→3` (`div`), (d2) `4→5` (`div` = `part="head"` im Shadow-Root von `fm-pagxo`), (3c) `1→2` (`fm-atributlisto`), `konto-m1` `8→9` (`div`). Danach der echte Stand (Fakten neu erzeugt, zweimal byte-gleich): grün.
+
+### Grün belegt (knapp)
+
+- `pnpm turbo run build --filter=@fundamento/nordstelo...`, dann `node packages/nordstelo/test/k8/generi.mjs` zweimal, `cp -r … /tmp/s052-k8-a` dazwischen: `diff -r` leer (byte-gleich). Last 6–8.
+- `git diff --exit-code -- packages/nordstelo/test/fixtures/k8/roh packages/nordstelo/test/fixtures/k8/sxablono`: leer, `roh` und `sxablono` byte-gleich (AC-B5). Ebenso byte-gleich: `anmelden-m1`, (a), (b), (c), (d1), (3c). Geändert nur `konto-m1` und `gegenprobe-d2-part` (je `faktoj.json`, `atendo.json`; `elements` unverändert).
+- nordstelo `vitest run src/k8/`: 96 bestanden, 0 rot (darin `k8.test.ts:357/367/378`, `interspacoj-052.test.ts:184/188/200/232` jetzt grün, ohne Änderung an den Tests). Paket `pnpm --filter @fundamento/nordstelo test`: 299 bestanden, 0 rot. Lint grün.
+- ekranoj `pnpm --filter @fundamento/ekranoj test`: 301 bestanden, 0 rot (`rondoj.test.ts:733` in diesem Lauf grün). `test:browser`: 3 bestanden, 0 rot. Lint grün.
+- Gespeicherte Fakten ohne Feld: `k8()` von `cfc56aba` und von diesem Stand auf allen `*.json` mit `renders` unter `test/fixtures/ablauf-038/post` (2 Dateien, je 8 Renders mit K8) mit zwei Modelos (cxiuj-Config, Standard) → `stabilaJson` byte-gleich (4 von 4; temporärer Test, nicht committet). `ekranoj/test/fixtures/ac8` trägt keine gespeicherten K8-Fakten (`fall`, `fragment`, `lingvo`, `expected`), dort gibt es nichts zu vergleichen; `ac8.test.ts` ist in der Paketsuite grün.
+- `k8.ts`: `git diff -U0 cfc56aba -- packages/nordstelo/src/k8/k8.ts | grep -E "^[-+].*(AUF_STUFO|surStupo|k8Plena|mankoj|MANKO_AL_MERKMAL|distanco)"` → kein Treffer. Die Hunks liegen nur in `interspacoj()` (Z. 190–220).
+
+### Ergebnis je Fixture (`interspacoj`, alle 4 Marken × hell/dunkel)
+
+| Fixture | komuna | ekzemplo | provo | provo-kompakta | `verteilita` (Herkunft) |
+|---|---|---|---|---|---|
+| `anmelden-m1` | 1 | 1 | 1 | 1 | keins |
+| `konto-m1` | 1 | 1 | 1 | 1 | `8→9` subtitle → actions, `x`, 930,05 / 817,5 / 911,58 / 957,14 px – `fm-pagxo` (alle 8) |
+| (a) `gegenprobe-a-eigener-abstand` | 0 | 0 | 0 | 0 | keins |
+| (b) `gegenprobe-b-doppelte-luecke` | 1 | 1 | 0 | 0 | keins |
+| (c) `gegenprobe-c-eigener-verteiler` | 0 | 0 | 0 | 0 | keins |
+| (d1) `gegenprobe-d1-eigene-klasse` | 0 | 0 | 0 | 0 | keins |
+| (d2) `gegenprobe-d2-part` | 0,6667 | 0,6667 | 0,6667 | 0,6667 | keins (eigenes `<style>`, Bedingung 3) |
+| (3c) `gegenprobe-3c-ero-mit-style` | 0,5 | 0,5 | 0,5 | 0,5 | keins (`style` am `fm-*`, Bedingung 2) |
+| `roh` | 0,75 | 0,6667 | 0,75 | 0,75 | keins |
+| `sxablono` | 1 | 1 | 1 | 1 | keins |
+
+`konto-m1` im Kopf von `fm-pagxo` (light; dunkel gleich), vorher (K8I-003) → nachher: badges → subtitle `7→8` `y` 8 / 11 / 12 / 8,88 → 4 / 3 / 4 / 4 px (gemessen zwischen `part="heading"` und `part="subtitle"` in `part="lead"`, auf Stufe); subtitle → actions `8→9` unverändert im Wert, jetzt `verteilita` (`part="head"`, `space-between`); actions → atributlisto `9→10` `y` 36 / 35,5 / 42 / 31,38 → 24 / 20 / 28 / 20 px (zwischen `part="head"` und `part="sections"`). (d2) badges → subtitle ebenso 8 / 11 / 12 / 8,88 → 4 / 3 / 4 / 4 px, daher 0,3333 → 0,6667; subtitle → actions (323,34 px u. a.) bleibt gewertet.
+
+### Befunde und Abweichungen K8I-004
+
+- **B-004-1 Zwilling und Spread mit Bedingung.** `...(ero === undefined ? {} : { verteilita: { ero } })` im Browser-Teil machte `zwilling.test.ts` (1) rot: tsc behält die Klammern, die Vitest-Transformation lässt sie weg (1722 gegen 1720 Tokens). Die Normalisierung bleibt unverändert (R-6); der Browser-Teil setzt das Feld stattdessen per Zuweisung (`if (ero !== undefined) paro.verteilita = { ero };`), in beiden Zwillingen gleich.
+- **B-004-2 Auslegung der Mechanik.** Grid-Achse, Querachse, `writing-mode`, `display: contents` und Dedupe-Schlüssel: D-052-10 und D-052-11 in `plan.md`, jeweils die strengere Lesart.
+- **B-004-3 `adoptedStyleSheets` kein Merkmal** (D-052-12): Eroj hängen eigene Folien an das Dokument.
+- **B-004-4 Rest-Lücke Bedingung 3 (nur Befund).** Erkannt werden `<style>` und `<link rel=stylesheet>` im Dokument. Nicht erkannt würde ein deklaratives Shadow-DOM (`<template shadowrootmode>`) mit eigenem `<style>` **an einem `fm-*`-Element**; dessen Shadow-Root hätte einen `fm-*`-Host. Die Gegenproben decken das nicht ab. Vorschlag für eine Folge-Spec, nicht in diesem Lauf.
+- **B-004-5 Marker an der Grundschrift-Regel von ekranoj.** Auch `<style>body { font-family: var(…) }</style>` des Rahmens setzt die Umgebung ein; ohne Marker wäre auf jedem F-Screen mit `bazaTiparo` kein Paar `verteilita`. Er trägt deshalb ebenfalls `data-nordstelo`.
+- **B-004-6 `rondoj.test.ts:733`** war in diesem Lauf grün (nicht angefasst).
+
 ## Geänderte Erwartungen älterer Tests (`testing.md` › „Extending tested pure functions“)
 
 Keine in K8I-001 und K8I-002 (`k8.test.ts` nur um einen `describe` ergänzt, der Typ-Import um `Interspaco` erweitert; keine bestehende Erwartung geändert). Keine in K8I-003: Die sieben bestehenden Eroj-Specs mit `fm-sxelo`/`fm-filtrilo` und alle projekcioj-Tests sind mit dem Fix ohne Änderung grün (keine feste Erwartung hing an der doppelten Lücke nav → main); die neu erzeugten `faktoj.json`/`atendo.json` von `anmelden-m1` und `konto-m1` sind gerenderte Fakten, keine Erwartung eines älteren Tests. K8I-003 und K8I-004 tragen hier jede geänderte Erwartung mit Datei:Zeile, vorher/nachher und Grund ein (z. B. durch den Marker D-052-05 oder die kleinere Lücke von A).
 
 | Datei:Zeile | vorher | nachher | Grund | Ticket |
 |---|---|---|---|---|
+| `packages/ekranoj/src/konstruo.test.ts:102` (jetzt 102–104) | `toContain('<link rel="stylesheet" href="../marko/css/fundamento.css">')` | `toContain('<link rel="stylesheet" href="../marko/css/fundamento.css" data-nordstelo>')` | Marker D-052-05 an jedem Rahmen-Link (`MEDIO_ATRIBUTO`) | K8I-004 |
+| `packages/ekranoj/src/konstruo.test.ts:150` (jetzt 152–154) | ``toContain(`<style>body { font-family: var(${BAZA_TIPARO}); }</style>`)`` | ``toContain(`<style data-nordstelo>body { font-family: var(${BAZA_TIPARO}); }</style>`)`` | Marker D-052-05 auch an der Grundschrift-Regel des Rahmens (B-004-5) | K8I-004 |
+| `packages/nordstelo/src/k8/zwilling.test.ts:211` | `expect(NORMIGAJ_KAZOJ.length).toBe(4)` | `expect(NORMIGAJ_KAZOJ.length).toBe(5)` | neuer Normalisierungsfall `VERTEILITA` (AC: mindestens ein Fall mit `verteilita`); `NORMIGAJ_KAZOJ` in `test-doubles/aspekto-kazoj.ts` um ihn ergänzt, die vier alten Fälle unverändert | K8I-004 |
+
+Ergänzt, keine bestehende Erwartung geändert: `faktoj.test.ts` (ein `it` „carries verteilita through …“, Import um `VERTEILITA`, `ATENDO_VERTEILITA`). `documentOf` (nordstelo) hat keinen Test mit festem `<link>`-Text; `render.ts` `HEAD`/`SONDO_DOKUMENTO` ändern keine Erwartung.

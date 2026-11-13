@@ -223,21 +223,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 8
+            "px": 4
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 930.05
+            "px": 930.05,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 36
+            "px": 24
           },
           {
             "akso": "x",
@@ -893,21 +896,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 8
+            "px": 4
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 930.05
+            "px": 930.05,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 36
+            "px": 24
           },
           {
             "akso": "x",
@@ -1563,21 +1569,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 11
+            "px": 3
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 817.5
+            "px": 817.5,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 35.5
+            "px": 20
           },
           {
             "akso": "x",
@@ -2308,21 +2317,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 11
+            "px": 3
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 817.5
+            "px": 817.5,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 35.5
+            "px": 20
           },
           {
             "akso": "x",
@@ -3053,21 +3065,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 12
+            "px": 4
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 911.58
+            "px": 911.58,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 42
+            "px": 28
           },
           {
             "akso": "x",
@@ -3807,21 +3822,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 12
+            "px": 4
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 911.58
+            "px": 911.58,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 42
+            "px": 28
           },
           {
             "akso": "x",
@@ -4561,21 +4579,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 8.88
+            "px": 4
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 957.14
+            "px": 957.14,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 31.38
+            "px": 20
           },
           {
             "akso": "x",
@@ -5306,21 +5327,24 @@
             "antaux": 7,
             "gepatro": 5,
             "post": 8,
-            "px": 8.88
+            "px": 4
           },
           {
             "akso": "x",
             "antaux": 8,
             "gepatro": 5,
             "post": 9,
-            "px": 957.14
+            "px": 957.14,
+            "verteilita": {
+              "ero": "fm-pagxo"
+            }
           },
           {
             "akso": "y",
             "antaux": 9,
             "gepatro": 5,
             "post": 10,
-            "px": 31.38
+            "px": 20
           },
           {
             "akso": "x",
