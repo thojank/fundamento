@@ -1,12 +1,38 @@
 # Spec 050 – Bericht (wacklige Browser-Tests aus Spec 036)
 
-Stand T5 (2026-11-13, 09:30), alles außer CI. Basis `main` `de931e40`, Branch `261112-wacklige-browser-tests--9197f6`. Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md), [`tasks.md`](tasks.md). Reihen, Berichte und Traces außerhalb des Repos unter `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwdq3cluiyydrirx/s050-lokal/<reihe>/`.
+Stand T6 (2026-11-13), mit PR und CI; Abschnitt 1 ist nach dem einen Dispatch gefüllt und nur lokal committet. Basis `main` `de931e40`, Branch `261112-wacklige-browser-tests--9197f6`. Quellen: [`spec.md`](spec.md), [`plan.md`](plan.md), [`tasks.md`](tasks.md). Reihen, Berichte und Traces außerhalb des Repos unter `/Users/thorstenjankowski/.purple-code/worktrees/fundamento-wt-mwdq3cluiyydrirx/s050-lokal/<reihe>/`.
 
 ## 1. PR, Dispatch, CI je Job
 
-<!-- PLATZHALTER PR -->
+- PR: [#164](https://github.com/thojank/fundamento/pull/164) „Spec 050: Wacklige Browser-Tests aus Spec 036 stabil machen“ gegen `main`, nicht gemergt.
+- Commit (Kopf des einen Pushs): `683a3635947eec36d1266ff314d61b00ee3d2b66`. `origin/main` war beim Push unverändert `de931e40`, kein Rebase.
+- Dispatch-Lauf (genau einer, kein Rerun): [43392725955](https://github.com/thojank/fundamento/actions/runs/43392725955), 2026-11-13 08:22–08:33 UTC. Ergebnis `failure`: 24 von 25 Jobs grün. Der eine rote Job ist `Unit tests (modelo)` mit dem bekannten fremden Zeitfenster in `ci/turbo-inputs.test.ts:679`; er berührt keine geänderte Datei.
+- **AC-5 erfüllt:** Die Jobs „Rendered Eroj (Playwright, shard 1–4 of 4)“ sind in allen drei Engines grün (`PLAYWRIGHT_ENGINES: chromium firefox webkit`). Kein Test steht als „bekannt fremd“ in der Liste. Aus den JUnit-Dateien der vier Shards: Chromium 676 grün, Firefox 675 grün und 1 übersprungen, WebKit 675 grün und 1 übersprungen, 0 rot.
+- Der `pull_request`-Lauf, den das Öffnen des PR startet ([43392720045](https://github.com/thojank/fundamento/actions/runs/43392720045), derselbe Commit), ist ganz grün: 25 von 25 Jobs, auch `Unit tests (modelo)`.
+- Kein Push nach dem Dispatch: `git ls-remote origin refs/heads/261112-wacklige-browser-tests--9197f6` zeigt weiter `683a3635`. Dieser Abschnitt ist nur lokal committet.
 
-<!-- PLATZHALTER CI je Job -->
+| Job | Ergebnis | Notiz |
+|---|---|---|
+| Affected packages (betroffen) | grün | |
+| Build, lint and Modelo checks | grün | |
+| Unit tests (agordilo) | grün | enthält `paletten-050` |
+| Unit tests (metiejo) | grün | enthält `ableitung-050` und `antworten-044` (byte-gleich) |
+| Unit tests (modelo) | rot, fremd | `ci/turbo-inputs.test.ts:679`: „Hook timed out in 10000ms“ (nur Zeitfenster; 4950 grün, 1 rot). Im `pull_request`-Lauf auf demselben Commit grün. `packages/modelo` ist in diesem Lauf unverändert. Nicht neu gestartet. |
+| Unit tests (cli · ekranoj · mcp · nordstelo) | grün | |
+| Unit tests (Projekcioj, shard 1 und 2 von 2) | grün | |
+| Timing checks (M5, Gegenprobe, Ableitung, G5) | grün | |
+| Rendered Eroj (Playwright, shard 1 von 4) | grün | Chromium 507. T-C, T-D, T-E und „3.4 (Spec 050)“ in Chromium grün |
+| Rendered Eroj (Playwright, shard 2 von 4) | grün | Chromium 169, Firefox 337 + 1 übersprungen. T-A und T-B in Chromium grün; T-C, T-D, T-E und „3.4 (Spec 050)“ in Firefox grün |
+| Rendered Eroj (Playwright, shard 3 von 4) | grün | Firefox 338, WebKit 169. T-A und T-B in Firefox grün; T-C, T-D, T-E (Linux-WebKit, mit `Tab`) und „3.4 (Spec 050)“ in WebKit grün |
+| Rendered Eroj (Playwright, shard 4 von 4) | grün | WebKit 506 + 1 übersprungen. T-A und T-B in WebKit grün |
+| Rendered accessibility (Alirebleco, shard 1–3 von 3) | grün | |
+| Rendered checks (Vitrino, cetero-1 bis -3) | grün | |
+| Rendered checks (Vitrino-Werkstatt, werkstatt-1 und -2) | grün | |
+| Rendered checks (Make Kit, Quickstart) | grün | |
+
+**Zieltests im Dispatch** (JUnit, je Engine einmal): T-A `zweitfarbe-036` „Keine Zweitfarbe …“ Assistent und Schnellstart, T-B „the screen is ready while its preview still loads“ Assistent und Schnellstart, T-C 3.4 Material, T-D 3.5, T-E `A-markobutono-1` und der neue Test „3.4 (Spec 050)“: alle grün in Chromium, Firefox und WebKit. Das ist **ein** Lauf. T-A und T-B waren vorher in jedem der 11 ausgewerteten Läufe in mindestens einer Engine rot, ihr Grün in allen drei Engines ist also ein starkes Zeichen. T-C war seit Spec 044 in CI nicht mehr rot und T-D nur in einem von elf Läufen: Für sie beweist ein grüner Lauf wenig, das zeigen erst die drei Läufe auf `main`.
+
+**Messung „CI nachher“** (`messung-044.json` des Dispatch, Unit-Job ohne Browser, AMD EPYC 9V45, 4 Kerne, n = 12): erste `POST /pruefung` eines neuen `rev` Median 1516 ms, Max 2229 ms. Auf demselben Runner-Typ vorher: Median 1481 und 1629 ms (Läufe 42438357281, 43200873975). **In CI ist die Prüfung also nicht messbar schneller geworden**; der Unterschied liegt in der Streuung. `GET vorschau.css` kalt: Median 49 ms. Zeiten aus dem Eroj-Job (Rahmen eines neuen `rev`, `GET /asistanto/…`) gibt es nicht, weil Traces nur von roten Tests aufbewahrt werden und keiner rot war. Dass T-A und T-B grün sind, kommt deshalb aus dem geänderten Warten (T3), nicht aus einer schnelleren Prüfung.
 
 ## 2. Ursache je Test (Kurzform von V-1, `plan.md` › „Ursache je Test“)
 
@@ -27,7 +53,7 @@ Stand T5 (2026-11-13, 09:30), alles außer CI. Basis `main` `de931e40`, Branch `
 | Rahmen (Prüfung im Speicher) / `GET stato` | 0,2 / 0,4 ms | 0,2 / 0,4 ms |
 | `GET vorschau.css` eines neuen `rev` | 155 ms | 50 ms |
 
-**Unter 1 s ist nicht erreicht (B-11):** 82 % der Prüfung liegen in `validateModeloFiles`, 10 % in `evaluateAlirebleco`, beide in `packages/modelo` (tabu). Byte-gleich: `antworten-044` und `ableitung-050` unverändert grün. Die Zahlen aus dem Dispatch fehlen noch (T6).
+**Unter 1 s ist nicht erreicht (B-11):** 82 % der Prüfung liegen in `validateModeloFiles`, 10 % in `evaluateAlirebleco`, beide in `packages/modelo` (tabu). Byte-gleich: `antworten-044` und `ableitung-050` unverändert grün. Die Zahlen aus dem Dispatch stehen in Abschnitt 1.
 
 ## 4. 30/30 (V-3), vorher → nachher
 
@@ -61,7 +87,7 @@ Die Suche nach Zeitlimits, Toleranzen, `skip`/`fixme`/`fail`/`only`, Engine-Weic
 ## 7. Offene Befunde
 
 - **Unter 1 s nicht erreicht (B-11):** Dafür müsste `packages/modelo` Teilergebnisse je Kombination wiederverwenden oder nur das Paket der Marke prüfen. Das wäre eine eigene Spec.
-- **T-B, T-C und T-D waren lokal nie rot** (ohne fremde Last). Ob ihre Fixes in CI wirken, zeigt erst der Dispatch.
+- **T-B, T-C und T-D waren lokal nie rot** (ohne fremde Last). Im einen Dispatch sind alle drei grün (Abschnitt 1). Für T-C und T-D sagt ein einzelner grüner Lauf wenig, weil sie auch vorher selten rot waren.
 - **B-15 bleibt offen:** Warum T-B (Schnellstart `:203`) in CI 11/11 rot war und die Schwester-Variante `:130` 0/11, ist nicht belegt.
 - **T-D, Rest-Risiko:** `komponente.focus()`, die Tooltip-Erwartungen und `toHaveAccessibleDescription` stehen weiter im `frameLocator`. Fehlt Playwright-Firefox der Kontext des Rahmens, kann dort weiter eine Erwartung nicht enden. Sie kommt jetzt erst nach vier von der Seite aus bestätigten Zuständen. Dasselbe Muster hat `buehne-036` 3.6 „dunkel“ (B-04, B-09; nicht Ziel der Spec, nicht angefasst).
 - **B-17** (oben): `buehne-036:414` 3.2 WebKit 1/30 rot unter Stufe (2), an einem unveränderten 5-s-Fenster.
@@ -70,5 +96,5 @@ Die Suche nach Zeitlimits, Toleranzen, `skip`/`fixme`/`fail`/`only`, Engine-Weic
 ## 8. Was der Maintainer tut
 
 1. Den PR prüfen (Link oben), vor allem `plan.md` › „Ursache je Test“, die ersetzten Erwartungen (`tasks.md` › „Geänderte Erwartungen älterer Tests“) und B-17.
-2. Mergen, wenn der Dispatch die Eroj-Shards 1–4 in allen drei Engines grün zeigt (AC-5).
+2. Mergen: Der Dispatch zeigt die Eroj-Shards 1–4 in allen drei Engines grün (AC-5 erfüllt). Vorher den lokalen Commit mit Abschnitt 1 dieses Berichts übernehmen (pushen oder verwerfen; derselbe Inhalt steht im PR-Text).
 3. Danach drei Läufe auf `main` (Push und zweimal `schedule` oder Dispatch) ansehen: Erst wenn T-A bis T-D dort in keinem Lauf rot sind, sind sie stabil. Bleibt einer rot: Trace sichern, B-15 bzw. das Rest-Risiko von T-D sind die nächsten Vermutungen.
