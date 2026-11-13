@@ -44,8 +44,13 @@
   },
   "tasko": "detailseite",
   "expected": {
-    "K3": 1,
-    "reguloGaps": [],
+    "K3": 0.6667,
+    "reguloGaps": [
+      {
+        "kind": "regulo",
+        "key": "label-required"
+      }
+    ],
     "instancoj": [
       {
         "ero": "saltligilo",
@@ -81,8 +86,26 @@
     ],
     "urteil": {
       "instances": 3,
-      "valid": true,
-      "violations": []
+      "valid": false,
+      "violations": [
+        {
+          "instance": [
+            1
+          ],
+          "issue": {
+            "rule": "label-required",
+            "severity": "error",
+            "path": "instances#/1",
+            "message": "Instance 1 of ligilo has neither a visible label nor a label prop.",
+            "suggestion": "Give the label as slot text, or for an icon-only link set the label prop as its accessible name.",
+            "regulo": {
+              "id": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+              "name": "label-required",
+              "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for. The label prop is never shown: without an icon the butono appears as an empty surface and the ligilo takes 0 × 0 px, and a name nobody sees is no label for sighted people, so the action looks absent although assistive technology announces it (F-052-4, Spec 053)."
+            }
+          }
+        }
+      ]
     }
   }
 }

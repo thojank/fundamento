@@ -141,6 +141,21 @@ describe("the Ero page of the Vitrino (Spec 036 ③)", () => {
     },
   );
 
+  // Spec 053 (Q-5): an example shows the filled slots of its instance, as the Make Kit writes
+  // them. The icon-only butono is right with its icon in icon-start; the example names no glyph,
+  // so the icon is the ikono without a name.
+  it("shows the icon-only butono example with its icon in icon-start", () => {
+    const markup = sectionOf("fm-vitrino-doku-butono");
+    const id = "jug_01M2XN0Q7YGPVYC981A9D98PT3";
+    const start = markup.indexOf(`<li data-fm-doku-ekzemplo="${id}">`);
+    expect(start).toBeGreaterThan(-1);
+    const item = markup.slice(start, markup.indexOf("</li>", start));
+    expect(item).toContain('<span lang="en" data-fm-doku-lingvo="en">right</span>');
+    expect(item).toContain(
+      `<code>${escaped('<fm-butono emphasis="low" size="small" label="Schließen"><fm-ikono slot="icon-start"></fm-ikono></fm-butono>')}</code>`,
+    );
+  });
+
   it("fills the contrast matrix only with pairs Alirebleco measures", () => {
     const known = new Set([
       ...modelo.kontrastParoj.map((pair) => pair.name),

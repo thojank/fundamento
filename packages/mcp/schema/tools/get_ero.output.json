@@ -633,6 +633,10 @@
               "shown": {
                 "description": "The prop is shown where the slot of the same name would stand (Spec 029 ②b-1b, Nachlese 12): label=\"…\" at a field is its visible label. Absent where the prop is not shown (the label of an icon-only butono is a hidden name).",
                 "const": true
+              },
+              "hidden": {
+                "description": "The prop is never shown (Spec 053): label=\"…\" at a butono or ligilo is only the accessible name of an icon-only action, next to its icon in icon-start or icon-end; write the visible label as the text of the element.",
+                "const": true
               }
             },
             "required": ["name", "type"],

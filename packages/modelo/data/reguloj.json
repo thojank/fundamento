@@ -221,13 +221,14 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
       "name": "label-required",
-      "statement": "Every butono has a visible label or, when it shows only an icon, a label prop as its accessible name.",
-      "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for.",
-      "scope": "eroj: butono instances; the rendered check (axe) confirms the accessible name",
+      "statement": "Every butono or ligilo has a visible label; the label prop names it only next to an icon in icon-start or icon-end, as the accessible name of an icon-only action.",
+      "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for. The label prop is never shown: without an icon the butono appears as an empty surface and the ligilo takes 0 × 0 px, and a name nobody sees is no label for sighted people, so the action looks absent although assistive technology announces it (F-052-4, Spec 053).",
+      "scope": "eroj: butono and ligilo instances; visible text of the element, or the label prop next to a filled icon-start or icon-end slot; the rendered check (axe) confirms the accessible name",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
-          "butono"
+          "butono",
+          "ligilo"
         ]
       }
     },

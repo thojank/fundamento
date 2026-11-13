@@ -190,6 +190,8 @@ describe("the Uzo of the ligilo (T006, A3)", () => {
       ["button-look", "ask-human", undefined],
       ["disabled-link", "not-supported", undefined],
       ["multi-line-label", "not-supported", { layout: "wrap" }],
+      // Spec 053: label-required applies to the ligilo; the same boundary as the butono's.
+      ["no-accessible-label", "not-supported", { regulo: "label-required" }],
     ]);
     for (const entry of uzo?.boundary ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
   });

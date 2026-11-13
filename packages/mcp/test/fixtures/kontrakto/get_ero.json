@@ -97,17 +97,17 @@
       "name": "butono",
       "brief": true
     },
-    "sha256": "ee746136af5f8e7a64ff0a348c8a259948ee2ede64f188ea69e64789351d40e5",
-    "bytes": 1762,
-    "antwort": "{\"ero\":\"butono\",\"axes\":[{\"name\":\"emphasis\",\"values\":[\"high\",\"medium\",\"low\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"type\",\"values\":[\"button\",\"submit\",\"reset\"],\"default\":\"button\"}],\"required\":{\"props\":[],\"slots\":[]},\"props\":[{\"name\":\"label\",\"type\":\"string\"}],\"flags\":[\"disabled\",\"loading\",\"full-width\"],\"purpose\":\"Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here; icon-end may hold an insigno, a count.\",\"instead\":[{\"goal\":\"toggle\",\"ero\":\"sxaltilo\",\"kialo\":\"A setting that stays on or off needs a control that shows its state, because a button acts once and forgets; sxaltilo (in a form, applied with it: markobutono).\"},{\"goal\":\"choose-many\",\"ero\":\"elektilo\",\"kialo\":\"One of many values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elektilo.\"},{\"goal\":\"choose-few\",\"ero\":\"elekto\",\"kialo\":\"One of a few visible values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elekto.\"},{\"goal\":\"confirm\",\"ero\":\"dialogo\",\"kialo\":\"An action that cannot be undone asks first, because the question needs a title, a reason and a way out: a dialogo, not a second button.\"},{\"goal\":\"area-loading\",\"ero\":\"plenstato\",\"kialo\":\"A button loads for its own action, because the person waits for what they pressed; an area without content yet is a plenstato.\"}],\"boundary\":[{\"case\":\"navigation\",\"action\":\"use-instead\",\"ero\":\"ligilo\"},{\"case\":\"form-in-slot\",\"action\":\"not-supported\"},{\"case\":\"multi-line-label\",\"action\":\"not-supported\"},{\"case\":\"no-accessible-label\",\"action\":\"not-supported\"}]}"
+    "sha256": "672690c24983fbb2b3acc4b67817f7bf4ee09772eca1cf1288715ba70cacf179",
+    "bytes": 1776,
+    "antwort": "{\"ero\":\"butono\",\"axes\":[{\"name\":\"emphasis\",\"values\":[\"high\",\"medium\",\"low\"],\"default\":\"medium\"},{\"name\":\"intent\",\"values\":[\"neutral\",\"danger\"],\"default\":\"neutral\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"},{\"name\":\"type\",\"values\":[\"button\",\"submit\",\"reset\"],\"default\":\"button\"}],\"required\":{\"props\":[],\"slots\":[]},\"props\":[{\"name\":\"label\",\"type\":\"string\",\"hidden\":true}],\"flags\":[\"disabled\",\"loading\",\"full-width\"],\"purpose\":\"Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here; icon-end may hold an insigno, a count.\",\"instead\":[{\"goal\":\"toggle\",\"ero\":\"sxaltilo\",\"kialo\":\"A setting that stays on or off needs a control that shows its state, because a button acts once and forgets; sxaltilo (in a form, applied with it: markobutono).\"},{\"goal\":\"choose-many\",\"ero\":\"elektilo\",\"kialo\":\"One of many values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elektilo.\"},{\"goal\":\"choose-few\",\"ero\":\"elekto\",\"kialo\":\"One of a few visible values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elekto.\"},{\"goal\":\"confirm\",\"ero\":\"dialogo\",\"kialo\":\"An action that cannot be undone asks first, because the question needs a title, a reason and a way out: a dialogo, not a second button.\"},{\"goal\":\"area-loading\",\"ero\":\"plenstato\",\"kialo\":\"A button loads for its own action, because the person waits for what they pressed; an area without content yet is a plenstato.\"}],\"boundary\":[{\"case\":\"navigation\",\"action\":\"use-instead\",\"ero\":\"ligilo\"},{\"case\":\"form-in-slot\",\"action\":\"not-supported\"},{\"case\":\"multi-line-label\",\"action\":\"not-supported\"},{\"case\":\"no-accessible-label\",\"action\":\"not-supported\"}]}"
   },
   {
     "fall": "butono-voll",
     "eingabe": {
       "name": "butono"
     },
-    "sha256": "719effbcb2a53b52dc873219f97c658c79653792e5345e92f0a270e16cad4608",
-    "bytes": 40635
+    "sha256": "9e98c8ec862048e8a251b3a069a3389b67fd62f3f6d056bb64c25c724ec93b5c",
+    "bytes": 42788
   },
   {
     "fall": "datelektilo-brief",
@@ -367,17 +367,17 @@
       "name": "ligilo",
       "brief": true
     },
-    "sha256": "2b0a37b1cf13f35ac0507948c80692a875263756718bd09e727edad69858b495",
-    "bytes": 1028,
-    "antwort": "{\"ero\":\"ligilo\",\"axes\":[{\"name\":\"placement\",\"values\":[\"inline\",\"standalone\"],\"default\":\"inline\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"}],\"required\":{\"props\":[\"to\"],\"slots\":[]},\"props\":[{\"name\":\"to\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\"}],\"flags\":[\"external\",\"download\"],\"purpose\":\"Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start); with download it hands over a file instead, marked, the label names its type and size.\",\"instead\":[{\"goal\":\"action\",\"ero\":\"butono\",\"kialo\":\"A link moves to another view or place and a button starts an action here, because screen readers announce them differently, the keyboard operates them differently and the way back is different; an action on a link promises a move that does not happen.\"}],\"boundary\":[{\"case\":\"button-look\",\"action\":\"ask-human\"},{\"case\":\"disabled-link\",\"action\":\"not-supported\"},{\"case\":\"multi-line-label\",\"action\":\"not-supported\"}]}"
+    "sha256": "c6cb2ab3b3582aff6c2f999e7856f885ab9f4a953c22cfc445845be7bb16fb29",
+    "bytes": 1098,
+    "antwort": "{\"ero\":\"ligilo\",\"axes\":[{\"name\":\"placement\",\"values\":[\"inline\",\"standalone\"],\"default\":\"inline\"},{\"name\":\"size\",\"values\":[\"small\",\"medium\",\"large\"],\"default\":\"medium\"}],\"required\":{\"props\":[\"to\"],\"slots\":[]},\"props\":[{\"name\":\"to\",\"type\":\"string\"},{\"name\":\"label\",\"type\":\"string\",\"hidden\":true}],\"flags\":[\"external\",\"download\"],\"purpose\":\"Moves to another view or place: it opens an overview, a detail, a document or an outside site; an icon may stand before the words (slot icon-start); with download it hands over a file instead, marked, the label names its type and size.\",\"instead\":[{\"goal\":\"action\",\"ero\":\"butono\",\"kialo\":\"A link moves to another view or place and a button starts an action here, because screen readers announce them differently, the keyboard operates them differently and the way back is different; an action on a link promises a move that does not happen.\"}],\"boundary\":[{\"case\":\"button-look\",\"action\":\"ask-human\"},{\"case\":\"disabled-link\",\"action\":\"not-supported\"},{\"case\":\"multi-line-label\",\"action\":\"not-supported\"},{\"case\":\"no-accessible-label\",\"action\":\"not-supported\"}]}"
   },
   {
     "fall": "ligilo-voll",
     "eingabe": {
       "name": "ligilo"
     },
-    "sha256": "92314f04cf17ad0b970420b5d99258c288b681d59fe0be688abe5206eeb66def",
-    "bytes": 25098
+    "sha256": "8a60d05a0b7054c764de55f89fabad7510848395e037559c9ccdf3758eb80f56",
+    "bytes": 27221
   },
   {
     "fall": "listelektilo-brief",

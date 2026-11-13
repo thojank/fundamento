@@ -73,6 +73,7 @@
       {
         "name": "label",
         "kind": "string",
+        "shown": false,
         "description": "Accessible name when the label slot is empty (icon-only); never shown."
       }
     ],

@@ -6,13 +6,17 @@
     "k": {
       "K1": 1,
       "K2": 1,
-      "K3": 1,
+      "K3": 0.6667,
       "K4": 0.75,
       "K5": 1,
       "K6": 1
     },
-    "total": 95,
+    "total": 90,
     "gaps": [
+      {
+        "kind": "regulo",
+        "key": "label-required"
+      },
       {
         "kind": "a11y",
         "key": "color-contrast"

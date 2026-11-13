@@ -24,6 +24,7 @@ import {
   traduko,
 } from "@fundamento/modelo";
 import { nomoSpan, tekstoSpan } from "../../lingvo.js";
+import { iconEroOf, slotChildrenOf } from "../make-kit/ekzemplo.js";
 
 /** The nine sections of an Ero page, in the order of Spec 029 ③. */
 export const DOKU_SEKCIOJ = [
@@ -381,11 +382,14 @@ const DECISIONS: Readonly<Record<string, DokuTexto>> = {
 
 function beispiele(modelo: Modelo, entry: LoadedEro): string {
   const examples = examplesOf(modelo, entry);
+  const iconEro = iconEroOf(modelo.eroj);
   const markupOf = (instance: (typeof examples)[number]["instances"][number]): string => {
     const attributes = Object.entries(instance.props)
       .map(([name, value]) => (value === true ? ` ${name}` : ` ${name}="${String(value)}"`))
       .join("");
-    return `<fm-${instance.ero}${attributes}>${instance.label ?? ""}</fm-${instance.ero}>`;
+    // Spec 053 (Q-5): the filled slots as children, as the Make Kit writes them; an icon-only
+    // example shows its icon, not an empty element.
+    return `<fm-${instance.ero}${attributes}>${slotChildrenOf(instance, iconEro)}${instance.label ?? ""}</fm-${instance.ero}>`;
   };
   const items = examples.map(
     (example) =>

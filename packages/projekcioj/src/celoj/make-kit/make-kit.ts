@@ -56,6 +56,7 @@ import {
   namesOf,
   stylesheetOf,
 } from "../web-component/web-component.js";
+import { iconEroOf, slotChildrenOf } from "./ekzemplo.js";
 
 /** `@fundamento/make-kit-komuna` (Q2: pre-releases under the dist-tag `next`, 0.1.0 under `latest`). */
 export function makeKitName(aspekto: string): string {
@@ -192,7 +193,12 @@ function entrySentence(skemo: LoadedEro["skemo"], slot: EntrySlot): string {
 }
 
 /** The example instances of a Jugxo as one line of HTML, with its kialo. */
-function exampleBlock(jugxo: Jugxo, tag: string, skemo: LoadedEro["skemo"]): string {
+function exampleBlock(
+  jugxo: Jugxo,
+  tag: string,
+  skemo: LoadedEro["skemo"],
+  iconEro: string | undefined,
+): string {
   const instances = (jugxo.ekzemplo?.instances ?? [])
     .map((instance) => {
       const attributes = Object.entries(instance.props)
@@ -212,7 +218,7 @@ function exampleBlock(jugxo: Jugxo, tag: string, skemo: LoadedEro["skemo"]): str
           return slot.default === true ? [texts] : [`<span slot="${name}">${texts}</span>`];
         })
         .join("");
-      return `<${tag}${attributes}>${instance.label ?? ""}${entries}</${tag}>`;
+      return `<${tag}${attributes}>${slotChildrenOf(instance, iconEro)}${instance.label ?? ""}${entries}</${tag}>`;
     })
     .join("\n");
   const verdict = jugxo.decision === "approved" ? "CORRECT" : "WRONG";
@@ -391,7 +397,7 @@ function componentGuideline(
       (jugxo) =>
         jugxo.ekzemplo !== undefined && "ero" in jugxo.ref && jugxo.ref.ero === entry.ero.id,
     )
-    .map((jugxo) => exampleBlock(jugxo, tag, skemo))
+    .map((jugxo) => exampleBlock(jugxo, tag, skemo, iconEroOf(input.modelo.eroj)))
     .join("\n\n");
   const states = skemo.states.map((state) => `\`${state}\``).join(", ");
   // Spec 008 (D-12): no button wording for every Ero. The states a prop switches are the boolean

@@ -15,6 +15,7 @@ import {
 } from "@fundamento/modelo";
 import { beforeAll, describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
+import { iconEroOf, slotChildrenOf } from "./ekzemplo.js";
 import { buildMakeKits, guidelinesInventory, MAKE_KIT_CELO, makeKitName } from "./make-kit.js";
 
 const config = new URL(
@@ -1059,4 +1060,78 @@ describe("Make Kit: the visible label of the fields (Spec 035 2.2)", () => {
       );
     },
   );
+});
+
+// Spec 053 (Q-5): an example shows the filled slots of its instance as children with their slot
+// attribute. The icon-only butono (corrected in Spec 053: its icon-start holds an icon) is written
+// with its icon, not as the empty button the tightened label-required rejects. The example names
+// no glyph, so the icon is the ikono without a name; an example without slots keeps its markup.
+describe("Make Kit examples show the filled slots of an instance (Spec 053)", () => {
+  const ICON_ONLY = "jug_01M2XN0Q7YGPVYC981A9D98PT3";
+  const jugxoj = prepared.input.modelo.jugxoj;
+  const byId = (id: string) => jugxoj.find((jugxo) => jugxo.id === id);
+
+  it("the icon Ero is the ikono, the one the icon line of the guidelines names", () => {
+    expect(iconEroOf(prepared.input.modelo.eroj)).toBe("ikono");
+    expect(kit("komuna", "guidelines/Guidelines.md")).toContain(
+      "- Every icon is an `<Ikono>` with a name from the Ikonaro",
+    );
+  });
+
+  it.each(ASPEKTOJ)(
+    "%s: the icon-only example is CORRECT with its icon in icon-start",
+    (aspekto) => {
+      const jugxo = byId(ICON_ONLY);
+      expect(jugxo?.decision).toBe("approved");
+      expect(jugxo?.ekzemplo?.instances[0]?.slots).toEqual({ "icon-start": ["icon"] });
+      const text = kit(aspekto, "guidelines/components/butono.md");
+      expect(text).toContain(
+        `**CORRECT** — ${jugxo?.kialo}\n\n\`\`\`html\n<fm-butono emphasis="low" size="small" label="Schließen"><fm-ikono slot="icon-start"></fm-ikono></fm-butono>\n\`\`\``,
+      );
+      expect(text).not.toContain(
+        '<fm-butono emphasis="low" size="small" label="Schließen"></fm-butono>',
+      );
+    },
+  );
+
+  it.each(ASPEKTOJ)("%s: the WRONG examples without slots show the label prop alone", (aspekto) => {
+    const wrong = [
+      [
+        "jug_01M7B5VZCCMPZKVEKX9TJPTHVV",
+        "butono",
+        '<fm-butono type="submit" emphasis="high" label="Konto speichern"></fm-butono>',
+      ],
+      [
+        "jug_01M7B5VZCD0PDHJF8CPCHYJH6E",
+        "ligilo",
+        '<fm-ligilo to="anmelden.html" label="Team Nord"></fm-ligilo>',
+      ],
+    ] as const;
+    for (const [id, ero, line] of wrong) {
+      const jugxo = byId(id);
+      expect(jugxo?.decision, id).toBe("rejected");
+      expect(jugxo?.ekzemplo?.instances[0]?.slots, id).toBeUndefined();
+      expect(kit(aspekto, `guidelines/components/${ero}.md`), id).toContain(
+        `**WRONG** — ${jugxo?.kialo}\n\n\`\`\`html\n${line}\n\`\`\``,
+      );
+    }
+  });
+
+  it("writes an Ero by name as its element, an icon as the icon Ero without a name, text as nothing", () => {
+    const instance = { ero: "butono", props: {} };
+    expect(slotChildrenOf(instance, "ikono")).toBe("");
+    expect(
+      slotChildrenOf(
+        {
+          ...instance,
+          slots: { "icon-start": ["icon"], "icon-end": [{ ero: "insigno" }], label: ["text"] },
+        },
+        "ikono",
+      ),
+    ).toBe('<fm-ikono slot="icon-start"></fm-ikono><fm-insigno slot="icon-end"></fm-insigno>');
+    // Without an icon Ero the icon is a bare decorative SVG: still no glyph and no name.
+    expect(slotChildrenOf({ ...instance, slots: { "icon-start": ["icon"] } }, undefined)).toBe(
+      '<svg slot="icon-start" aria-hidden="true"></svg>',
+    );
+  });
 });
