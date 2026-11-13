@@ -58,7 +58,8 @@ describe("Spec 029 ②b-1b (Nachlese 12): the label of a field as an attribute i
 
   it("the butono's label stays the hidden name of an icon-only button", () => {
     const label = entryOf("butono").skemo.props.find((prop) => prop.name === "label");
-    expect(label?.shown).toBeUndefined();
+    // Spec 053: said explicitly, shown: false (the brief turns it into hidden: true).
+    expect(label?.shown).toBe(false);
     expect(label?.description).toMatch(/never shown/);
   });
 
@@ -68,7 +69,8 @@ describe("Spec 029 ②b-1b (Nachlese 12): the label of a field as an attribute i
       expect(brief.props, ero).toContainEqual({ name: "label", type: "string", shown: true });
     }
     const butono = briefOf(entryOf("butono"));
-    expect(butono.props).toContainEqual({ name: "label", type: "string" });
+    // Spec 053: the butono's label says it is hidden.
+    expect(butono.props).toContainEqual({ name: "label", type: "string", hidden: true });
     expect(tokensOf(briefOf(entryOf("kampo")))).toBeLessThan(750);
   });
 

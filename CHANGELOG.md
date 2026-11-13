@@ -28,6 +28,8 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
   Für eine Version liest Fundamento auch den bisherigen Schlüssel und die bisherigen Schema- und Ontologie-IDs und rechnet sie beim Lesen in die neuen um; geschrieben wird nur noch neu. Eigene Token-Sets, Aspekto-Pakete, `fundamento.config.json` und Schemata mit Verweisen auf die Fundamento-Schemata funktionieren also unverändert weiter; wer sie umstellen will, ersetzt die alten Namen durch die neuen. Mit der nächsten Version entfällt das Lesen der alten Namen.
   Private Schriften: In der `.env` ist nichts einzutragen; `FM_TIPAROJ_REPO` bleibt die einzige Variable.
   (Spec 036 Teil 6, Befunde 6.1 und 6.3, D-25 zur Bestätigung durch den Maintainer.)
+- Strenger: `check_usage` und `check_markup` melden ein `fm-butono` oder `fm-ligilo`, das nur `label="…"` trägt – ohne eigenen Text und ohne Icon in `icon-start` oder `icon-end` –, als Fehler `label-required` („has only the label prop …, which is never shown, and no icon“). `label` wird an beiden nie angezeigt; ohne Icon erscheint der Knopf leer und der Link mit 0 × 0 px. Wer so schreibt, setzt den Text in das Element (`<fm-butono>Anmelden</fm-butono>`); `label` bleibt der Name eines reinen Icon-Knopfs neben seinem Icon. `label-required` gilt jetzt auch für `fm-ligilo`.
+  (Spec 053, Befund F-052-4.)
 
 ### Hinweis für MCP-Clients
 
@@ -37,6 +39,8 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
   (Spec 036 Teil 5 ②b-2.)
 - Additiv: Die volle Antwort von `get_ero` enthält in `uzo` die Felder `when-not`, `do-dont` und `keyboard` in der erfragten Sprache (ohne `lingvo` Englisch); das Ausgabeschema beschreibt sie. Das Kurzprofil (`brief`) bleibt ohne diese Felder und unverändert, jedes unter 750 Einheiten.
   (Spec 036 Teil 5 ③.)
+- Additiv: Das Kurzprofil von `get_ero` (`brief`) markiert eine Prop, die nie angezeigt wird, mit `hidden: true` – an `fm-butono` und `fm-ligilo` `{ "name": "label", "type": "string", "hidden": true }`; das Ausgabeschema von `get_ero` kennt `hidden`. `shown: true` an den Feldern bleibt.
+  (Spec 053.)
 
 ## 0.2.0
 

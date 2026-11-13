@@ -65,6 +65,14 @@
           "layout": "wrap"
         },
         "kialo": "A standalone link that breaks into lines no longer reads as one destination, because its neighbours stand in one line; in running text the label breaks with the text."
+      },
+      {
+        "case": "no-accessible-label",
+        "action": "not-supported",
+        "via": {
+          "regulo": "label-required"
+        },
+        "kialo": "A link without a name cannot be followed, because assistive technology and voice control know only names and sighted people see only its text; the label prop alone shows nothing."
       }
     ],
     "composes": {

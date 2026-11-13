@@ -94,8 +94,8 @@ describe("get_ero", () => {
 
   it("carries the examples of the Jugxoj with their instances", () => {
     // Six of Spec 003 and, since Spec 007 T021, twelve of the three text rules (A7) and two of
-    // the full-width rule (A6).
-    expect(output.examples).toHaveLength(20);
+    // the full-width rule (A6); since Spec 053 the rejected butono with only the label prop.
+    expect(output.examples).toHaveLength(21);
     const [first] = output.examples;
     expect(first?.decision).toBe("approved");
     expect(first?.kialo.length).toBeGreaterThan(0);
@@ -385,6 +385,8 @@ describe("brief: the props without an axis (Nachlese 5 N5-3)", () => {
           type: prop.kind,
           // Spec 029 ②b-1b (Nachlese 12): a shown prop says so.
           ...(prop.shown === true ? { shown: true } : {}),
+          // Spec 053: a prop never shown says that too.
+          ...(prop.shown === false ? { hidden: true } : {}),
         }));
       const flags = entry.skemo.props
         .filter((prop) => !axes.has(prop.name) && prop.kind === "boolean")

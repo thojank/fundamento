@@ -101,7 +101,12 @@ describe("butono in the repo Modelo (T007)", () => {
         new Set(["approved", "rejected"]),
       );
       for (const jugxo of examples) {
-        expect(jugxo.ref).toEqual({ ero: butono?.ero.id });
+        // Spec 053: label-required applies to the ligilo too, so an example may be a ligilo's;
+        // each example refers to the Ero of its instances.
+        const ero = modelo.eroj.find(
+          (entry) => entry.ero.name === jugxo.ekzemplo?.instances[0]?.ero,
+        );
+        expect(jugxo.ref).toEqual({ ero: ero?.ero.id });
         const result = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []);
         const rules = result.violations.map((violation) => violation.issue.rule);
         expect(rules, `${jugxo.id}`).toEqual(jugxo.decision === "rejected" ? [name] : []);

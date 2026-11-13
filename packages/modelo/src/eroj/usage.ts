@@ -1069,16 +1069,28 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
     instances.flatMap((instance, index) => {
       const ero = eroOf(instance);
       if (ero === undefined || !applies(regulo, ero)) return [];
-      // The visible label (slot text) or, icon-only, the label prop as accessible name.
-      const name = instance.label ?? instance.props.label;
-      if (typeof name === "string" && name.trim() !== "") return [];
+      // Spec 053 (F-052-4): the visible label is the text of the element alone (the one derivation,
+      // not textOf, which falls back to the prop); the label prop is never shown and names the
+      // action only next to a filled icon slot (icon-only). Blank text counts as empty (trim()
+      // strips U+00A0 too).
+      if (typeof instance.label === "string" && instance.label.trim() !== "") return [];
+      const prop = instance.props.label;
+      const label = typeof prop === "string" && prop.trim() !== "" ? prop : undefined;
+      if (label !== undefined && hasIcon(ero.skemo, instance)) return [];
+      const name = ero.ero.name;
+      const noun = ero.skemo.a11y.role;
       return [
-        {
-          instance: [index],
-          message: `Instance ${index} of ${ero.ero.name} has neither a visible label nor a label prop.`,
-          suggestion:
-            "Give the label as slot text, or for an icon-only button set the label prop as its accessible name.",
-        },
+        label === undefined
+          ? {
+              instance: [index],
+              message: `Instance ${index} of ${name} has neither a visible label nor a label prop.`,
+              suggestion: `Give the label as slot text, or for an icon-only ${noun} set the label prop as its accessible name.`,
+            }
+          : {
+              instance: [index],
+              message: `Instance ${index} of ${name} has only the label prop "${label}", which is never shown, and no icon.`,
+              suggestion: `Write the label as the text of the element: <fm-${name} …>${label}</fm-${name}>. The label prop names an icon-only ${noun} next to its icon.`,
+            },
       ];
     }),
   // Spec 007 T019 (A6, A7, data-model §4): the layout rule and the text rules of the Uzo. Each
@@ -1207,6 +1219,23 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {
   return regulo.appliesTo?.eroj?.includes(ero.ero.name) ?? false;
+}
+
+/** The prefix of the decorative slots that hold the icon of an action (icon-start, icon-end). */
+const ICON_SLOT_PREFIX = "icon-";
+
+/**
+ * Whether an instance fills an icon slot of its Skemo (Spec 053): a decorative slot named icon-*
+ * with at least one entry in `slots`. The icon an Ero draws on its own (the ligilo's download or
+ * external mark) stands in no slot and does not count; an instance without `slots` has no icon.
+ */
+function hasIcon(skemo: Skemo, instance: EroInstance): boolean {
+  return skemo.slots.some(
+    (slot) =>
+      slot.decorative === true &&
+      slot.name.startsWith(ICON_SLOT_PREFIX) &&
+      (instance.slots?.[slot.name]?.length ?? 0) > 0,
+  );
 }
 
 /**

@@ -176,7 +176,7 @@
       "decision": "approved",
       "kialo": "An icon-only button names itself with the label prop, so assistive technology can announce it.",
       "date": "2026-09-19",
-      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines. Icon slot added in Spec 053: the label prop names the button only next to its icon.",
       "ekzemplo": {
         "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
         "instances": [
@@ -186,6 +186,11 @@
               "emphasis": "low",
               "size": "small",
               "label": "Schließen"
+            },
+            "slots": {
+              "icon-start": [
+                "icon"
+              ]
             }
           }
         ]
@@ -4631,6 +4636,61 @@
       "kialo": "Barrierefreiheit ist für das Paket packages/nodredaktilo ausgenommen: Es ist die Leinwand der Metiejo, die die Ableitung einer bestehenden Marke als Graph zum Lesen zeigt, ein Werkzeug für die Arbeit an einer Marke und keine Oberfläche, die Fundamento für eine Marke erzeugt. Die Ausnahme gilt nur für dieses Paket. Die Eroj, die die Leinwand in ihren Knoten zeigt, die Bildschirme der Metiejo außerhalb der Leinwand und die erzeugten Marken behalten jede Regel und jede Prüfung der Barrierefreiheit.",
       "date": "2026-11-09",
       "context": "Spec 047 (Node-Editor NE-1), Entscheidung A-1 des Maintainers vom 2026-11-09 (spec.md, Tabelle der Entscheidungen); in plan.md D-12 offen geblieben, weil diese Datei in jenem Lauf tabu war. ref.artikolo X, weil die Ausnahme die Konformitätsprüfung 4 (Alirebleco: Fokus, Tastatur, ARIA, das Benchmark-Werkzeug) für ein Paket aufhebt und keine einzelne Regulo: Jede Regulo der Barrierefreiheit gilt weiter für die Eroj und die Marken. Das Schema kennt kein Feld für ein Paket; der Geltungsbereich packages/nodredaktilo steht deshalb im Kialo und hier. Angelegt im Auftrag des Maintainers vom 2026-11-11 (Spec 047 Nachtrag)."
+    },
+    {
+      "id": "jug_01M7B5VZCCMPZKVEKX9TJPTHVV",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "The button appears empty: the label prop is the name of an icon, not text, and it is never shown; without text and without an icon a sighted person sees an empty surface where the action should be.",
+      "date": "2026-11-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 053, finding F-052-4: the registrieren screen of M-1 F); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "type": "submit",
+              "emphasis": "high",
+              "label": "Konto speichern"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M7B5VZCD0PDHJF8CPCHYJH6E",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "rejected",
+      "kialo": "The link has 0 × 0 px: the label prop is the name of an icon, not text, and it is never shown; without text and without an icon there is nothing to see or to click.",
+      "date": "2026-11-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 053, finding F-052-4: the brand link of every screen of M-1 F); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {
+              "to": "anmelden.html",
+              "label": "Team Nord"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M7B5VZCD0PDHJF8CPCHYJH6F",
+      "ref": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY"
+      },
+      "decision": "approved",
+      "kialo": "label-required nimmt den Prop label nur noch neben einem gefüllten Icon-Slot (icon-start oder icon-end) als Namen und gilt auch für ligilo. Bisher genügte jeder label-Prop: Ein butono oder ligilo, der nur label=\"…\" trägt, erscheint als leere Fläche bzw. mit 0 × 0 px, hat aber einen zugänglichen Namen, und check_markup meldete nichts. Ein Name, den niemand sieht, ist für Sehende keine Beschriftung. label-names-action bleibt eine Warnung, weil sie Ziel-Verben prüft, nicht Leere; als Fehler machte sie das sichtbare „Abmelden“ (konto) rot und ließe das leere „Konto speichern“ (registrieren) grün. Ohne Text und ohne Icon gibt es jetzt einen eigenen Fund (error): „has only the label prop …, which is never shown, and no icon“. Wirkung auf die Neubewertung von M-1 aus Spec 052: F grün 4/4 → 0/4, Grund überall check_usage; Variante 0 bleibt 0/4. Anlass ist Befund F-052-4 (Spec 052, PR #166). Keine Schwelle, Toleranz oder Grenze wird gelockert.",
+      "date": "2026-11-13",
+      "context": "Spec 053 (leere Aktion), Anlass Befund F-052-4 aus Spec 052 (PR #166): die Neubewertung von M-1 F zeigte alle vier Screens grün, zwei mit leerem Absende-Knopf und alle vier mit unsichtbarem Markenlink."
     }
   ]
 }
