@@ -42,7 +42,29 @@ const CXIUJ_CONFIG = fileURLToPath(
     import.meta.url,
   ),
 );
-const NOMOJ = ["roh", "sxablono"];
+// Spec 052 (V-5, D-052-03): the M-1 markup (`anmelden-m1` a byte copy of
+// specs/050-mvp-probelauf/daten/m1/F/anmelden/fragmento.html, `konto-m1` of …/F/konto/fragmento.html
+// without the line `<span slot="heading">Kontoangaben</span>`, Rest C) and the counter-probes of
+// D-052-01. They carry no placeholder and are rendered unchanged, like `roh`.
+const NOMOJ = [
+  "roh",
+  "sxablono",
+  "anmelden-m1",
+  "konto-m1",
+  "gegenprobe-a-eigener-abstand",
+  "gegenprobe-b-doppelte-luecke",
+  "gegenprobe-c-eigener-verteiler",
+  "gegenprobe-d1-eigene-klasse",
+  "gegenprobe-d2-part",
+  "gegenprobe-3c-ero-mit-style",
+  // K8I-004b (D-052-13): agent-written declarative shadow roots (on fm-* hosts; with an own <style>).
+  "gegenprobe-e1-deklarativa-ombro",
+  "gegenprobe-e2-fermita-ombro",
+  "gegenprobe-e3-ombro-part",
+  // K8I-006 (F-052-1): the full M-1 konto fragment, a byte copy with the heading of the attribute
+  // list (Rest C), pinning the re-evaluation's „konto green“ in CI.
+  "konto-m1-plena",
+];
 
 /** CSS generic family words (CSS Fonts 4), none of them a brand's own family. */
 const GENERIC_FAMILIES = [
@@ -203,8 +225,15 @@ function referenco(facts, modelo) {
         t: `${krudaj.length} von ${nativaj.length} nativen Elementen roh (${krudaj[0].kio.join(", ")}), zuerst \`${loko(elementoj, krudaj[0].n.elemento)}\``,
       };
 
-    // interspacoj (D-08, D-103)
-    const paroj = [...f.interspacoj].sort(
+    // interspacoj (D-08, D-103; Spec 052 D-052-01, V-2): a pair with `verteilita` is counted
+    // apart, never scored; the sentence names their number when there is one.
+    const paroj = [];
+    let verteilitaj = 0;
+    for (const p of f.interspacoj) {
+      if (p.verteilita === undefined) paroj.push(p);
+      else verteilitaj += 1;
+    }
+    paroj.sort(
       (a, b) =>
         a.post - b.post ||
         a.antaux - b.antaux ||
@@ -221,6 +250,7 @@ function referenco(facts, modelo) {
         v: (paroj.length - eksterStupoj.length) / paroj.length,
         t: `${eksterStupoj.length} von ${paroj.length} Geschwisterabständen nicht auf einer Abstandsstufe, zuerst \`${loko(elementoj, eksterStupoj[0].post)}\` (${String(eksterStupoj[0].px).replace(".", ",")} px)`,
       };
+    if (verteilitaj > 0) interspaco.t += `, ${verteilitaj} verteilte Abstände nicht gezählt`;
 
     const merkmaloj = {
       ersatzschrift: r4(ersatzschrift.v),

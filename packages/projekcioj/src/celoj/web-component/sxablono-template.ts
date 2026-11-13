@@ -130,6 +130,13 @@ const TYPOGRAPHY_FIELDS = [
   "line-height",
 ] as const;
 
+/** The live regions of a Sxablono (region.live of its Skemo), in Skemo order. */
+function liveOf(entry: LoadedSxablono): string[] {
+  return entry.skemo.regions
+    .filter((region) => region.live !== undefined)
+    .map((region) => region.name);
+}
+
 /** The px of a dimension token in the base resolution, for a container query (no var() there). */
 function lengthOf(token: string, base: Readonly<Record<string, ResolvedToken>>): string {
   const value = base[token]?.value as { value?: number; unit?: string } | undefined;
@@ -223,6 +230,16 @@ export function sxablonoStylesheetOf(
       `@container (inline-size < ${lengthOf(stack, base)}) { [part="header"], [part="head"] { flex-direction: column; align-items: flex-start; } }`,
     );
   }
+  // Spec 052 A (V-3, D-052-04): an empty live region (marked data-fm-leer by the element) leaves
+  // the flow, so it adds no second gap, and stays in the accessibility tree to be heard when it
+  // fills — the pattern of .fm-hidden without a length; the frame is its reference box. Only a
+  // Sxablono with a live region gets these rules.
+  if (liveOf(entry).length > 0) {
+    rules.push(
+      '[part="frame"] { position: relative; }',
+      "[part][data-fm-leer] { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }",
+    );
+  }
   return rules.join("\n");
 }
 
@@ -247,6 +264,24 @@ export function sxablonoElementSource(
         region.name !== a11y.focus,
     )
     .map((region) => region.name);
+  // Spec 052 A (V-3): a live region that is empty is marked data-fm-leer — out of the flow by the
+  // stylesheet, never hidden, so it is heard when it fills. Only a Sxablono with one gets the code.
+  const live = liveOf(entry);
+  const liveList =
+    live.length === 0 ? "" : `\nconst LIVE: readonly string[] = ${JSON.stringify(live)};`;
+  const liveLoop =
+    live.length === 0
+      ? ""
+      : `
+    for (const region of LIVE) {
+      const holder = this.shadowRoot?.querySelector(\`[part="\${region}"]\`);
+      const slot = holder?.querySelector("slot");
+      if (!(holder instanceof HTMLElement) || !(slot instanceof HTMLSlotElement)) continue;
+      const filled = slot.assignedNodes({ flatten: true }).some(
+        (node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? "").trim() !== "",
+      );
+      if (holder.hasAttribute("data-fm-leer") === filled) holder.toggleAttribute("data-fm-leer", !filled);
+    }`;
   const isForm = regions.some((region) => region.one !== undefined);
   const preview = previewOf(entry);
   const source = sourceOf(entry);
@@ -329,7 +364,7 @@ export function sxablonoElementSource(
       : "";
   // As a template literal: the markup holds no backtick and no placeholder.
   const body = `const MARKUP = \`${sxablonoMarkup(entry)}\`;
-const HIDEABLE: readonly string[] = ${JSON.stringify(hideable)};
+const HIDEABLE: readonly string[] = ${JSON.stringify(hideable)};${liveList}
 const FOCUS: string | undefined = ${JSON.stringify(a11y.focus)};
 /** The props of the Sxablono (its Skemo), observed as attributes. */
 const PROPS: readonly { name: string; kind: string }[] = ${JSON.stringify(entry.skemo.props.map((prop) => ({ name: prop.name, kind: prop.kind })))};${isForm ? '\n/** The inputs Enter does not send from: no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
@@ -415,7 +450,7 @@ ${
         (node) => node.nodeType === Node.ELEMENT_NODE || (node.textContent ?? "").trim() !== "",
       );
       if (holder.hidden === filled) holder.hidden = !filled;
-    }
+    }${liveLoop}
   }
 ${formMethods}${editorMethods}}
 

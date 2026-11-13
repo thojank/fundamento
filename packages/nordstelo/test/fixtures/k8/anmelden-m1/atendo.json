@@ -1,0 +1,238 @@
+{
+  "kombinacioj": [
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-sxelo`"
+        }
+      ],
+      "kvoto": 1,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 1,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    }
+  ],
+  "kvoto": 1,
+  "mankoj": []
+}

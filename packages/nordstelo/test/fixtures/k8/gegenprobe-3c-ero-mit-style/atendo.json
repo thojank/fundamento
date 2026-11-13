@@ -1,0 +1,238 @@
+{
+  "kombinacioj": [
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (970,53 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (970,53 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (1047,45 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (1047,45 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (1022,61 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (1022,61 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (1046,06 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 2 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-atributlisto > dl` (1046,06 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "keine Sxablono mit erkannter Region im Markup"
+        }
+      ],
+      "kvoto": 0.625,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.5,
+        "nativaj": 1,
+        "sxablono": 0
+      },
+      "scheme": "light"
+    }
+  ],
+  "kvoto": 0.625,
+  "mankoj": []
+}

@@ -10,10 +10,12 @@ import { facts, h } from "../test-doubles/facts.js";
 import { aspektoFaktojEnPagxo, normigiAspektoFaktojn, sondojEnPagxo } from "./faktoj.js";
 import {
   ATENDO,
+  ATENDO_VERTEILITA,
   KRUDA,
   MALPLENA,
   permutita,
   SONDOJ_ALIA_ECO,
+  VERTEILITA,
 } from "./test-doubles/aspekto-kazoj.js";
 
 // C-2 at compile time: an ekranoj Fakto (renders without `k8`) is still a nordstelo Facts.
@@ -73,6 +75,14 @@ describe("normigiAspektoFaktojn (AC-L2-2)", () => {
 
   it("keeps empty lists empty", () => {
     expect(normigiAspektoFaktojn(MALPLENA)).toEqual(MALPLENA);
+  });
+
+  // Spec 052 (D-052-01, V-1): the optional field is carried through, sorted and deduped with it.
+  it("carries verteilita through, as part of the sort and dedupe keys", () => {
+    expect(normigiAspektoFaktojn(VERTEILITA)).toEqual(ATENDO_VERTEILITA);
+    expect(stabilaJson(normigiAspektoFaktojn(permutita(VERTEILITA)))).toBe(
+      stabilaJson(ATENDO_VERTEILITA),
+    );
   });
 });
 

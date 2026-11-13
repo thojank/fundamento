@@ -1,0 +1,238 @@
+{
+  "kombinacioj": [
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (303,83 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "ekzemplo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (303,83 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (323,34 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "komuna",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (323,34 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (319,86 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (319,86 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (329,72 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "dark"
+    },
+    {
+      "aspekto": "provo-kompakta",
+      "kialoj": [
+        {
+          "merkmal": "ersatzschrift",
+          "teksto": "vollständig"
+        },
+        {
+          "merkmal": "nativaj",
+          "teksto": "nichts zu prüfen"
+        },
+        {
+          "merkmal": "interspacoj",
+          "teksto": "1 von 3 Geschwisterabständen nicht auf einer Abstandsstufe, zuerst `fm-pagxo > fm-butono` (329,72 px)"
+        },
+        {
+          "merkmal": "sxablono",
+          "teksto": "vollständig: `fm-pagxo`"
+        }
+      ],
+      "kvoto": 0.9167,
+      "merkmaloj": {
+        "ersatzschrift": 1,
+        "interspacoj": 0.6667,
+        "nativaj": 1,
+        "sxablono": 1
+      },
+      "scheme": "light"
+    }
+  ],
+  "kvoto": 0.9167,
+  "mankoj": []
+}

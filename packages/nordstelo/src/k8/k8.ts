@@ -187,22 +187,34 @@ function nativaj(fakto: FaktoAspekto, soloj: Soloj, elementoj: readonly Element[
   };
 }
 
+/**
+ * The share of counted sibling gaps on a spacing step. A `verteilita` pair (free space an Ero or a
+ * Sxablono distributes, D-052-01) is neither in the numerator nor in the denominator; the sentence
+ * gets `, n verteilte Abstände nicht gezählt` for n > 0 (fixed wording, D-132, Spec 052 V-2).
+ */
 function interspacoj(fakto: FaktoAspekto, soloj: Soloj, elementoj: readonly Element[]): Rezulto {
-  const listo = [...fakto.interspacoj].sort(
-    (a, b) =>
-      a.post - b.post ||
-      a.antaux - b.antaux ||
-      a.gepatro - b.gepatro ||
-      kompari(a.akso, b.akso) ||
-      a.px - b.px,
-  );
-  if (listo.length === 0) return { valoro: 1, teksto: NENIO };
+  const listo = fakto.interspacoj
+    .filter((interspaco) => interspaco.verteilita === undefined)
+    .sort(
+      (a, b) =>
+        a.post - b.post ||
+        a.antaux - b.antaux ||
+        a.gepatro - b.gepatro ||
+        kompari(a.akso, b.akso) ||
+        a.px - b.px,
+    );
+  const verteilitaj = fakto.interspacoj.length - listo.length;
+  const kun = (teksto: string): string =>
+    verteilitaj > 0 ? `${teksto}, ${verteilitaj} verteilte Abstände nicht gezählt` : teksto;
+  if (listo.length === 0) return { valoro: 1, teksto: kun(NENIO) };
   const ekster = listo.filter((interspaco) => !surStupo(interspaco.px, soloj.stupoj));
   const unua = ekster[0];
-  if (unua === undefined) return { valoro: 1, teksto: PLENA };
+  if (unua === undefined) return { valoro: 1, teksto: kun(PLENA) };
   return {
     valoro: (listo.length - ekster.length) / listo.length,
-    teksto: `${ekster.length} von ${listo.length} Geschwisterabständen nicht auf einer Abstandsstufe, zuerst \`${pfadoDe(elementoj, unua.post)}\` (${germanaNombro(unua.px)} px)`,
+    teksto: kun(
+      `${ekster.length} von ${listo.length} Geschwisterabständen nicht auf einer Abstandsstufe, zuerst \`${pfadoDe(elementoj, unua.post)}\` (${germanaNombro(unua.px)} px)`,
+    ),
   };
 }
 

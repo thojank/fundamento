@@ -15,8 +15,9 @@
 //
 // Spec 038 S038-19 (3.1, C-5): in Variante F the back-link is the link Ero (`fm-ligilo`, standalone)
 // inside the marked element, and – when the brand build names it – the brand's base font is set on
-// `body` through its custom property, `var(<name>)`, never a value. The rule stands unmarked in the
-// head (the body walk of the facts never sees it, and the K8 facts read the page with it). The
+// `body` through its custom property, `var(<name>)`, never a value. The rule stands in the head
+// without `KADRO_ATRIBUTO` (the body walk of the facts never sees it, and the K8 facts read the
+// page with it); like the stylesheets it carries `MEDIO_ATRIBUTO` (Spec 052 V-4). The
 // background is the stylesheet's own page block (`:where(:root)`); the frame adds none. The
 // overview of Variante F stands in the shell Sxablono (`fm-sxelo`, `fm-navigado` in `nav`,
 // `fm-pagxo` in the default region).
@@ -29,6 +30,12 @@ import type { Plano, Varianto } from "./tipoj.js";
 
 /** The attribute that marks what the frame adds (excluded from facts, axe and D-05, D-27). */
 export const KADRO_ATRIBUTO = "data-ekranoj-kadro";
+/**
+ * The attribute on every stylesheet the frame writes (Spec 052 V-4, Q-4): the K8 facts tell the
+ * frame's style rules from the agent's own by it (D-052-01, condition 3). Not `KADRO_ATRIBUTO` –
+ * those elements are removed before the K8 measurement. The same name as nordstelo's.
+ */
+export const MEDIO_ATRIBUTO = "data-nordstelo";
 /** The markers around the agent fragment in a screen document. */
 export const FRAGMENTO_KOMENCO = "<!-- ekranoj:fragmento -->";
 export const FRAGMENTO_FINO = "<!-- /ekranoj:fragmento -->";
@@ -95,13 +102,15 @@ function markaKapo(marko: KadraMarko | undefined, radiko: string): string[] {
   if (marko === undefined) return [];
   const tiparo = marko.bazaTiparo;
   return [
-    ...marko.css.map((css) => `<link rel="stylesheet" href="${radiko}marko/${vojo(css)}">`),
+    ...marko.css.map(
+      (css) => `<link rel="stylesheet" href="${radiko}marko/${vojo(css)}" ${MEDIO_ATRIBUTO}>`,
+    ),
     ...(marko.skripto === undefined
       ? []
       : [`<script src="${radiko}marko/${vojo(marko.skripto)}"></script>`]),
     // C-5: the base font by its name only; a name that is no custom property is never written.
     ...(tiparo !== undefined && PROPRA_ECO.test(tiparo)
-      ? [`<style>body { font-family: var(${tiparo}); }</style>`]
+      ? [`<style ${MEDIO_ATRIBUTO}>body { font-family: var(${tiparo}); }</style>`]
       : []),
   ];
 }
