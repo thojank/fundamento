@@ -1,9 +1,9 @@
-// Spec 050 T2 (AC-2): the first check of a new rev solves only what changed. A change of the
+// Spec 051 T2 (AC-2): the first check of a new rev solves only what changed. A change of the
 // Zweitfarbe (the stage's colour step, T-A/T-B of Spec 036) leaves the lead colour, the status
 // colours, the sliders and the targets as they were, so the six palettes of the calibration ask for
 // the very same steps as before; only the twelve steps of the Zweitfarbe are new. Counted at the
 // seam `solveStep` (each call solves one step by bisection), never by a clock. The bytes of the
-// derivation stay those of 79a463bc: `metiejo/src/ableitung-050.test.ts`. Invented values.
+// derivation stay those of 79a463bc: `metiejo/src/ableitung-051.test.ts`. Invented values.
 
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -37,7 +37,7 @@ beforeAll(() => {
 
 const palettesOf = (agordo: Agordo) => derivationBasis(agordo, structure, calibration).palettes;
 
-describe("a change of the Zweitfarbe solves only the Zweitfarbe (Spec 050 T2)", () => {
+describe("a change of the Zweitfarbe solves only the Zweitfarbe (Spec 051 T2)", () => {
   it("solves the twelve steps of the new Zweitfarbe and none of the six other palettes", () => {
     const marke: Agordo = { name: "probekolora", leitfarbe: "#2a6f97" };
     palettesOf({ ...marke, zweitfarbe: { farbe: "#0f8f86" } });

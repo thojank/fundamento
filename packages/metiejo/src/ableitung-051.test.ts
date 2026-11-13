@@ -1,11 +1,11 @@
-// Spec 050 T2 (AC-3, R0-i): the derivation stays byte-equal while the check gets faster. The
+// Spec 051 T2 (AC-3, R0-i): the derivation stays byte-equal while the check gets faster. The
 // fixture holds the SHA-256 of what a fixed course of invented Agordo derives, in this order, in one
 // process: the palettes of the derivation basis for a course in which each Agordo differs from the
 // one before in one input of the palettes (lead colour, Zweitfarbe set, changed and removed, the
 // three sliders, a target of the Werkstatt, a status colour, the tint of the neutrals, the basis),
 // then every file of `deriveAspekto` (`checkDraft`) for the bases `leer` and `komuna`, each with the
 // Zweitfarbe set and removed. Whatever a derivation keeps for the next one, the next one must give
-// the bytes it gave before. Written once with FM_ABLEITUNG_050=schreiben on 79a463bc, before any
+// the bytes it gave before. Written once with FM_ABLEITUNG_051=schreiben on 79a463bc, before any
 // change of the code; afterwards only compared. No clock, no model, invented brands and values.
 
 import { createHash } from "node:crypto";
@@ -24,8 +24,8 @@ interface Fixture {
   faelle: Fall[];
 }
 
-const FIXTURE = new URL("./test-doubles/ableitung-050.json", import.meta.url);
-const SCHREIBEN = process.env.FM_ABLEITUNG_050 === "schreiben";
+const FIXTURE = new URL("./test-doubles/ableitung-051.json", import.meta.url);
+const SCHREIBEN = process.env.FM_ABLEITUNG_051 === "schreiben";
 const STAND = "79a463bc";
 
 const sha256 = (text: string): string => createHash("sha256").update(text).digest("hex");
@@ -86,7 +86,7 @@ const ABLEITUNGEN: readonly [string, Agordo][] = [
   ["komuna-ohne", komuna],
 ];
 
-describe("the derivation of a fixed course is byte-equal to 79a463bc (Spec 050 T2, AC-3)", () => {
+describe("the derivation of a fixed course is byte-equal to 79a463bc (Spec 051 T2, AC-3)", () => {
   it("the palettes of the derivation basis, each input changed in turn", () => {
     const own = PALETTEN.map(([fall, agordo]): Fall => {
       const { palettes } = derivationBasis(agordo, bases.structure, bases.calibration);

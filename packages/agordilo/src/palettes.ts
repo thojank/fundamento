@@ -223,7 +223,7 @@ export function floored(moved: number, calibrated: number, floors: TargetFloors)
 }
 
 /**
- * Spec 050 T2: the steps already solved, by everything a step's solution depends on – its target,
+ * Spec 051 T2: the steps already solved, by everything a step's solution depends on – its target,
  * its chroma, its hue and the surface of its mode (`solveStep` is pure and reads nothing else). A
  * change of one colour (the Zweitfarbe) asks the other palettes for the very same steps, so a new
  * rev solves only what is new. Numbers are keyed exactly (`-0` apart from `0`); a full store is

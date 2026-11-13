@@ -136,7 +136,7 @@ for (const [ort, pfad, pollt, merkmal] of [
     // Spec 040 B-5: the test changes the step only once the page it loaded has settled – loaded,
     // its preview of the page's rev loaded, its check on load answered. Spec 042 T3: read as states
     // of the page (`geladen-042.ts`), never as `framenavigated`, which Firefox missed for the preview
-    // in run 42103645313 (the test waited its whole 120 s at the reload below). Spec 050 T3 (K2):
+    // in run 42103645313 (the test waited its whole 120 s at the reload below). Spec 051 T3 (K2):
     // the answers the step's load waits for stand behind a check, so they are waited for from
     // before the load on, bounded by the test's time only (`schrittLaedt`).
     const geoeffnet = schrittLaedt(page, id, merkmal);
@@ -180,7 +180,7 @@ for (const [ort, pfad, pollt, merkmal] of [
     // Press it right after the page's poll of the draft answered, not while one is under way: the
     // reload would cut it short (Spec 040 B-8).
     if (pollt) await nachDerAbfrage(page, id);
-    // Spec 050 T3 (K2, B-14): the reload's page is written after the server checked the new rev.
+    // Spec 051 T3 (K2, B-14): the reload's page is written after the server checked the new rev.
     const ohneZweitfarbe = schrittLaedt(page, id, merkmal, vorDemLoeschen);
     await page.keyboard.press("Enter");
     expect((await geloescht).status()).toBe(200);
@@ -216,7 +216,7 @@ for (const [ort, pfad, pollt, merkmal] of [
         await route.fallback();
       },
     );
-    // Spec 050 T3 (K2): the step's first check (POST …/pruefung) is answered after the server checked
+    // Spec 051 T3 (K2): the step's first check (POST …/pruefung) is answered after the server checked
     // the new brand; its answer is waited for from before the load on (`schrittLaedt`).
     const geladen = schrittLaedt(page, id, merkmal);
     await page.goto(`${base}${pfad(id)}`, { waitUntil: "domcontentloaded" });

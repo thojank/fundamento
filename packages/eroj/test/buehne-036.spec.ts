@@ -253,7 +253,7 @@ const sichtbarBei = (page: Page, anteil: number) =>
   }, anteil);
 
 /**
- * Spec 050 T3 (K3): what a frame of the stage shows is read from the page that holds it – through
+ * Spec 051 T3 (K3): what a frame of the stage shows is read from the page that holds it – through
  * the frame's contentDocument, in the page's context, which a navigation of the frame does not
  * destroy – not in the frame's own context. Run 42376059543 (Firefox): a read in the frame
  * (`frameLocator(…).evaluate`) died with „Execution context was destroyed“ when the frame's document
@@ -317,7 +317,7 @@ const anzahlIm = (page: Page, rahmen: string, ziel: string) =>
 
 /** The fill of the first main button in a frame of the stage, once the frame has painted it. */
 async function knopf(page: Page, selector: string): Promise<string> {
-  // Spec 050 T3 (K3): before, the button's visibility and fill were read in the frame
+  // Spec 051 T3 (K3): before, the button's visibility and fill were read in the frame
   // (frameLocator: toBeVisible, then evaluate in an expect.poll). Now both in one read from the
   // page, polled under the default window until the button is visible and painted.
   let fuellung = "";
@@ -630,13 +630,13 @@ test.describe("Bühne (Spec 036, Befund 3.4)", () => {
     await expect(dialog).toContainText("Petrol führt, der Grund ist hell.");
   });
 
-  // Spec 050 T3 (K4 Navigation, run 42376059543, Firefox): closing the dialog after a reading reloads
+  // Spec 051 T3 (K4 Navigation, run 42376059543, Firefox): closing the dialog after a reading reloads
   // the screen, and Firefox then fetched each frame of the stage twice with the same URL – it gave
   // the frame its last document back, and the client sent it there once more. The second document
   // replaced the first one while the test read in it („Execution context was destroyed“). Counted
   // as the browser fetches: every navigation of a frame after the reload that the server answered,
   // per frame; each frame loads the page's rev once, in every engine.
-  test("3.4 (Spec 050): after a reload each frame of the stage loads its document once", async ({
+  test("3.4 (Spec 051): after a reload each frame of the stage loads its document once", async ({
     page,
   }) => {
     const id = await marke(page.request, "Probomarko Neuladen");
@@ -686,7 +686,7 @@ test.describe("Bühne (Spec 036, Befund 3.5)", () => {
     const jetzt = page.frameLocator(JETZT);
     const MARKIERT = '[data-mt-pruefung="offen"]';
     const markiert = jetzt.locator(MARKIERT);
-    // Spec 050 T3 (K3, T-D): read from the page that holds the frame, not in the frame (B-04/B-09:
+    // Spec 051 T3 (K3, T-D): read from the page that holds the frame, not in the frame (B-04/B-09:
     // in Firefox the first expectation in a frameLocator after the frame loaded at times never
     // ended). oeffne() has read both frames loaded with the page's rev (geladen()).
     await expect
@@ -704,7 +704,7 @@ test.describe("Bühne (Spec 036, Befund 3.5)", () => {
     const schieber = page.locator("[data-mt-buehne]").getByRole("slider");
     await schieber.focus();
     await page.keyboard.press("End");
-    // Spec 050 T3 (K3, T-D): before any action in the frame, its state is confirmed by an
+    // Spec 051 T3 (K3, T-D): before any action in the frame, its state is confirmed by an
     // expectation under the default window, read from the page: the cut applied (the whole stage
     // shows „Jetzt“), the marked component visible in „Jetzt“ (which oeffne() read loaded with the
     // page's rev). Before, `expect(markiert.first()).toBeVisible()` read it in the frame (run

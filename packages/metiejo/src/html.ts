@@ -113,7 +113,7 @@ for (const wahl of document.querySelectorAll("[data-fm-lingvo-wahl]")) {
   });
 }
 
-// Spec 050 T3 (K4 Navigation): Firefox gives a frame the parser made its last document back when
+// Spec 051 T3 (K4 Navigation): Firefox gives a frame the parser made its last document back when
 // the page reloads, and the client below sends the frame there once more – two fetches of the same
 // URL, and the second document replaced the first one under a reader (run 42376059543). A frame
 // made by script has no document restored. So the client lays a copy of each preview frame in its

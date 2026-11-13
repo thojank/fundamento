@@ -81,7 +81,7 @@ test.describe("②b-2 A-elektilo-1: a read-only select", () => {
 /**
  * The key that moves focus to the next button. WebKit on macOS reaches buttons only with Alt+Tab
  * (the system's keyboard setting); WebKit on Linux, Chromium and Firefox reach them with Tab.
- * Platform and engine together, not `TAB()` of alirebleco.ts (every WebKit): Spec 050 D-25.
+ * Platform and engine together, not `TAB()` of alirebleco.ts (every WebKit): Spec 051 D-25.
  */
 const nextButtonKey = (browserName: string) =>
   browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab";

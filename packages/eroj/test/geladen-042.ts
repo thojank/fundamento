@@ -21,7 +21,7 @@ const MARKE = "__fmDokument050";
 
 /**
  * Which document the page shows: a number the first read lays on the document's window, its own for
- * every document. Spec 050 T3 (B-14): not `performance.timeOrigin` any more – WebKit reported a
+ * every document. Spec 051 T3 (B-14): not `performance.timeOrigin` any more – WebKit reported a
  * value 1 ms higher for the same document seconds later, so the old page passed for a new one.
  */
 export function dokument(page: Page): Promise<number> {
@@ -42,7 +42,7 @@ function zwischenDokumenten(error: unknown): boolean {
 }
 
 /**
- * Spec 050 T3: a read from the page that the page's navigation cut short (its context destroyed)
+ * Spec 051 T3: a read from the page that the page's navigation cut short (its context destroyed)
  * gives `sonst`, the value of "not loaded yet"; every other error is thrown. Only for reads, never
  * for an action (Spec 042 D-15).
  */
@@ -242,12 +242,12 @@ const vorschauVon =
   };
 
 /**
- * Spec 050 T3 (K2, testing.md › „Playwright stability patterns“): the page's responses from now on,
+ * Spec 051 T3 (K2, testing.md › „Playwright stability patterns“): the page's responses from now on,
  * in the order they came. Made before the action whose answers a test waits for. `antwort` waits
  * for the first response after the index `ab` that `passt` and gives its index; it is bounded by
  * the test's own time only, never by an expectation's window. The answers it waits for stand behind
  * a server computation – the check of a rev, the frame of a new rev, a page the server checks before
- * it writes it – which took 3.9 to more than 11 s on CI runners (Spec 050 plan.md › T-A, T-B),
+ * it writes it – which took 3.9 to more than 11 s on CI runners (Spec 051 plan.md › T-A, T-B),
  * longer than the window of 5 s that polled for them before. What the page then shows is still
  * read as a state, under the default expect window.
  */
@@ -283,12 +283,12 @@ function antwortenAb(page: Page): {
 }
 
 /**
- * Spec 050 T3 (K2): `schrittBereit` for a load whose answers stand behind a server computation (T-A,
+ * Spec 051 T3 (K2): `schrittBereit` for a load whose answers stand behind a server computation (T-A,
  * T-B). Call it **before** the action that loads the step (page.goto, page.reload, a button whose
  * answer reloads the page) and call what it returns after that action; it resolves with the loaded
  * document's `dokument()`, once
  * - the server answered the page's document (the assistant checks a new rev before it writes the
- *   page: 2.2–2.5 s locally under CPU load after „Keine Zweitfarbe“, Spec 050 B-14), then
+ *   page: 2.2–2.5 s locally under CPU load after „Keine Zweitfarbe“, Spec 051 B-14), then
  *   `seiteBereit(page, merkmal, nicht)` as in `schrittBereit`,
  * - where the step checks: the check of this document answered (POST …/pruefung, after the
  *   document's answer), then `abrufBeantwortet` as in `schrittBereit`,
@@ -332,7 +332,7 @@ export function schrittLaedt(
  * - the preview, if the step has one, has loaded that rev (`rahmenBereit`, not `framenavigated`),
  * - the check the step Farbe runs after a save (POST /api/marko/<id>/pruefung) answered, if it runs.
  * The page stays the same document meanwhile, so the answers are read as they come.
- * Spec 050 T3 (K2, T-A): the preview of a new rev is answered only after the server checked that
+ * Spec 051 T3 (K2, T-A): the preview of a new rev is answered only after the server checked that
  * rev (3.9 to more than 11 s on CI runners), so the server's answer to the preview's navigation is
  * waited for first, bounded by the test's time only; then `rahmenBereit` reads the loaded frame
  * under the default window, as before.

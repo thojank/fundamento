@@ -1,4 +1,6 @@
-# Spec 050 – Aufgaben (Wacklige Browser-Tests aus Spec 036 stabil machen)
+# Spec 051 – Aufgaben (Wacklige Browser-Tests aus Spec 036 stabil machen)
+
+**Umbenennung (Maintainer-Entscheidung 2026-11-13):** Dieser Lauf hieß bis zum ersten Push Spec 050. Die Nummer 050 behält der MVP-Probelauf; dieser Lauf ist jetzt **Spec 051**. Umbenannt sind der Ordner (`specs/051-wacklige-tests-036/`), die Testdateien `paletten-051.test.ts` und `ableitung-051.test.ts`, die Fixture `ableitung-051.json`, die Variable `FM_ABLEITUNG_051`, der Testname „3.4 (Spec 051)“ und alle Verweise im Code und in diesen Dokumenten, auch in wörtlich kopierten Ausgaben. **Unverändert** bleibt, was Geschichte oder ein echter Pfad ist: die Betreffzeilen der vorhandenen Commits („Spec 050 T<n>: …“), die Ticket-IDs `W050-T1` … `W050-T6`, die Ordner außerhalb des Repos (`s050-*`, `/tmp/s050/`) und [`spec.md`](spec.md), die byte-gleiche Kopie des Auftrags (sie nennt sich selbst noch Spec 050; ihr SHA-256 gilt weiter). Die Umbenennung lief ohne lokalen Test, Bau oder Server (auf der Maschine lief eine Messung); geprüft hat sie der zweite Dispatch.
 
 **Spec:** [`spec.md`](spec.md) · **Plan:** [`plan.md`](plan.md) · **Basis:** `main` `de931e40` · **Branch:** `261112-wacklige-browser-tests--9197f6`
 
@@ -23,14 +25,14 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 - [x] **Plattform-Probe T-E** (D-14) und **Rahmen-Probe T-C/T-D** (D-15), beide Wegwerf unter `/tmp/s050/probe-pw/` (Kopie `…/s050-werkzeug/`).
 - [x] **V-1** nach den Klassenregeln (D-10): T-A, T-B K4 Prüfung (+K2, +K1); T-C K4 Navigation (+K3); T-D K3 (+K5, +K1); T-E K5.
 - [x] `spec.md` mit `cp` aus `user-provided-product-spec-wacklige-tests-036.md`, SHA-256 `386f6db80c0e99edd5813b22b67d8481e59098ca96d48fdee3fdc7a329e3d8c5` (Quelle = Kopie, 16 031 Byte). Wird nicht editiert.
-- [x] Kein Code geändert: `git diff de931e40 --name-only` zeigt nur `specs/050-wacklige-tests-036/{plan,spec,tasks}.md`. Kein Push, kein PR, kein Dispatch, kein Rerun.
+- [x] Kein Code geändert: `git diff de931e40 --name-only` zeigt nur `specs/051-wacklige-tests-036/{plan,spec,tasks}.md`. Kein Push, kein PR, kein Dispatch, kein Rerun.
 
 ## W050-T2 im Einzelnen (Prüfung schneller)
 
 - [x] **Gemessen vor dem Entwurf** (D-17): Was `validateModeloFiles` je Prüfung bekommt (Struktur + abgeleitetes Paket, 144 Kombinationen, die Hälfte komuna) und was zwischen rev n und n+1 gleich bleibt. Wiederverwendbar im Scope: nur die Palettenstufen in `agordilo`; der Rest hängt in `modelo` an der Identität des `Modelo` und an `protected-minimum` (Vergleich mit komuna).
-- [x] **Byte-Fixture zuerst** (D-20) auf `79a463bc`: `packages/metiejo/src/ableitung-050.test.ts` + `test-doubles/ableitung-050.json`, einmal geschrieben (`FM_ABLEITUNG_050=schreiben`), `git check-ignore -v` leer. `antworten-044` grün auf `79a463bc` (3/3).
-- [x] **Roter Test** (D-19) `packages/agordilo/src/paletten-050.test.ts`: zählt `solveStep` über `vi.mock`; rot (105 statt 12, 93 statt 0).
-- [x] **Fix** `packages/agordilo/src/palettes.ts` (`solvedStep`, D-18), Testdatei unverändert. Grün: `paletten-050` 3/3; Quelle 23/23 und `dist` 23/23 (`ableitung-050`, `antworten-044`, `stato-044`, `ableitungen-044`, `grenzfaelle-044`); `pruefung-worker-044` 11/11; beide Fixtures unverändert.
+- [x] **Byte-Fixture zuerst** (D-20) auf `79a463bc`: `packages/metiejo/src/ableitung-051.test.ts` + `test-doubles/ableitung-051.json`, einmal geschrieben (`FM_ABLEITUNG_051=schreiben`), `git check-ignore -v` leer. `antworten-044` grün auf `79a463bc` (3/3).
+- [x] **Roter Test** (D-19) `packages/agordilo/src/paletten-051.test.ts`: zählt `solveStep` über `vi.mock`; rot (105 statt 12, 93 statt 0).
+- [x] **Fix** `packages/agordilo/src/palettes.ts` (`solvedStep`, D-18), Testdatei unverändert. Grün: `paletten-051` 3/3; Quelle 23/23 und `dist` 23/23 (`ableitung-051`, `antworten-044`, `stato-044`, `ableitungen-044`, `grenzfaelle-044`); `pruefung-worker-044` 11/11; beide Fixtures unverändert.
 - [x] **Schluss:** `modelo` allein grün (4954), `lint` grün; `test:betroffen` rot nur durch Zeitfenster in `nordstelo` im parallelen Lauf (B-13, allein 270/270); derselbe Paketsatz nacheinander 18/19 grün inkl. Eroj-Playwright 675/675, `projekcioj` `komuna-fonto.test.ts:182` einmal über 60 s, allein 11/11 – `plan.md` › „Schluss T2“.
 - [x] **Messung nachher** (V-2, ohne fremde Tests): erste `/pruefung` 1613 / 2434 → **1491 / 2103 ms** (nicht unter 1 s, B-11), Ableitung 99 → ≈ 36 ms, `vorschau.css` 155 → 50 ms. **Zwischenprüfung** `zweitfarbe-036` `--repeat-each=10`, drei Engines: 150/150 grün (zählt nicht für AC-4).
 
@@ -44,9 +46,9 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 ## W050-T3 im Einzelnen (Warten an der Ursache, doppelte Navigation)
 
 - [x] **Mechanismus der doppelten Navigation** belegt (Probe `/tmp/s050/t3/zustand.probe.ts`, `plan.md` › „T3“): Firefox gibt beim Neuladen jedem vom Parser angelegten Vorschau-Rahmen sein letztes Dokument zurück (Navigationstyp „reload“, Dokument schon „interactive“, wenn der Client läuft); der Client weist dieselbe URL noch einmal zu. Nicht `vorschauNochmal`.
-- [x] **Roter Test** `buehne-036.spec.ts` „3.4 (Spec 050): after a reload each frame of the stage loads its document once“ (`fd90b67b`): zählt je Rahmen die beantworteten Navigationen nach `location.reload()`; Firefox 3/3 rot, Chromium/WebKit 3/3 grün.
+- [x] **Roter Test** `buehne-036.spec.ts` „3.4 (Spec 051): after a reload each frame of the stage loads its document once“ (`fd90b67b`): zählt je Rahmen die beantworteten Navigationen nach `location.reload()`; Firefox 3/3 rot, Chromium/WebKit 3/3 grün.
 - [x] **Fix** `packages/metiejo/src/html.ts` (`de3fd057`, D-23), Testdatei unverändert (`git diff fd90b67b..de3fd057 -- packages/eroj/test/buehne-036.spec.ts` leer); 9/9 grün. Kein Timer, `stato`-Takt unverändert.
-- [x] **Regressionen nach dem Fix:** `buehne-036`, `buehne-navigation-042`, `zweitfarbe-036` je Engine 81/81; `metiejo` 670/670 (`FM_MESSUNG_044_N=2`); `dist` 8/8 (`antworten-044`, `stato-044`, `ableitung-050`); Fixtures unverändert.
+- [x] **Regressionen nach dem Fix:** `buehne-036`, `buehne-navigation-042`, `zweitfarbe-036` je Engine 81/81; `metiejo` 670/670 (`FM_MESSUNG_044_N=2`); `dist` 8/8 (`antworten-044`, `stato-044`, `ableitung-051`); Fixtures unverändert.
 - [x] **K2** (`c5147982`): `schrittLaedt` (neu in `geladen-042.ts`) vor `goto`/`reload`/„Keine Zweitfarbe“ angelegt; `entwurfGespeichert` wartet auf die Antwort der Rahmen-Navigation der `rev`; `dokument()` als Marke am `window` (B-14; Probe unter Last: je Dokument ein Wert in allen Engines).
 - [x] **K3** (`9a51b5cd`): `knopf()` und T-D lesen die Rahmen von der Seite aus; vor Hover bestätigt: geladen mit `rev`, Schnitt 100 %, sichtbar, Zeiger trifft (D-24). 3.6 `:711` nicht angefasst.
 - [x] **Zwischenprüfung** (zählt nicht für AC-4): `buehne-036 -g "3\.(4|5)"` 120/120, `zweitfarbe-036` 150/150, je `--repeat-each=10`, drei Engines, `--workers 2`, ohne fremde Last.
@@ -92,14 +94,14 @@ Sechs Tickets, ein Strang, streng nacheinander: `W050-T1 → W050-T2 → W050-T3
 
 ### Commits T5
 
-- Spec 050 T5: final local run, report without CI (nur `specs/050-wacklige-tests-036/{plan,tasks,bericht}.md`)
+- Spec 050 T5: final local run, report without CI (nur `specs/051-wacklige-tests-036/{plan,tasks,bericht}.md`)
 
 ### Befunde für die nächsten Tickets
 
 - **T2 (erledigt, siehe oben):** Die Zeit steckt zu 82 % in `validateModeloFiles` (`packages/modelo`, tabu) und zu 10 % in `evaluateAlirebleco`; die Ableitung ist mit ≈ 100 ms klein. „Unter 1 s“ verlangt, diese Prüfregeln seltener oder mit wiederverwendeten Teilergebnissen zu rechnen, ohne `packages/modelo` zu ändern und byte-gleich – sonst Befund mit Werten (B-03).
 - **T3:** Drei Teile: K2 bei T-A/T-B (`waitForResponse` vor der Aktion, Q-2), K4 Navigation bei T-C (rot zuerst: „nach dem Neuladen genau eine Navigation je Rahmen und `rev`“ – die Rahmen-Probe zählt in Firefox 2 Anfragen bei 1 Zuweisung; der Test muss die Anfragen bzw. Dokumente zählen, nicht nur die Zuweisungen), K3 bei T-C/T-D (vor jeder Erwartung oder Aktion im Rahmen den Zustand von der Seite aus lesen; nach B-04/B-09 hängt in Firefox gerade die **erste** Erwartung im `frameLocator` nach einer Navigation des Rahmens). **Neu (B-14):** in WebKit ist `dokument()` (`performance.timeOrigin`) keine feste Kennung (dasselbe Dokument +1 ms) – `seiteBereit(…, nicht)` hält dann die alte Seite für neu (T-A `:181`, Stufe (2) 4/30); dieselbe Hilfe tragen `geladen()` (T-C) und `zweitfarbe-036:163`. Für T-B ist K2 nur über die Klassenregel belegt, nicht über den Vergleich der Varianten (B-15).
 - **T4:** K5; Weiche nach Plattform **und** Engine (Q-4), `toBeFocused` bleibt.
-- **T3 → T5:** Der neue Test „3.4 (Spec 050)“ läuft in der Datei-Reihe `buehne-036` mit; `geladen-042.ts` hat neue Exporte (`lesenOder`, `schrittLaedt`), die alten Signaturen sind gleich. T-D-Rest-Risiko (K5) siehe `plan.md` › „Was T3 nicht belegt“.
+- **T3 → T5:** Der neue Test „3.4 (Spec 051)“ läuft in der Datei-Reihe `buehne-036` mit; `geladen-042.ts` hat neue Exporte (`lesenOder`, `schrittLaedt`), die alten Signaturen sind gleich. T-D-Rest-Risiko (K5) siehe `plan.md` › „Was T3 nicht belegt“.
 - **T5:** Dieselben Reihen und Stufen wie T1 (D-13, Befehle in `plan.md` › „Messanleitung“; Stufe (2) mit `s050-werkzeug/reihe-cpu.sh`), vor jeder Reihe 90 s ohne fremde Test-Prozesse anderer Arbeitsbäume (B-08). Lokal sind T-B/T-C/T-D schon vorher 30/30 – ihr Nachweis ist der Dispatch (AC-5).
 
 ### Commits
@@ -128,5 +130,5 @@ Keine in T1 und T2 (T2 ändert keine Erwartung eines älteren Tests). T3/T4 trag
 | `buehne-036.spec.ts:570`–`:581` | `komponente.evaluate(…)` (Warnfarbe/Umriss), `komponente.getAttribute(satz)` | ein Lesen von der Seite aus, dazu `expect(gelesen).not.toBeNull()`; Erwartungen auf `stil`/`farbe`/`satz` unverändert | K3 | T3 |
 | `buehne-036.spec.ts:585` | `komponente.hover()` | `expect.poll(<Zeiger trifft die Komponente>).toBe(true)`, dann `page.mouse.move(Mitte)` | K3: Aktion ohne eigenes Zeitlimit nur nach bestätigtem Zustand | T3 |
 | `buehne-036.spec.ts:591` | `komponente.evaluate(tabIndex)` | `tabIndex` aus dem Lesen von der Seite aus (`toBe(0)` unverändert); `komponente.focus()` (`:592`) bleibt | K3 | T3 |
-| `buehne-036.spec.ts` (neu, nach `:541`) | – | roter Test „3.4 (Spec 050): after a reload each frame of the stage loads its document once“ | K4 Navigation, rot zuerst (`fd90b67b`) | T3 |
+| `buehne-036.spec.ts` (neu, nach `:541`) | – | roter Test „3.4 (Spec 051): after a reload each frame of the stage loads its document once“ | K4 Navigation, rot zuerst (`fd90b67b`) | T3 |
 | `packages/eroj/test/achsen-2b2.spec.ts:93` (Stand `ed1670fc`; nachher `:102`) | `await page.keyboard.press("Tab");` | `await page.keyboard.press(nextButtonKey(browserName));` (`Alt+Tab` nur WebKit auf macOS, sonst `Tab`; Hilfe `:86`–`:87`, Fixture `browserName` `:92`). Keine Erwartung geändert. | K5 (T-E): macOS-WebKit erreicht Buttons nur mit `Alt+Tab`; die Weiche nach Engine **und** Plattform hält `Tab` für Linux-WebKit, Chromium, Firefox (D-25) | T4 |
