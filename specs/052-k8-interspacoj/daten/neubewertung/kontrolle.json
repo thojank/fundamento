@@ -1,0 +1,214 @@
+{
+  "commit": "fe6b80dc",
+  "kontrolo": [
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 1,
+        "ekzemplo/light": 1,
+        "komuna/dark": 1,
+        "komuna/light": 1,
+        "provo-kompakta/dark": 0.8571,
+        "provo-kompakta/light": 0.8571,
+        "provo/dark": 0.8571,
+        "provo/light": 0.8571
+      },
+      "k8Gleich": true,
+      "kvoto": 0.9821,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/F/1/rondoj/3/anmelden",
+      "sha256": {
+        "gespeichert": "711574a31847cda44d3e026d092fd58a1933842e7ee7c0a6aa3b65e27ebb08b0",
+        "kontrolle": "711574a31847cda44d3e026d092fd58a1933842e7ee7c0a6aa3b65e27ebb08b0"
+      },
+      "slug": "anmelden",
+      "varianto": "F",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    },
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 0.7,
+        "ekzemplo/light": 0.7,
+        "komuna/dark": 0.7,
+        "komuna/light": 0.7,
+        "provo-kompakta/dark": 0.6,
+        "provo-kompakta/light": 0.6,
+        "provo/dark": 0.5,
+        "provo/light": 0.5
+      },
+      "k8Gleich": true,
+      "kvoto": 0.9063,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/F/1/rondoj/3/konto",
+      "sha256": {
+        "gespeichert": "6531d56562e3115ddc5720f1413c824e5c895906ee0126a9d6fdcd71ee44fb58",
+        "kontrolle": "6531d56562e3115ddc5720f1413c824e5c895906ee0126a9d6fdcd71ee44fb58"
+      },
+      "slug": "konto",
+      "varianto": "F",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    },
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 1,
+        "ekzemplo/light": 1,
+        "komuna/dark": 1,
+        "komuna/light": 1,
+        "provo-kompakta/dark": 0.8,
+        "provo-kompakta/light": 0.8,
+        "provo/dark": 0.8,
+        "provo/light": 0.8
+      },
+      "k8Gleich": true,
+      "kvoto": 0.975,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/F/1/rondoj/3/passwort-vergessen",
+      "sha256": {
+        "gespeichert": "47e7f0678d7a4eb6f48d9e487e0764c6444e9487eddefd8f16abb938b412c8cb",
+        "kontrolle": "47e7f0678d7a4eb6f48d9e487e0764c6444e9487eddefd8f16abb938b412c8cb"
+      },
+      "slug": "passwort-vergessen",
+      "varianto": "F",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    },
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 1,
+        "ekzemplo/light": 1,
+        "komuna/dark": 1,
+        "komuna/light": 1,
+        "provo-kompakta/dark": 0.8571,
+        "provo-kompakta/light": 0.8571,
+        "provo/dark": 0.8571,
+        "provo/light": 0.8571
+      },
+      "k8Gleich": true,
+      "kvoto": 0.9821,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/F/1/rondoj/3/registrieren",
+      "sha256": {
+        "gespeichert": "711574a31847cda44d3e026d092fd58a1933842e7ee7c0a6aa3b65e27ebb08b0",
+        "kontrolle": "711574a31847cda44d3e026d092fd58a1933842e7ee7c0a6aa3b65e27ebb08b0"
+      },
+      "slug": "registrieren",
+      "varianto": "F",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    },
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 0,
+        "ekzemplo/light": 0,
+        "komuna/dark": 0.8333,
+        "komuna/light": 0.8333,
+        "provo-kompakta/dark": 0.6667,
+        "provo-kompakta/light": 0.6667,
+        "provo/dark": 0.6667,
+        "provo/light": 0.6667
+      },
+      "k8Gleich": true,
+      "kvoto": 0.1354,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/0/1/rondoj/3/anmelden",
+      "sha256": {
+        "gespeichert": "0674e32d4abbe91ba689deba7c37d2dd7758a83e6726a69465b0992f1219d7ea",
+        "kontrolle": "0674e32d4abbe91ba689deba7c37d2dd7758a83e6726a69465b0992f1219d7ea"
+      },
+      "slug": "anmelden",
+      "varianto": "0",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    },
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 0,
+        "ekzemplo/light": 0,
+        "komuna/dark": 1,
+        "komuna/light": 1,
+        "provo-kompakta/dark": 0.5556,
+        "provo-kompakta/light": 0.5556,
+        "provo/dark": 0.5556,
+        "provo/light": 0.5556
+      },
+      "k8Gleich": true,
+      "kvoto": 0.132,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/0/1/rondoj/3/konto",
+      "sha256": {
+        "gespeichert": "5c308fb63119a3c72ee51174df6658da57dff257a13232092eb7a9f64ef9e8e6",
+        "kontrolle": "5c308fb63119a3c72ee51174df6658da57dff257a13232092eb7a9f64ef9e8e6"
+      },
+      "slug": "konto",
+      "varianto": "0",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    },
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 0,
+        "ekzemplo/light": 0,
+        "komuna/dark": 0.6667,
+        "komuna/light": 0.6667,
+        "provo-kompakta/dark": 0.5,
+        "provo-kompakta/light": 0.5,
+        "provo/dark": 0.1667,
+        "provo/light": 0.1667
+      },
+      "k8Gleich": true,
+      "kvoto": 0.0834,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/0/1/rondoj/3/passwort-vergessen",
+      "sha256": {
+        "gespeichert": "92e6812de392e872a0fa319ea28ee0ba00b0c9c1f4e1cbade3d8ccb619e6c0b6",
+        "kontrolle": "92e6812de392e872a0fa319ea28ee0ba00b0c9c1f4e1cbade3d8ccb619e6c0b6"
+      },
+      "slug": "passwort-vergessen",
+      "varianto": "0",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    },
+    {
+      "interspacoj": {
+        "ekzemplo/dark": 0,
+        "ekzemplo/light": 0,
+        "komuna/dark": 1,
+        "komuna/light": 1,
+        "provo-kompakta/dark": 1,
+        "provo-kompakta/light": 1,
+        "provo/dark": 1,
+        "provo/light": 1
+      },
+      "k8Gleich": true,
+      "kvoto": 0.1875,
+      "prueffaehig": true,
+      "rondo": "anmelden-und-konto/0/1/rondoj/3/registrieren",
+      "sha256": {
+        "gespeichert": "b8218a626d55df53e57a685b719b85f6e454351d5278786262b975e306025963",
+        "kontrolle": "b8218a626d55df53e57a685b719b85f6e454351d5278786262b975e306025963"
+      },
+      "slug": "registrieren",
+      "varianto": "0",
+      "verda": {
+        "gespeichert": false,
+        "kontrolle": false
+      }
+    }
+  ],
+  "tasko": "anmelden-und-konto"
+}

@@ -1,0 +1,6 @@
+Last vor: 5.90 6.14 7.17
+Last nach: 5.99 6.12 7.11
+Kerne: 10
+Commit: fe6b80dc
+Node: v24.21.0
+Quelle: specs/050-mvp-probelauf/daten/m1 (fragmento.html, fakto.json)

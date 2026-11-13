@@ -10,7 +10,7 @@ Sechs Tickets, ein Strang, streng nacheinander (D-052-08): `K8I-001 → K8I-002 
 | K8I-002 | 2 Rote Tests | Rote Tests A und B, Fixtures aus M-1 (`anmelden-m1`, `konto-m1`), Gegenproben (a)–(d), 3c; Typ `verteilita` (V-1) | K8I-001 | erledigt 2026-11-13 (rot belegt) |
 | K8I-003 | 3 Fixes | Fix A: leere Live-Bereiche im Projektor (`data-fm-leer`), Neubau Eroj, Baselines nach D-052-06 | K8I-002 | erledigt 2026-11-13 (`konto-m1` rot bis K8I-004) |
 | K8I-004 | 3 Fixes | Fix B: Flat-Tree-Messung, `verteilita` nach D-052-01, Zwilling, `k8.ts`, Marker D-052-05 | K8I-003 | erledigt 2026-11-13 (`konto-m1`, `anmelden-m1` = 1 in allen 8 Kombinationen); Folge K8I-004b (B-004-4, D-052-13) erledigt 2026-11-13 |
-| K8I-005 | 4 Nachweis | Neubewertung M-1 (Kontrolle und gerendert) ohne Modell, `neubewertung.md`, Rest C als Befund | K8I-004 | offen |
+| K8I-005 | 4 Nachweis | Neubewertung M-1 (Kontrolle und gerendert) ohne Modell, `neubewertung.md`, Rest C als Befund | K8I-004 | erledigt 2026-11-13 (Kontrolle 8/8 byte-gleich; gerendert F 4/4 statt erwartet 3/4, F-052-1) |
 | K8I-006 | 5 Tests | Test-Ticket: Gesamtstand, AC-Matrix vollständig, Querschnitt | K8I-005 | offen |
 
 ## AC-Zuordnung (AC → Ticket → Test)
@@ -28,13 +28,13 @@ Geplante Belege. Datei- und Testnamen stehen fest, sobald das Ticket sie anlegt;
 | AC-B3 | Gegenproben (a)–(d) bleiben rot, jede zuerst rot belegt | K8I-002, K8I-004 | `interspacoj-052.test.ts` mit Selbsttest der gelockerten Fakten (K8I-002); Zwischenstand ohne Bedingung 2 und 3 rot (K8I-004, Build-Log); (e1)–(e3) rot vor D-052-13 (K8I-004b, `81d51d05`, `906e835b`) |
 | AC-B4 | Jugxo mit Kialo vor dem Code | **K8I-001** | `plan.md` › D-052-01; Commit K8I-001 liegt vor jedem Code-Commit |
 | AC-B5 | Zwilling identisch; gespeicherte Fakten ohne Feld wie bisher | K8I-004, K8I-006 | `zwilling.test.ts` (Fall mit `verteilita`), `gegenprobe.test.ts`, `determinismo.test.ts`; `roh`/`sxablono` byte-gleich (`git diff --exit-code`) |
-| AC-C1 | Rest C nur Befund, nichts an `fm-atributlisto` oder Inline-Messung | K8I-005 | `neubewertung.md` › Rest C; Diff-Beleg in K8I-006 |
-| AC-N1 | Kontrolle: gespeicherte M-1-Fakten byte-gleich, Urteil F 0/4 | K8I-005 | (a) `node specs/050-mvp-probelauf/pruefen.mjs` Exit 0; (b) `k8()` auf den Roh-Fakten = `taksado.k8` (D-052-09) |
-| AC-N2 | Gerendert: wie viele der 4 F-Screens grün (erwartet 3) | K8I-005 | `node specs/052-k8-interspacoj/neubewertung.mjs`; `pruefen.mjs --daten specs/052-k8-interspacoj/daten/neubewertung --ohne-bericht` |
+| AC-C1 | Rest C nur Befund, nichts an `fm-atributlisto` oder Inline-Messung | K8I-005 | `neubewertung.md` Abschnitt 5 (Werte je Marke × Schema, beide Erklärungen, `NAMED_SLOTS`, Folge-Spec); K8I-005 ändert nur `specs/052-k8-interspacoj/**`; Diff-Beleg in K8I-006 |
+| AC-N1 | Kontrolle: gespeicherte M-1-Fakten byte-gleich, Urteil F 0/4 | K8I-005 | (a) `node specs/050-mvp-probelauf/pruefen.mjs` Exit 0, F 0/4, 0 0/4; (b) `neubewertung.mjs --roh <M-1-Lauf> --nur-kontrolle` Exit 0, 8/8 byte-gleich (D-052-09, `daten/neubewertung/kontrolle.json`) |
+| AC-N2 | Gerendert: wie viele der 4 F-Screens grün (erwartet 3) | K8I-005 | `node specs/052-k8-interspacoj/neubewertung.mjs --roh <M-1-Lauf>` → **F 4/4**, 0 0/4 (F-052-1); `pruefen.mjs --daten specs/052-k8-interspacoj/daten/neubewertung --ohne-bericht` Exit 0 |
 | AC-N3 | Fixture vorher rot, nachher grün (`anmelden-m1`, `konto-m1`) | K8I-002 (rot), K8I-003, K8I-004 | `interspacoj-052.test.ts` (CI-Job `unit (nordstelo)`, D-052-03) |
 | AC-N4 | Neue Tests zuerst rot; bestehende Suiten grün außer den drei fremden | K8I-002 … K8I-006 | rote Commits je Paket (K8I-002); Paketläufe K8I-006 |
-| AC-N5 | Bericht: gespeichert · Kontrolle · gerendert, `verteilita` nach Herkunft, Variante 0 | K8I-005 | `neubewertung.md`; Selbstprüfung von `neubewertung.mjs` (Exit ≠ 0 bei Agenten-Paar oder `verteilita` in Variante 0) |
-| AC-N6 | Sauberer Probelauf nur vorbereitet | K8I-005 | `neubewertung.md` › Befehl, Kostenrahmen, Lastbedingung, „nicht gestartet“ |
+| AC-N5 | Bericht: gespeichert · Kontrolle · gerendert, `verteilita` nach Herkunft, Variante 0 | K8I-005 | `neubewertung.md` Abschnitte 3, 6, 7; Selbstprüfung `neubewertung.mjs --selbstpruefung` (Exit 5 bei Agenten-Paar oder `verteilita` in Variante 0, belegt an zwei Kopien in `/tmp`) |
+| AC-N6 | Sauberer Probelauf nur vorbereitet | K8I-005 | `neubewertung.md` Abschnitt 10: Befehl, `--max-tokens 1562000`, ≈ 3,75 $, Lastbedingung, keine fremde Messung, „nicht gestartet“; Commit als Platzhalter |
 | AC-G1 | Keine Schwelle, Toleranz, Grenze, Zeitlimit angehoben | K8I-006 | Test bzw. Diff-Beleg `AUF_STUFO === 0.5`, `k8Plena`; `git diff c439918f -- '**/vitest*.config.ts' '**/playwright*.config.ts' .github turbo.json` |
 | AC-G2 | Ein PR vom aktuellen `main`, nichts gemergt | Orchestrator | – |
 | AC-G3 | Kein Modell-Lauf | alle | Build-Log je Ticket |
@@ -267,6 +267,35 @@ Die 16 Einträge je Gegenprobe: 8 × „interspacoj 1, not < 1“ und 8 × „pa
 - **B-004b-1 Ergänzung in Bedingung 3 über den Auftrag hinaus.** Der Auftrag nannte Bedingung 2 (`:defined`). (e3) zeigt einen Weg, den `:defined` nicht schließt (Root des Agenten an einem Nicht-`fm-*`-Host färbt eine echte Ero per `::part`). Geschlossen mit dem strengeren Merkmal in Bedingung 3, zuerst rot belegt. Keine Namensliste der Eroj.
 - **B-004b-2 Geschlossene Roots an Nicht-`fm-*`-Hosts** sind von außen nicht lesbar; ein `<style>` darin bleibt unerkannt. Sie ergeben aber kein `verteilita`: Ohne `assignedSlot` endet der Flat-Tree-Weg am Light-DOM-Host, und die Wege aus einem solchen Root auf ein Light-DOM-`fm-*`-`V` (`::slotted`, `::slotted()::part()`) wirken im Browser nicht auf die Verteilung (Skizze oben). Kein offener Weg bekannt; bei Änderungen am Flat-Tree-Weg neu prüfen.
 - **B-004b-3 Eroj ohne `<style>` im Shadow-Root.** Die Ergänzung setzt voraus, dass keine Ero ein `<style>`/`<link>` in ihren Root schreibt (heute: alle per `adoptedStyleSheets`, kein Treffer in `packages/eroj/src/generated/`). Schriebe eine Ero künftig eines, wäre auf solchen Screens kein Paar mehr `verteilita` (strenger, nicht lockerer).
+
+## K8I-005 im Einzelnen (Neubewertung M-1 ohne Modell)
+
+Bericht: [`neubewertung.md`](neubewertung.md). Kein Modell, kein Netz, keine Änderung außerhalb von `specs/052-k8-interspacoj/**`.
+
+### Commit K8I-005
+
+- Spec 052 K8I-005: M-1 re-evaluation without a model (`neubewertung.mjs`, `neubewertung.md`, `daten/neubewertung/**`, `plan.md`, `tasks.md`)
+
+### Befehle und Ergebnisse (gemessen auf `fe6b80dc`, 10 Kerne)
+
+- [x] `pnpm build`: 10/10 aus dem Cache.
+- [x] **AC-N1 (a)** `node specs/050-mvp-probelauf/pruefen.mjs`: Exit 0, `grün: m1 F 0/4 - · m1 0 0/4 - · m2 F 0/4 - · m2 0 0/4 -`, Abweichungen 0, Struktur 0, `bericht.md` stimmt.
+- [x] **AC-N1 (b)** `node specs/052-k8-interspacoj/neubewertung.mjs --roh <M-1-Lauf 20261113-0243> --nur-kontrolle`: Exit 0, 8 von 8 `k8()` = gespeichertes `taksado.k8` ohne `plena` (`stabilaJson` byte-gleich, SHA-256 in `daten/neubewertung/kontrolle.json`), Urteil 8 von 8 gleich (nicht grün).
+- [x] **AC-N2** `node specs/052-k8-interspacoj/neubewertung.mjs --roh <M-1-Lauf>`: Exit 0, **F 4/4** (anmelden, konto, passwort-vergessen, registrieren), 0 0/4, 8 `verteilita`-Einträge (alle `fm-pagxo`, `konto` `8→9`). Last 5,90 6,14 7,17 → 5,99 6,12 7,11.
+- [x] `node specs/050-mvp-probelauf/pruefen.mjs --daten specs/052-k8-interspacoj/daten/neubewertung --ohne-bericht`: Exit 0, `grün: m1 F 4/4 anmelden,konto,passwort-vergessen,registrieren · m1 0 0/4 -`.
+- [x] **Determinismus:** zwei weitere Läufe nach `/tmp/s052-neubewertung-2` und `-3` (der dritte nach der Biome-Formatierung des Skripts, mit `--roh`): `diff -r -x last.txt` leer, alle `fakto.json` und `kontrolle.json` byte-gleich.
+- [x] **Selbstprüfung belegt:** `--selbstpruefung` auf den echten Daten Exit 0 (8 Paare, 0 Fehler); auf `/tmp/s052-selbst-a` (F/konto `13→14` mit Herkunft `div`) Exit 5 „verteilita without fm-* origin“; auf `/tmp/s052-selbst-b` (0/anmelden `1→4` mit Herkunft `fm-pagxo`) Exit 5 „verteilita in Variante 0“. Wortlaut in `neubewertung.md` Abschnitt 7.
+- [x] **Weg wie M-1 (D-052-14):** `bytes`, `elements`, `aria`, axe je Render, K1–K6, `total`, `mankoj` in allen 8 Screens gleich den gespeicherten Werten. Variante 0: `taksado.k8` und alle K8-Fakten gleich M-1 (kein Paar `verteilita`).
+- [x] **Rest C** im Browser an einer Kopie von `konto` mit Überschrift (`/tmp/s052-rest-c/`, nicht eingecheckt): Element-Kasten 17 / 14 / 21 / 12,25 px (= M-1), Zeilenkasten und Flat-Tree 16 / 12 / 20 / 12 px (= `spacing.large`).
+- [x] Biome `pnpm exec biome check specs/052-k8-interspacoj/neubewertung.mjs`: ohne Befund. `pnpm check:privat`: grün.
+
+### Befunde und Abweichungen K8I-005
+
+- **F-052-1** 4 von 4 statt 3 von 4 grünen F-Screens; Rest C verschwindet durch B (Flat-Tree misst `fm-titolo[part=heading]` → `div[part=list]`). Nicht nachjustiert. Siehe `plan.md` › Befunde K8I-005.
+- **F-052-2** `NAMED_SLOTS = ["heading"]` in `fm-atributlisto` (`[]` gilt für `fm-titolo`); Erklärung „Messung“ trifft zu, „Ero“ nicht. Vorschlag Folge-Spec.
+- **F-052-3** Ledger von Spec 050 trägt den sauberen Probelauf nicht; `S050_REPO` nötig; Rest für Variante 0 bei `--max-tokens 1562000` knapp.
+- **D-052-14** `simplaDokumento` statt `ekranaDokumento` (Weg von M-1), Abweichung vom Wortlaut des Tickets.
+- Die gerenderten `fakto.json` tragen die vollständigen K8-Fakten (`renders[].k8`), anders als der Export von Spec 050; damit lassen sich K8 und die Selbstprüfung aus dem Repo nachrechnen (zusammen ≈ 1,5 MB).
 
 ## Geänderte Erwartungen älterer Tests (`testing.md` › „Extending tested pure functions“)
 
