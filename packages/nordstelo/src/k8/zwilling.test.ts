@@ -208,7 +208,7 @@ describe("the K8 twin (T-2, E-4)", () => {
   );
 
   it("(2) both normalisers give the same output for the cases of faktoj.test.ts", () => {
-    expect(NORMIGAJ_KAZOJ.length).toBe(4);
+    expect(NORMIGAJ_KAZOJ.length).toBe(5);
     expect(malsamajKazoj(normigiAspektoFaktojn, ekranojNormigi, NORMIGAJ_KAZOJ)).toEqual([]);
   });
 

@@ -193,17 +193,80 @@ export function aspektoFaktojEnPagxo(): FaktoAspektoKruda {
     }
   };
 
+  // Spec 052 B, D-052-01: the pairs stay adjacent visible light-DOM siblings, but the gap is measured
+  // between the two boxes that are direct flat-tree children of the pair's nearest common ancestor.
+  const VERTEILAJ = new Set(["space-between", "space-around", "space-evenly"]);
+  /** The flat-tree parent: the assigned slot, else the parent node, a shadow root's host. */
+  const ebenaGepatro = (nodo: Node): Node | null => {
+    const slot = (nodo as globalThis.Element).assignedSlot;
+    if (slot !== null && slot !== undefined) return slot;
+    const gepatro = nodo.parentNode;
+    if (gepatro !== null && gepatro.nodeType === 11 && "host" in gepatro)
+      return (gepatro as ShadowRoot).host;
+    return gepatro;
+  };
+  /** `el` and its flat-tree ancestors with a box (`display: contents`, e.g. slots, skipped). */
+  const kesta = (el: globalThis.Element): globalThis.Element[] => {
+    const cxeno: globalThis.Element[] = [el];
+    let nuna = ebenaGepatro(el);
+    while (nuna !== null && nuna.nodeType === 1) {
+      const elemento = nuna as globalThis.Element;
+      if (getComputedStyle(elemento).display !== "contents") cxeno.push(elemento);
+      nuna = ebenaGepatro(elemento);
+    }
+    return cxeno;
+  };
+  // Condition 3: no style rules of the agent's own; the measurement setup marks its stylesheets
+  // like its scripts (`data-nordstelo`, Spec 052 V-4). In doubt the pair is measured. (The Eroj
+  // adopt their own light-DOM sheets into the document, so adopted sheets are no sign here.)
+  const eigenajReguloj = Array.from(document.querySelectorAll("style, link")).some(
+    (stilo) =>
+      (stilo.localName === "style" ||
+        (stilo.getAttribute("rel") ?? "").toLowerCase().split(/\s+/).includes("stylesheet")) &&
+      stilo.getAttribute("data-nordstelo") === null,
+  );
+  /** Condition 2: the Ero or Sxablono `V` belongs to, by its host's localName; else undefined. */
+  const eroDe = (v: globalThis.Element): string | undefined => {
+    const radiko = v.getRootNode();
+    if (radiko.nodeType === 11 && "host" in radiko) {
+      const gastiganto = (radiko as ShadowRoot).host.localName;
+      return gastiganto.startsWith("fm-") ? gastiganto : undefined;
+    }
+    if (radiko !== document) return undefined;
+    if (!v.localName.startsWith("fm-")) return undefined;
+    if (v.hasAttribute("style") || v.hasAttribute("class")) return undefined;
+    return v.localName;
+  };
+  /** Condition 1: `V` distributes free space on `akso` (horizontal writing mode only). */
+  const distribuas = (v: globalThis.Element, akso: "x" | "y"): boolean => {
+    const stilo = getComputedStyle(v);
+    if (stilo.writingMode !== "horizontal-tb") return false;
+    const display = stilo.display.split(/\s+/);
+    if (display.includes("grid") || display.includes("inline-grid"))
+      return VERTEILAJ.has(akso === "x" ? stilo.justifyContent : stilo.alignContent);
+    if (!(display.includes("flex") || display.includes("inline-flex"))) return false;
+    const cxefa = stilo.flexDirection.startsWith("row") ? "x" : "y";
+    if (akso === cxefa) return VERTEILAJ.has(stilo.justifyContent);
+    return stilo.flexWrap !== "nowrap" && VERTEILAJ.has(stilo.alignContent);
+  };
+  /** Adjacent visible light-DOM siblings, in walk order; measured after the walk. */
+  const kandidatoj: {
+    gepatro: number;
+    antaux: { indekso: number; el: globalThis.Element };
+    post: { indekso: number; el: globalThis.Element };
+  }[] = [];
+
   let sekva = 0;
   /** `parent` is the index of `node` (-1 for body), as in nordstelo's `extractInPage`. */
   const walk = (node: globalThis.Element, parent: number, enEro: boolean): void => {
-    const videblaj: { indekso: number; kesto: DOMRect }[] = [];
+    const videblaj: { indekso: number; el: globalThis.Element }[] = [];
     for (const child of Array.from(node.children)) {
       if (child.tagName === "SCRIPT" && child.getAttribute("data-nordstelo") !== null) continue;
       const elemento = sekva;
       sekva += 1;
       const tag = child.tagName.toLowerCase();
       const estasVidebla = videbla(child);
-      if (estasVidebla) videblaj.push({ indekso: elemento, kesto: child.getBoundingClientRect() });
+      if (estasVidebla) videblaj.push({ indekso: elemento, el: child });
       tekstoj(child, elemento);
       if (estasVidebla && NATIVAJ.has(tag)) {
         const stilo = getComputedStyle(child);
@@ -230,21 +293,48 @@ export function aspektoFaktojEnPagxo(): FaktoAspektoKruda {
       const antaux = videblaj[i - 1];
       const post = videblaj[i];
       if (antaux === undefined || post === undefined) continue;
-      const y = post.kesto.top - antaux.kesto.bottom;
-      const x = post.kesto.left - antaux.kesto.right;
-      const akso = y >= 0 ? "y" : x >= 0 ? "x" : undefined;
-      const interspaco = akso === "y" ? y : x;
-      if (akso === undefined || interspaco <= 0) continue;
-      rezulto.interspacoj.push({
-        gepatro: parent,
-        antaux: antaux.indekso,
-        post: post.indekso,
-        akso,
-        px: interspaco,
-      });
+      kandidatoj.push({ gepatro: parent, antaux, post });
     }
   };
   walk(document.body, -1, false);
+
+  // Document order of the pairs (light-DOM indices), so the first of equal box pairs counts.
+  kandidatoj.sort((a, b) => a.antaux.indekso - b.antaux.indekso || a.post.indekso - b.post.indekso);
+  const viditaj = new Map<globalThis.Element, Set<globalThis.Element>>();
+  for (const { gepatro, antaux, post } of kandidatoj) {
+    const cxeno1 = kesta(antaux.el);
+    const cxeno2 = kesta(post.el);
+    const en1 = new Set(cxeno1);
+    const j = cxeno2.findIndex((el) => en1.has(el));
+    const v = cxeno2[j];
+    const k2 = cxeno2[j - 1];
+    const k1 = v === undefined ? undefined : cxeno1[cxeno1.indexOf(v) - 1];
+    if (v === undefined || k1 === undefined || k2 === undefined || k1 === k2) continue;
+    const posts = viditaj.get(k1) ?? new Set<globalThis.Element>();
+    if (posts.has(k2)) continue;
+    posts.add(k2);
+    viditaj.set(k1, posts);
+    const kesto1 = k1.getBoundingClientRect();
+    const kesto2 = k2.getBoundingClientRect();
+    const y = kesto2.top - kesto1.bottom;
+    const x = kesto2.left - kesto1.right;
+    const akso = y >= 0 ? "y" : x >= 0 ? "x" : undefined;
+    const interspaco = akso === "y" ? y : x;
+    if (akso === undefined || interspaco <= 0) continue;
+    // D-052-01: verteilita only when all three conditions hold; otherwise measured like any other.
+    const ero = eigenajReguloj || !distribuas(v, akso) ? undefined : eroDe(v);
+    const paro: FaktoAspektoKruda["interspacoj"][number] = {
+      gepatro,
+      antaux: antaux.indekso,
+      post: post.indekso,
+      akso,
+      px: interspaco,
+    };
+    // A plain assignment, not a spread of a conditional: the twin test compares the source as the
+    // two build tools emit it, and only one of them keeps the parentheses of such a spread.
+    if (ero !== undefined) paro.verteilita = { ero };
+    rezulto.interspacoj.push(paro);
+  }
   return rezulto;
 }
 
@@ -430,9 +520,10 @@ export function normigiAspektoFaktojn(kruda: FaktoAspektoKruda): FaktoAspekto {
         post: i.post,
         akso: i.akso,
         px: rondigi(i.px),
+        ...(i.verteilita === undefined ? {} : { verteilita: { ero: i.verteilita.ero } }),
       }),
     ),
-    (i) => [i.gepatro, i.antaux, i.post, i.akso, i.px],
+    (i) => [i.gepatro, i.antaux, i.post, i.akso, i.px, i.verteilita?.ero ?? ""],
   );
   const orientiloj = ordigiUnike(
     kruda.orientiloj.map((o) => ({ rolo: o.rolo, elemento: o.elemento })),

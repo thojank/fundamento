@@ -141,10 +141,38 @@ export const SONDOJ_ALIA_ECO: FaktoAspektoKruda = {
   ],
 };
 
+/**
+ * Spec 052 (D-052-01, V-1): pairs with `verteilita` – the field is carried through, it is part of
+ * the sort key (after px) and of the identity: the same pair with and without it stays twice, a
+ * duplicate with the same origin once. Its px stay put under rounding to 0.1 (zwilling.test.ts (3)).
+ */
+export const VERTEILITA: FaktoAspektoKruda = {
+  ...MALPLENA,
+  interspacoj: [
+    { gepatro: 5, antaux: 8, post: 9, akso: "x", px: 930.504, verteilita: { ero: "fm-pagxo" } },
+    { gepatro: 5, antaux: 6, post: 7, akso: "x", px: 4, verteilita: { ero: "fm-sxelo" } },
+    { gepatro: 5, antaux: 7, post: 8, akso: "y", px: 11.996 },
+    { gepatro: 5, antaux: 8, post: 9, akso: "x", px: 930.496, verteilita: { ero: "fm-pagxo" } },
+    { gepatro: 5, antaux: 6, post: 7, akso: "x", px: 4 },
+  ],
+};
+
+/** The expected normalised facts of `VERTEILITA`. */
+export const ATENDO_VERTEILITA: FaktoAspekto = {
+  ...MALPLENA,
+  interspacoj: [
+    { gepatro: 5, antaux: 6, post: 7, akso: "x", px: 4 },
+    { gepatro: 5, antaux: 6, post: 7, akso: "x", px: 4, verteilita: { ero: "fm-sxelo" } },
+    { gepatro: 5, antaux: 7, post: 8, akso: "y", px: 12 },
+    { gepatro: 5, antaux: 8, post: 9, akso: "x", px: 930.5, verteilita: { ero: "fm-pagxo" } },
+  ],
+};
+
 /** Every normalisation case of `faktoj.test.ts`, by name. */
 export const NORMIGAJ_KAZOJ: readonly (readonly [string, FaktoAspektoKruda])[] = [
   ["KRUDA", KRUDA],
   ["KRUDA permutita", permutita(KRUDA)],
   ["MALPLENA", MALPLENA],
   ["SONDOJ_ALIA_ECO", SONDOJ_ALIA_ECO],
+  ["VERTEILITA", VERTEILITA],
 ];
