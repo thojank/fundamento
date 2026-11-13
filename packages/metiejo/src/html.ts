@@ -113,6 +113,12 @@ for (const wahl of document.querySelectorAll("[data-fm-lingvo-wahl]")) {
   });
 }
 
+// Spec 050 T3 (K4 Navigation): Firefox gives a frame the parser made its last document back when
+// the page reloads, and the client below sends the frame there once more – two fetches of the same
+// URL, and the second document replaced the first one under a reader (run 42376059543). A frame
+// made by script has no document restored. So the client lays a copy of each preview frame in its
+// place before it sends one; the client alone navigates them, once per rev and scheme.
+for (const element of document.querySelectorAll("iframe[data-mt-src]")) element.replaceWith(element.cloneNode(true));
 const root = document.documentElement;
 const marko = root.getAttribute("data-mt-marko");
 const sxtupo = root.getAttribute("data-mt-sxtupo");
