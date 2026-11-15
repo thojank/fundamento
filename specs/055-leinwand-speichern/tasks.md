@@ -8,11 +8,11 @@ Acht Tickets, ein Strang (Spec: „höchstens 8 Tickets, ein PR“). Kein Ticket
 |---|---|---|---|---|
 | LNS-1.1 | T1 + T2 (Daten) | Leinwand ohne Rahmen: Anordnung, sieben Farbknoten, runde Kanten auf Spuren, Verträge | – | erledigt |
 | LNS-1.2 | T3 (Modelo/agordilo/Schreibweg) | `neutral.farbe`: Schema, Ableitung, Schreibweg | – | erledigt |
-| LNS-1.3 | T6 | Markenliste auf der Startseite | – | offen |
-| LNS-2.1 | T2 (UI) + T3 (Leinwand) | Farbknoten: „abgeleitet / von Hand / zurück zur Ableitung“, Kante und eigene Farbe für Neutral | 1.1, 1.2 | offen |
-| LNS-2.2 | T4 | Leinwand-Zustand: Datei, Schreiben, Laden, „Anordnung zurücksetzen“ | 1.1, 1.3 | offen |
-| LNS-3.1 | T5 | Benannte Stände: speichern, Liste, öffnen mit Sicherung | 2.2 | offen |
-| LNS-4.1 | T7 | Tests gesamt, eroj in Chromium, Bilder, Bericht-Entwurf | 2.1, 3.1 | offen |
+| LNS-1.3 | T6 | Markenliste auf der Startseite | – | erledigt |
+| LNS-2.1 | T2 (UI) + T3 (Leinwand) | Farbknoten: „abgeleitet / von Hand / zurück zur Ableitung“, Kante und eigene Farbe für Neutral | 1.1, 1.2 | erledigt |
+| LNS-2.2 | T4 | Leinwand-Zustand: Datei, Schreiben, Laden, „Anordnung zurücksetzen“ | 1.1, 1.3 | erledigt |
+| LNS-3.1 | T5 | Benannte Stände: speichern, Liste, öffnen mit Sicherung | 2.2 | erledigt |
+| LNS-4.1 | T7 | Tests gesamt, eroj in Chromium, Bilder, Bericht-Entwurf | 2.1, 3.1 | erledigt |
 | LNS-5.1 | T8 | PR, ein Push, ein Dispatch, Bericht (nach QA, Orchestrator) | 4.1 | offen |
 
 ## Ausgangsmaß Bündel
@@ -25,9 +25,135 @@ Gebaut am unberührten Stand `642ab2202a021f5f7deb867c0a7454f519982ecb` (`git st
 
 ## Geänderte ältere Tests
 
+Zusammengefasst aus den Ticket-Abschnitten (LNS-4.1). Zeilen beziehen sich auf `642ab220`, jeweils vorher → nachher, Grund. Kein eroj-Test, kein 047/048-Test und kein `sxtupoj.test.ts` geändert.
+
+| Datei:Zeile | vorher → nachher | Grund | Ticket |
+|---|---|---|---|
+| `packages/metiejo/src/grafeo-gestalten-054.test.ts:20, :27, :29` | Importe `ARANGXO_054`, `type FazoId`, `largxoDe` → `ARANGXO_055` | Namen gibt es nicht mehr | 1.1 |
+| `grafeo-gestalten-054.test.ts:138–160` | „has six phases …“ → „has no phase nodes any more (Spec 055 T1)“ | Rahmen weg (T1) | 1.1 |
+| `grafeo-gestalten-054.test.ts:162–174` | „every other node a phase that exists“ → „a purpose tag of phase 4 or 5“ | `fazo` nur noch Kennung | 1.1 |
+| `grafeo-gestalten-054.test.ts:178–180` | `flatMap(n.speco === "fazo" ? [] : …)` → `map(…)` | `speco` kennt `fazo` nicht mehr | 1.1 |
+| `grafeo-gestalten-054.test.ts:229–231`, `:258` | keine Funktionsfarbe / `farbo-success` fehlt → vier Knoten `stato: "abgeleitet"` | T2 | 1.1 |
+| `grafeo-gestalten-054.test.ts:419`, `:453` | `kolora` nur `!== "leer"` → auch `!== "abgeleitet"`; `leer?.fonto` `toBeNull()` → `toBe("warning")` | D-17 | 1.1 |
+| `grafeo-gestalten-054.test.ts:549–603` | describe „ARANGXO_054“ → gelöscht (Kommentar) | Phasen weg, Ersatz `grafeo-anordnung-055` | 1.1 |
+| `grafeo-gestalten-054.test.ts:604–700` | „poziciojKun“ auf absolute Plätze aus `ARANGXO_055`; „follow a moved phase“ gelöscht | Platzregel ohne Phasen | 1.1 |
+| `grafeo-gestalten-054.test.ts:200` | `stato: "leer"` → `"abgeleitet"` | Neutral ohne Wert und Tönung (T3) | 2.1 |
+| `grafeo-gestalten-054.test.ts:488–493` | erwartete Kanten + feste Kante Primär → Neutral | D-18 | 2.1 |
+| `grafeo-kabloj-054.test.ts:195–227` | `bildoLeer` → `bildoOhne` (Bildo ohne `farbo-warning`/`-success`) | Funktionsfarben immer im Bildo | 1.1 |
+| `grafeo-kabloj-054.test.ts:467–477`, `:486`, `:503–509` | „anlegen“ → „da“; wählbar nur Akzent | T2 | 1.1 |
+| `grafeo-kabloj-054.test.ts:172` | `.filter((l) => l.de === "farbo-primaer.el")` → `… && l.fest !== true` | feste Kante | 2.1 |
+| `grafeo-literale-054.test.ts:24` | Eintrag `"nodoj/fazo.tsx"` aus `SHELL` entfernt | Datei gelöscht (D-9) | 1.1 |
+| `grafeo-wirksam-054.test.ts:193` | `vicoDe(ohne, "warning")?.fonto` `toBe(null)` → `toBe("warning")` + `basis` `toBeUndefined()` | D-17 | 1.1 |
+| `grafeo-skribo-054.test.ts:525` (→ :525–527) | `….some((n) => n.id === "farbo-warning")).toBe(false)` → `(….find(…) as BildoFarbo).stato).toBe("abgeleitet")` | T2: Knoten bleibt | 1.2 |
+| `grafeo-route-054.test.ts:24, :27, :301–304` | `serializeBildo(gestaltenDe(…))` → `serializeLeinwandAntwort(gestaltenDe(…), null)` (Import aus `./leinwand-stato.js`) | R-3: Antwort trägt immer `stato` | 2.2 |
+| `grafeo-anordnung-055.test.ts:242` (055-Datei aus 1.1) | `for (const ligo of ligoj)` → `ligoj.filter((l) => l.fest !== true)` | feste Kante ohne Spur | 2.1 |
+
 ## Für den PR-Text
 
+### PR-Text (Entwurf, LNS-4.1)
+
+Zweiter Teil von MP-1 (Spec 055, MP-1b), weiter ohne KI. Die Leinwand der Ansicht Gestalten besteht nur noch aus Knoten und Kanten, alle sieben Farben stehen von Anfang an da, Neutral zeigt seine Herkunft und lässt sich frei setzen, die Arbeit an der Leinwand bleibt erhalten, benannte Stände halten Zwischenergebnisse fest, und die Startseite listet die angefangenen Marken. Kein Urteil: keine Regelmeldung, kein Rot, keine Sperre.
+
+**Bitte nicht mergen**, bevor die offenen Punkte der Produkt-Spec nach den Bildern bestätigt sind und der volle Lauf grün ist. `kontrakto-038` ist lokal grün (unten); rote Einträge dort, falls CI welche zeigt, rückt nur der Maintainer nach `9ee8d430` vor.
+
+#### Was sich ändert
+
+**Leinwand ohne Rahmen (T1)**
+- Die sechs Phasenrahmen und „kommt später“ sind weg (`nodoj/fazo.tsx` gelöscht). Feste, überdeckungsfreie Startanordnung `ARANGXO_055` (Marke → Farben → Palette → Vorschau) mit Höchsthöhen je Knotenart.
+- Kanten mit runden Ecken (`getSmoothStepPath`, Radius aus `--fm-radius-role-surface`) auf eigenen Spuren zwischen den Spalten (`spuroX`). Kein neuer Token.
+
+**Funktionsfarben von Anfang an (T2)**
+- Erfolg, Warnung, Fehler, Hinweis stehen immer da: „abgeleitet“ (abgeleiteter Hex nur als Platzhalter) oder „von Hand“; „zurück zur Ableitung“ (kompakt „↺“) statt Entfernen. „+ Knoten“ zeigt sie „auf der Leinwand“.
+
+**Neutral (T3): genau ein neues optionales Schemafeld**
+- `Agordo.neutral.farbe` (`$ref AgordoColor`). Ableitung in `packages/agordilo/src/palettes.ts`: mit Feld Farbton und Buntheit aus der Farbe × Tönung (Vorgabe 1), `origin: "neutralfarbe"`; ohne Feld byte-gleich (Prüfsummen von `642ab220`). `explain` behält das Feld.
+- Neutral zeigt die feste Kante von Primär und „aus Primär abgeleitet“; „Eigene Farbe setzen“, „abbrechen“, „zurück zur Ableitung“. Palette: „eigene Farbe · Tönung 1,00“.
+- Schreibweg `POST /api/marko/:name/leinwand` nimmt `{ neutral: { farbe: string | null } }` (200/422 `{feld:"neutral.farbe", satz}`/400).
+
+**Leinwand-Zustand (T4)**
+- `marken/<name>/leinwand.json` (kanonisch, `version: 1`, `knoten[]`, `kabloj`), nie im Agordo. Geschrieben nach Ziehen, Lösen/Stecken, Hinzufügen; je Animationsframe, höchstens eine Anfrage unterwegs, ohne Timer.
+- `GET /api/leinwand` trägt `stato` (und `statoUnlesbar`) und wendet ohne `kabloj`-Parameter die Datei an. Neu `PUT`/`DELETE /api/marko/:name/leinwand-stato` (200 `{gespeichert}`, 422 `{feld:"leinwand-stato", satz}`, 404 `{satz}`).
+- Kopfleiste: „Anordnung zurücksetzen“ (Startplätze, Verbindungen aus dem Agordo, hinzugefügte Knoten bleiben), ruhige Zeile bei unlesbarer Datei (Sicherung `leinwand.unlesbar-<zeit>.json`).
+
+**Benannte Stände (T5)**
+- `marken/<name>/staende/<id>.json` (`{agordo, id, leinwand, name, version: 1, zeit}`). `GET`/`POST /api/marko/:name/staende`, `POST …/staende/:id/oeffnen` (sichert vorher als „vor dem Öffnen von „…““, außer byte-gleich; `agordo.json` und `historio` bleiben; 422 `{satz}` für einen unlesbaren Stand ohne Schreiben).
+- Kopfleiste: „Stand speichern“ (Name, Vorschlag Datum und Uhrzeit), „Stände“ (Liste unter dem Knopf, Option A).
+
+**Markenliste auf der Startseite (T6)**
+- „Angefangene Marken“: je Marke eine `fm-karto` mit drei Farbfeldern, „zuletzt geändert“, Zahl der Stände und dem Link „Leinwand von <Name>“ → `/marko/<name>/grafeo`. Breit neben dem Formular, schmal darunter (Option B, ohne Media Query). „Vorhandene Marke öffnen“ ist Byte für Byte unverändert.
+
+#### Geänderte Zeilen in `sxtupoj.ts` (nur Start, D-11) und `servilo.ts`
+
+`git diff -U0 642ab220 -- packages/metiejo/src/sxtupoj.ts`:
+- `@@ -20,0 +21 @@`: `import { type MarkenZeile, staendeText, zeitpunktText } from "./marken-liste.js";`
+- `@@ -148,0 +150,2 @@`: `ScreenInput.markenListe?: MarkenZeile[]`.
+- `@@ -508,0 +512,58 @@`: `MARKEN_CSS`, `FARBO_NOMOJ`, `markenFarbeHtml`, `markenKarteHtml`, `markenListeHtml` (neue Funktionen, nur vom Start gerufen).
+- `@@ -509,0 +571,2 @@`: erste Zeile von `preview()`: `if (input.sxtupo === "start" && input.markenListe !== undefined) return markenListeHtml(input.markenListe);`
+- `@@ -556 +619 @@`: die Section trägt beim Start mit Liste `data-mt-marken` statt `data-mt-plena`.
+- `fields()` unverändert; Start ohne Liste und jeder andere Schritt byte-gleich (Prüfsummen in `markenliste-055` und `grafeo-einstieg-054`). `sxtupoj.test.ts` unverändert und grün.
+
+`servilo.ts`: Importe aus `./marken-liste.js`, `./leinwand-stato.js`, `./staende.js` (`serializeBildo`-Import entfällt); in `inputOf` `...(key === "start" ? { markenListe: markenListeDe(options.workdir, bases) } : {})`; Cache-Eintrag von `/api/leinwand` mit den Bytes von `leinwand.json` und `leinwandBildoForigi` (D-14); `GET /api/leinwand` mit `stato` und den `kabloj` der Datei (D-15); neue Blöcke `PUT`/`DELETE …/leinwand-stato` und die drei Stände-Routen, beide vor `POST …/leinwand` und vor den allgemeinen `/api/marko/*`-Handlern.
+
+#### Gelöschte Dateien
+- `packages/nodredaktilo/src/gestalten/nodoj/fazo.tsx` (Rahmen).
+- `packages/nodredaktilo/scripts/bilder-054.ts` (zog Phasen; ersetzt durch `scripts/bilder-055.ts`, D-9).
+
+#### Geänderte ältere Tests
+Tabelle „Geänderte ältere Tests“ oben (054-Tests, 1 Zeile `grafeo-anordnung-055`). Kein 047/048-Test, kein eroj-Test geändert; Verstehen (`grafeo-sicht.ts`, `grafeo.ts`, `html.ts`) unberührt.
+
+#### Nicht in CI
+- AK-1 im Browser (D-19) läuft in `scripts/bilder-055.ts`, lokal in Chromium (11 Knoten ohne Schnitt, 17 Kanten ohne Weg durch fremde Boxen, 15 mit Knick und `Q`, 2 gerade ausgenommen).
+- Die eroj-Browser-Tests der Metiejo liefen vor dem Push lokal in Chromium, alle grün (38 Tests in 7 Dateien).
+
+#### Rote `kontrakto-038`-Einträge (erwartet, Abnahme 11)
+Keiner. `kontrakto-038` lief lokal grün (9/0): der Vertrag erlaubt neue Schlüssel in `properties`, und `neutral.farbe` ist ein solcher. Sollte CI anders urteilen, gilt die Ausnahme aus Abnahme 11 nur für Einträge dieses Tests.
+
+#### Befunde
+Siehe „Befunde“ in `specs/055-leinwand-speichern/tasks.md` und Abschnitt 5 in `bericht.md`.
+
+#### CI
+⟨PLATZHALTER: CI-Tabelle je Job, PR-Lauf und `workflow_dispatch`⟩
+
+Created with [p0 by BePurple](https://bepurple.ai) in Spec mode
+
 ## Befunde
+
+Zusammengefasst aus allen Tickets (Einzelheiten in deren Abschnitten). Nichts davon ist in diesem Lauf behoben, außer wo vermerkt.
+
+**Für den Maintainer (Verträge außerhalb der Zone)**
+- **R-1 MCP-Ausgabeschema:** `packages/mcp/schema/tools/preview_agordo.output.json:289` erlaubt für `source.origin` nur `leitfarbe | zusatzfarbe | default | toenung`; `packages/mcp/src/tools.ts:634` reicht `origin` durch. Ein Agordo mit `neutral.farbe` ergibt `"neutralfarbe"` und verletzt das eigene Ausgabeschema. Aufzählung samt Fixtures erweitern.
+- **R-2 `kontrakto-038` tritt nicht ein:** lokal 9/0; der Vertrag (`packages/mcp/src/kontrakto-038.test.ts`, `incompatibilities`) erlaubt neue Schlüssel in `properties`. Kein Vorrücken nötig, solange CI das bestätigt.
+
+**Abweichungen (gewollt, im PR-Text)**
+- Kantenradius **8 px** aus `--fm-radius-role-surface` in der neutralen Belegung, nicht 12 px wie in D-5 angenommen (`packages/nodredaktilo/src/gestalten/kanvaso.tsx`, `radiusoDe`).
+- Startseite: Karte mit Link „Leinwand von <Name>“ statt einer ganz klickbaren Zeile/Karte (`fm-karto` hat kein Ziel, `sxtupoj.test.ts:50` verbietet `<a>`); Formular 38rem breit, weil `fm-elekto` seine Optionen nicht umbricht (`packages/metiejo/src/sxtupoj.ts`, `MARKEN_CSS`).
+- Funktionsfarben: „zurück zur Ableitung“ sichtbar als „↺“ (Zugriffsname „<Farbe>: zurück zur Ableitung“), weil ein Textknopf im 96-px-Maximum nicht passt (`packages/nodredaktilo/src/gestalten/nodoj/farbo.tsx`).
+- „abbrechen“ im Neutral-Feld mit der Tastatur: Tab vom Feld zum Knopf verlässt das Feld, und Verlassen schreibt (Spec: Enter/Verlassen/`change` schreiben). Mit Maus oder Finger schreibt „abbrechen“ nie (`farbo.tsx:749–756`).
+- Ein leerer `kabloj=`-Parameter überstimmt die Datei (nur ein fehlender Parameter wendet sie an); `statoAtendi()` zusätzlich im Kontext.
+
+**Bekannt, unverändert gelassen**
+- **D-6 Verstehen:** `packages/metiejo/src/grafeo.ts:653–662` kennt `origin: "neutralfarbe"` nicht und zeigt dafür keine Verweise (Abnahme 9: Verstehen unberührt).
+- **D-7 Historie:** ein Speichern, das nur `neutral.farbe` ändert, hängt `{ wunsch: "Hand", diff: [] }` an (`packages/agordilo/src/regler.ts:155` `reglerDiff`), wie heute bei `zweitfarbe`/`zusatzfarben`.
+- **D-13 nur `kabloj`:** ein gelöstes Marke → Farbe-Kabel kommt nach dem Neuladen als „Zeile nicht verbunden“ zurück, ein gelöstes Palette → Vorschau-Kabel gar nicht. Beide Randfälle sind im Browser nicht durchgespielt.
+- Der Schalter hell | dunkel einer **weiteren Vorschau** wird nicht gespeichert; die Datei behält das Schema beim Hinzufügen (`packages/nodredaktilo/src/gestalten/nodoj/vorschau.tsx`, lokaler Zustand).
+- **D-19 nicht in CI:** die Geometrie-Prüfung von AK-1 läuft nur in `packages/nodredaktilo/scripts/bilder-055.ts` (lokal und in der QA).
+- **Studio:** zeigt `neutral.farbe` nicht eigens; der Tönungsregler behält das Feld, Speichern schreibt es unverändert (`neutral-studio-055`, grün).
+- **Helligkeit von `neutral.farbe`** wird beim Lesen nicht geprüft (`packages/agordilo/src/agordo.ts`, `colourPointers` nur `leitfarbe`/`zusatzfarben`); der Schreibweg lehnt solche Werte über `farboHex` ab.
+- **Markenliste zählt fremde Dateien:** jede `*.json` in `staende/` zählt als Stand, auch wenn ihr Name nicht dem Id-Muster folgt und die Stände-Liste sie nicht zeigt (`packages/metiejo/src/marken-liste.ts`, `markenListeDe`).
+- `markenListeDe` und die Stände-Liste leiten je Marke/Stand die Paletten ab (`paletrojDe`); bei sehr vielen Einträgen langsamer.
+- Die Neutral-Farbfläche einer Marke ohne Tönung ist ein sehr helles Grau und hebt sich auf der Karte wenig ab (Wert der Ableitung).
+- `kanvaso.tsx` mattiert Farbe-Kanten nur bei `stato === "leer"`, nicht bei „abgeleitet“.
+- Der feste Pfad Primär → Neutral bekommt nach einer Höhenänderung von Neutral `Q`-Stücke im Subpixel-Bereich; sichtbar bleibt eine Gerade.
+- `nodredaktilo/src/gestalten/roloj.ts:22, :85` stylen noch die alten Rahmen (tot).
+- Konsolenwarnung `fm-ikono: name is required` (Eroj, vorbestehend); jedes 422 erzeugt im Browser „Failed to load resource … 422“.
+- Unlesbare `leinwand.json` beim Speichern/Öffnen eines Stands: `leinwand: null`, die Datei wird beim Öffnen gesichert, nie gelöscht.
+- Namen von Ständen haben keine Längengrenze; der Slug ist auf 48 Zeichen begrenzt.
+- **Bündel wächst:** 728 751 → 746 121 Byte roh, 192 071 → 195 930 Byte gzip -6 (+17 370 / +3 859). Keine Schwelle.
+
+**Neu aus LNS-4.1**
+- **Hinweis „gilt nur in dieser Sitzung“ stimmt nicht mehr:** Nach dem Lösen einer Verbindung zeigt die Kopfleiste weiter „Verbindungen geändert · gilt nur in dieser Sitzung“ (`packages/nodredaktilo/src/gestalten/kapo.tsx:105`), auch nach dem Neuladen (Bild 05). Seit T4 werden `kabloj` aber in `leinwand.json` gespeichert und überleben das Neuladen. Gemeint ist „gilt nur auf der Leinwand“ (der gespeicherte Agordo bleibt). Wortlaut ist eine Produktentscheidung; nicht geändert.
+- **Startseite in der Urteilssuche:** Die ganze Seite `GET /` enthält `mt-pruefung` im Stil- und Skriptteil der gemeinsamen Schale (`packages/metiejo/src/html.ts:40`, `:270`, schon bei `642ab220`); `grafeo-urteil-055` durchsucht die Startseite darum ohne `<style>`/`<script>` und die Markenliste als Ganzes.
+- **Last-Fenster lokal:** Bei Lastmittel bis über 300 (andere Prozesse auf dem Rechner) liefen Hooks und Tests einzelner Pakete in ihre Zeitgrenzen (Einzelheiten unter „LNS-4.1: Gesamtläufe“). Nicht angehoben.
 
 ---
 
@@ -357,11 +483,115 @@ Keine. `grafeo-literale-054.test.ts` durchsucht den ganzen Ordner `src/gestalten
 
 ### LNS-4.1 im Einzelnen
 
+- [x] **Neue Tests** (Vitest, metiejo, über HTTP am Testserver mit Stub-Bündel):
+  - `packages/metiejo/src/grafeo-urteil-055.test.ts` (5 Tests): eine ganze Sitzung (Startseite leer und mit Liste, Anlegen mit `ziel=leinwand`, Seite, `/api/leinwand` ohne und mit Zustandsdatei, Vorschauen und `vorschau.css` je rev, Gelb `#f5c400` als Primär, Rot `#ff0000` als eigene Neutralfarbe, Akzent, Warnung, Tönung, `PUT`/`DELETE leinwand-stato`, zwei Stände speichern, Liste, Öffnen, Liste) mit nur 2xx; Zähler am Prüftor und an `checkDraft` bleiben 0. Dieselbe 404 `{"satz":"Diese Marke gibt es nicht."}` für eine unbekannte Marke auf allen neuen Routen (PUT/DELETE `leinwand-stato`, GET/POST `staende`, POST `…/oeffnen`), die älteren Routen weiter 404. Dieselbe 422-Form `{feld?, satz}` auf den Schreibwegen der Leinwand (`{neutral:{farbe:"blau"}}`, `"#12"`, Primär `blau`, Tönung 2, PUT kein JSON, PUT `version: 2`, Öffnen eines Stands mit ungültigem Agordo), dabei rev und Datei unverändert. Keine Antwort trägt Name, Id, Aussage oder Kialo einer Regulo, „Problem“, „Prüfung“, „Vorschlag“ usw.; die Startseite wird ohne den `<style>`/`<script>`-Teil der Schale durchsucht (siehe Befund). Gegenprobe: der Bühnen-Rahmen derselben Marke enthält Urteilswörter und fragt die Prüfung.
+  - `packages/metiejo/src/abnahme-055.test.ts` (6 Tests): Ablauf 1 (keine Rahmen-Knoten, sieben Farbknoten Startwert/abgeleitet/leer/4× abgeleitet mit Hex, genau eine feste Kante mit Primärs Hex, `stato: null`, keine `leinwand.json`), Ablauf 2 (`#e8e2d6` → `herkunft: "eigene"`, „von Hand“, Tönung 1, keine Kante, Entwurf `{farbe, toenung: 1}`, Neutral-Zeile und `vorschau.css` ändern sich, Vorschau-Adressen mit neuem rev; `null` → Kante zurück, Tönung bleibt, Palette und CSS folgen), Abnahme 8 (Rot als Neutral, Gelb als Primär gespeichert), Ablauf 3 (PUT mit verschobener Palette, `kabloj {akzent: null}`, `vorschau-3` → Datei kanonisch, neues GET gleich, Akzent-Zeile ohne Quelle, Adressen mit `&kabloj=akzent:-`, rev gleich; DELETE → `vorschau-3` ohne Platz, `kabloj {}`), Ablauf 4 (Stand „Blau kühl“, Rot und verschobene Knoten, Öffnen → rev+1, Primär `#1f5fbf`, alte Plätze, Liste „vor dem Öffnen von „Blau kühl““ (Rot) über „Blau kühl“, `agordo.json` byte-gleich), Ablauf 5 (Startseite: Link `/marko/lumeto/grafeo`, „2 Stände“, Seite 200, gespeicherter Zustand; „Vorhandene Marke öffnen“ mit `lumeto` weiter da; Prüftor nie gefragt).
+  - `FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo test grafeo-urteil-055 abnahme-055` → **11 bestanden, 0 rot**. `biome check` und `tsc --noEmit` sauber.
+- [x] **Rot gezeigt mit gepflanzten Fehlern** (beide Dateien waren beim ersten Lauf grün, bis auf zwei Testfehler im Test selbst: die Startseite trägt `mt-pruefung` in der Schale, und „Vorhandene Marke öffnen“ ist ein `fm-elektilo name="oeffnen"`; beide im Test korrigiert). Wegwerf-Skript unter `/tmp` (danach gelöscht): Datei sichern, ersetzen, `vitest run` beider Dateien, zurückkopieren, `filecmp` byte-gleich (alle 13: `True`); `git status` danach nur die neuen Dateien.
+  - U1 `leinwand-stato.ts` `serializeLeinwandAntwort`: `hinweis: "1 Problem"` im `stato` → rot: Urteilssuche, Ablauf 3.
+  - U2 `servilo.ts` Stände-404 „Diese Marke fehlt.“ → rot: 404-Test.
+  - U3 `servilo.ts` Öffnen-422 mit `rule: "stand-invalid"` → rot: 422-Form.
+  - U4 `servilo.ts` `GET …/staende` ruft `options.pruefTor` → rot: Sitzung (Zähler), 422-Test (Zähler), Ablauf 5.
+  - U5 `marken-liste.ts` `staendeText` „· 1 Problem“ → rot: Urteilssuche (Startseite).
+  - A1 `grafeo-gestalten.ts` feste Kante ohne `fest: true` → rot: Ablauf 1.
+  - A2 `grafeo-skribo.ts` keine Vorgabe-Tönung 1 → rot: Ablauf 2.
+  - A3 `servilo.ts` Datei-`kabloj` nur **mit** Parameter → rot: Ablauf 3.
+  - A4 `servilo.ts` Öffnen ohne Sicherung (`sama || nun.speco !== "unlesbar"`) → rot: Sitzung, Ablauf 4, Ablauf 5.
+  - A5 `sxtupoj.ts` Kartenlink ohne `/grafeo` → rot: Ablauf 5, Routenliste der Urteilssuche.
+  - A6 `grafeo-skribo.ts` eigene Neutralfarbe `#ff0000` abgelehnt → rot: Sitzung, Abnahme 8, Ablauf 4.
+  - Zwei erste Fassungen (U4 mit `pruefTor(name)`, A4 mit `sama || true`) übersetzten nicht (Vorbau rot) und wurden durch die genannten ersetzt.
+- [x] **Bilder und AK-1 im Browser (D-19)**: neu `packages/nodredaktilo/scripts/bilder-055.ts`. Bau `pnpm turbo run build --filter=@fundamento/cli --filter=@fundamento/metiejo --filter=@fundamento/nodredaktilo --force` (10 Aufgaben, ohne Cache, damit keine Pflanzung im `dist` bleibt), dann `pnpm --filter @fundamento/nodredaktilo exec tsx scripts/bilder-055.ts --ziel /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec055/bilder` → Exit 0, 41 Prüfungen „ok“, Chromium 153.0.8010.12, 2100×1250, freier Port, Temp-Arbeitsordner (gelöscht), CLI beendet. Der Ordner `bilder/` ist neu und enthält nur die sieben Bilder.
+  - Start (D-19): **11 Knoten**, paarweise ohne Schnitt. **17 Kanten**, jede alle 2 px mit `getPointAtLength` abgetastet und über `getScreenCTM` in Bildschirmpunkte gerechnet: kein Punkt in einer Box außer der ihrer beiden Endknoten. **15 Kanten mit Knick geprüft**, alle mit `Q`. **2 gerade ausgenommen** (ein waagrechtes oder senkrechtes Stück, keine Ecke): `farbo-primaer.el>farbo-neutral.en.farbo` (`M432 199L432 247`) und `paletro.el>vorschau-hell.en` (`M1021 79L1131 79`).
+  - Höhen (`offsetHeight`, Flusseinheiten) gegen D-2 (`ARANGXO_055.alteco`, unverändert): Marke 64/72, Primär 170/190, Akzent 172/190, Neutral 194/300, mit offenem Feld 238/300, Erfolg/Warnung/Fehler/Hinweis je 94/96, Palette 470/520, Vorschau hell und dunkel je 466/480. Keine über ihrem Maximum.
+  - Abläufe: 1 (keine Rahmen, kein „kommt später“, Stati, Kante); 2 (Satz, `#e8e2d6` + Enter → „eigene Farbe“, Kante weg, „von Hand“, „1,00“, Palette „eigene Farbe · Tönung 1,00“, Vorschauen auf neuem rev; „zurück zur Ableitung“ → Kante zurück); Funktionsfarbe Warnung `#d99a00` „von Hand“, drei „abgeleitet“; 3 (Akzent `#2e8b57`, Palette gezogen, Akzent → Palette gelöst, „+ Knoten“ → „Komponenten“ = `vorschau-3`, Zustand geschrieben, „gespeichert HH:MM“, Neuladen → gleicher Platz, „nicht verbunden“, `data-nr-vorschau-kabloj="akzent:-"`, `vorschau-3` da; „Anordnung zurücksetzen“ → Startplatz, Akzent verbunden, `vorschau-3` bleibt); 4 (Blau, Marke verschoben, „Stand speichern“ „Blau kühl“, Rot, Primär und Palette verschoben, „Stände“ → „Öffnen“ → rev+1, Liste zu, Primär `#1f5fbf`, alte Plätze von Marke/Primär/Palette, gleiche URL; Liste „vor dem Öffnen von „Blau kühl““ über „Blau kühl“); 5 (Startseite „Angefangene Marken“, Klick auf „Leinwand von lumeto“ → Leinwand mit den gespeicherten Plätzen). 0 Seiten- und Konsolenfehler.
+  - Ein erster Lauf scheiterte am Skript selbst (`__name` von tsx in `page.evaluate`, falscher Satz-Selektor); danach behoben.
+- [x] **eroj (Lehre aus #168)**, je Datei einzeln, nur Chromium, nicht parallel zu anderen Playwright-Läufen: `cd packages/eroj && PLAYWRIGHT_ENGINES=chromium FM_AUSGABE=knapp pnpm exec playwright test test/<datei>` →
+
+  | Datei | Ergebnis |
+  |---|---|
+  | `metiejo.spec.ts` | 6 bestanden, 0 rot |
+  | `metiejo-036.spec.ts` | 2 bestanden, 0 rot |
+  | `metiejo-036-uebernahme.spec.ts` | 2 bestanden, 0 rot |
+  | `form-036.spec.ts` | 1 bestanden, 0 rot |
+  | `zweitfarbe-036.spec.ts` | 5 bestanden, 0 rot |
+  | `buehne-036.spec.ts` | 20 bestanden, 0 rot |
+  | `buehne-navigation-042.spec.ts` | 2 bestanden, 0 rot |
+
+  38 Tests, keine Wiederholung nötig, kein eroj-Test geändert.
+- [x] **Bündel** `packages/nodredaktilo/dist/leinwand.js` (Bau oben, `wc -c` und `gzip -6 -c | wc -c`): **746 121 Byte roh, 195 930 Byte gzip -6**; Ausgangsmaß `642ab220` 728 751 / 192 071 → +17 370 / +3 859. Keine Schwelle.
+
+### LNS-4.1: Gesamtläufe
+
+- `FM_AUSGABE=knapp pnpm test:betroffen` (parallel, 10 Pakete: agordilo, cli, ekranoj, eroj, mcp, metiejo, modelo, nodredaktilo, nordstelo, projekcioj) → **rot nur in eroj**, zwei Hooks im 10-s-Limit (`packages/eroj/test/knapp-playwright.test.ts:54`, `vitrino-partoj.test.ts:101`); der Lauf brach danach ab (10 von 19 Aufgaben).
+- Nacheinander nach testing.md: `FM_AUSGABE=knapp pnpm turbo run test --continue --concurrency=1 --output-logs=errors-only --filter=@fundamento/agordilo --filter=@fundamento/cli --filter=@fundamento/ekranoj --filter=@fundamento/eroj --filter=@fundamento/mcp --filter=@fundamento/metiejo --filter=@fundamento/modelo --filter=@fundamento/nodredaktilo --filter=@fundamento/nordstelo --filter=@fundamento/projekcioj` → **16 von 19 Aufgaben grün**; rot nur Zeitgrenzen, während das Lastmittel des Rechners durch fremde Prozesse bei 186–308 lag (`uptime`; u. a. ein Playwright-WebKit-Lauf eines anderen Arbeitsbaums):
+  - projekcioj `src/fonto/komuna-fonto.test.ts:182, :206, :227` (je 60-s-Testlimit; 1565 bestanden, 3 rot),
+  - modelo `src/ci/turbo-inputs.test.ts:679` (Hook 10 s; 4975 bestanden, 1 rot),
+  - eroj Playwright `test/zweitfarbe-036.spec.ts:203` [chromium, webkit] („frame … is loaded“ nicht rechtzeitig) und `test/markobutono.spec.ts:21` [firefox] („Target page … closed“); 2170 bestanden, 3 rot.
+- Einzeln wiederholt bei Lastmittel ≈ 8 (nichts angehoben, nichts geändert): `pnpm --filter @fundamento/modelo test turbo-inputs` 8/0; `pnpm --filter @fundamento/projekcioj test komuna-fonto` 11/0; eroj `vitest run test/knapp-playwright.test.ts test/vitrino-partoj.test.ts` 13/0; `PLAYWRIGHT_ENGINES=chromium … playwright test test/zweitfarbe-036.spec.ts` 5/0, dasselbe `webkit` 5/0; `PLAYWRIGHT_ENGINES=firefox … test/markobutono.spec.ts` 9/0. Keine Datei dieser Tests berührt dieser Lauf. Urteil über Zeit-Tests: CI-Job „Timing checks“.
+- `pnpm lint` → **22/22 grün**. `pnpm check:privat` → **PASS** (4560 Dateien, 0 Treffer). `grep -rn "\.only(\|\.skip(" packages/*/src` → nur `packages/mcp/src/http.test.ts:97` `context.skip(…)` (alt, unverändert, ein Laufzeit-Skip, kein `.skip(`-Aufruf eines Tests); sonst leer.
+- Abschluss: `FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo test grafeo-urteil-055 abnahme-055 grafeo-047 grafeo-route-047 grafeo-grupoj-048` → 41/0.
+
+### LNS-4.1: kontrakto-038
+
+`FM_AUSGABE=knapp pnpm --filter @fundamento/mcp test kontrakto-038` (einmal) → **9 bestanden, 0 rot. Kein Eintrag ist rot.** Nichts unter `packages/mcp/**` geändert.
+
+Grund: Der Test „every input schema of the Bezug still accepts what it accepted“ (`packages/mcp/src/kontrakto-038.test.ts`, `incompatibilities`) erlaubt neue Schlüssel innerhalb einer `properties`-Map. `neutral.properties.farbe` ist genau so ein Schlüssel; die gelieferten Eingabeschemata von `preview_agordo`, `propose_agordo` und `save_agordo` (Fixture `packages/mcp/test/fixtures/kontrakto/input-schemas.json` ≈ :845–855, :1530, :2210) enthalten `farbe` jetzt, gelten aber als verträglich. Die Antwort-Bytes des Katalogs ändern sich nicht (kein Katalogfall nutzt `neutral.farbe`). R-2 aus dem Plan tritt damit **nicht** ein; das Vorrücken der Fixtures nach `9ee8d430` ist für diesen PR nicht nötig. R-1 (Ausgabeschema `origin`) bleibt.
+
+### LNS-4.1: Diff-Suche gegen `642ab220`
+
+Arbeitsbaum (Commits `7b5864ab`…`5ccab851` plus die neuen Dateien dieses Tickets) gegen `642ab220`:
+
+```text
+$ git diff --name-only 642ab220 -- packages/modelo/data packages/mcp packages/eroj/src packages/vortaro .github pnpm-lock.yaml
+ (leer)
+$ git diff --name-only 642ab220 | grep -v /          # Root-Dateien
+ (leer)
+$ git diff --name-only 642ab220 | grep package.json
+ (leer)
+$ git ls-files --others --exclude-standard
+ packages/metiejo/src/abnahme-055.test.ts
+ packages/metiejo/src/grafeo-urteil-055.test.ts
+ packages/nodredaktilo/scripts/bilder-055.ts
+ specs/055-leinwand-speichern/bericht.md
+$ git diff 642ab220 -- packages/modelo/schema/
+ @@ -4333,6 +4333,9 @@  …"maximum": 1 }, + "farbe": { "$ref": "#/$defs/AgordoColor" }   (genau neutral.properties.farbe)
+$ git diff --name-only 642ab220 -- packages/modelo
+ packages/modelo/schema/modelo.schema.json
+ packages/modelo/src/generated/modelo-schema.ts
+$ git diff --stat 642ab220 -- packages/metiejo/src/marko.ts
+ (leer)
+$ git diff --name-only 642ab220 | grep -E "grafeo-(047|route-047|grupoj-048)|grafeo-sicht|/grafeo\.ts|/html\.ts"
+ (leer: 047/048-Tests und Verstehen unverändert; grafeo-047, grafeo-route-047, grafeo-grupoj-048 grün)
+$ git diff -U0 642ab220 -- packages | grep '^+' | grep -inE "timeout|retries|threshold|schwelle|toleran|limit|grenze"   (+ dieselbe Suche über die neuen Dateien)
+ packages/agordilo/src/neutralfarbe-055.test.ts: floors { thresholds: [3, 4.5, 7] } und explain("contrast-below-threshold") – Eingaben eines Tests, kein geänderter Wert
+ packages/nodredaktilo/src/gestalten/kanvaso.tsx: Kommentar „no timer, no new time limit“
+ packages/nodredaktilo/src/gestalten/nodoj/farbo.tsx:752: setTimeout(…) ohne Dauer (Merker bis zum nächsten Takt, kein Zeitlimit)
+ packages/nodredaktilo/scripts/bilder-055.ts:22: import setTimeout as warten (Takt beim Start wie bilder-054.ts)
+ (kein Timeout, keine retries, keine Schwelle, Grenze oder Toleranz geändert)
+$ git diff -U0 642ab220 -- packages/metiejo/src/sxtupoj.ts | grep '^@@'
+ @@ -20,0 +21 @@ (Import)  @@ -148,0 +150,2 @@ (ScreenInput.markenListe)  @@ -508,0 +512,58 @@ (neue Start-Funktionen)
+ @@ -509,0 +571,2 @@ (preview(): Start mit Liste)  @@ -556 +619 @@ (data-mt-marken beim Start mit Liste)
+ (nur Start-Pfade, fields() unverändert)
+$ node <Wegwerf-Skript>   # --fm--Namen in neuen Zeilen und in src/gestalten/**, sxtupoj.ts, marken-liste.ts gegen komunaCss(loadBases())
+ Kernsatz 3218; neue Zeilen 23 Namen, Dateien 63 Namen; nicht im Kernsatz: []
+$ node <Wegwerf-Skript>   # Wort aus R-12, privates Schriften-Repo, Erweiterungsschlüssel, zur Laufzeit aus oldNames()
+ Zeilen 8683 (hinzugefügte Zeilen + neue Dateien); 0 / 0 / 0
+$ pnpm check:privat
+ PASS privat (4560 Dateien, 17 wörtliche Ausnahmen, 0 Treffer)
+```
+
 ### LNS-4.1: geänderte ältere Tests
+
+Keine. Kein eroj-Test, kein 047/048-Test, keine Produktdatei geändert.
 
 ### LNS-4.1: für den PR-Text
 
+- Neue Tests `packages/metiejo/src/grafeo-urteil-055.test.ts`, `abnahme-055.test.ts`; neues Skript `packages/nodredaktilo/scripts/bilder-055.ts` (Bilder und AK-1 im Browser, nicht in CI).
+- Der PR-Text-Entwurf steht oben unter „Für den PR-Text“.
+
 ### LNS-4.1: Befunde
+
+Unter „Befunde“ oben („Neu aus LNS-4.1“).
 
 ## LNS-5.1 (T8): PR, Push, Dispatch, Bericht
 
