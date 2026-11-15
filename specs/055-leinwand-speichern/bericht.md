@@ -54,6 +54,7 @@ Stand 2026-11-15, Entwurf aus LNS-4.1 (T7); LNS-5.1 (T8) füllt die Platzhalter.
 - Startseite: Link „Leinwand von <Name>“ in der Karte statt ganz klickbarer Karte (`fm-karto` ohne Ziel, `sxtupoj.test.ts:50`); Formular 38rem, weil `fm-elekto` nicht umbricht.
 - Helligkeit von `neutral.farbe` beim Lesen nicht geprüft (`packages/agordilo/src/agordo.ts`, `colourPointers`); der Schreibweg lehnt solche Werte ab.
 - Markenliste zählt jede `*.json` in `staende/`, auch Dateien, die die Stände-Liste nicht zeigt (`packages/metiejo/src/marken-liste.ts`).
+- Ein Stand mit dem vorgeschlagenen Namen zeigt in der Liste zweimal denselben Text: Name „15.11.2026, 22:02“ und darunter die Zeit „15.11.2026, 22:02“ (Browser-QA; folgt aus Teil F, Vorschlag = Datum und Uhrzeit).
 - Bündel `dist/leinwand.js`: 728 751 → **746 121** Byte roh, 192 071 → **195 930** gzip -6 (+17 370 / +3 859), keine Schwelle.
 - Lokale Last: parallele und sequentielle Gesamtläufe hatten nur Zeitgrenzen-Rote bei Lastmittel 186–308 (fremde Prozesse); einzeln alle grün (Abschnitt 6).
 
@@ -62,6 +63,7 @@ Stand 2026-11-15, Entwurf aus LNS-4.1 (T7); LNS-5.1 (T8) füllt die Platzhalter.
 - Neue Tests `grafeo-urteil-055` 5/5 und `abnahme-055` 6/6; rot gezeigt mit 11 gepflanzten Fehlern (U1–U5, A1–A6 in `tasks.md`), jeweils byte-gleich zurückgesetzt.
 - eroj in Chromium, je Datei einzeln: `metiejo` 6, `metiejo-036` 2, `metiejo-036-uebernahme` 2, `form-036` 1, `zweitfarbe-036` 5, `buehne-036` 20, `buehne-navigation-042` 2 – alle grün, ohne Wiederholung.
 - `FM_AUSGABE=knapp pnpm test:betroffen`: rot nur zwei eroj-Hooks (10-s-Limit). Nacheinander (`pnpm turbo run test --continue --concurrency=1 …` mit den 10 Paketen): 16/19 grün, rot nur Zeitgrenzen (projekcioj `komuna-fonto.test.ts:182/206/227`, modelo `turbo-inputs.test.ts:679`, eroj `zweitfarbe-036.spec.ts:203` [chromium, webkit], `markobutono.spec.ts:21` [firefox]); jede einzeln wiederholt grün. Nichts angehoben.
+- Browser-QA nach dem Bau (Chromium, 2100×1250 und Startseite bei 700 px, Stand `78e1ade4`, ein Durchgang): Startseite, Abläufe 1–4, unlesbare `leinwand.json` und unlesbarer `agordo.json`, „kein Urteil“, Verstehen und Konsole ohne Fehler bestanden; `agordo.json` vor und nach „Öffnen“ byte-gleich.
 - `pnpm lint` 22/22 grün; `pnpm check:privat` PASS; `.only(`/`.skip(` nur das alte `context.skip` in `packages/mcp/src/http.test.ts:97`.
 - Diff-Suche gegen `642ab220` (Befehle in `tasks.md`): nichts unter `modelo/data`, `mcp`, `eroj/src`, `vortaro`, `.github`, keine Root-Datei, kein Lockfile, kein `package.json`; Schema genau `neutral.properties.farbe`; kein `--fm-`-Name außerhalb des Kernsatzes; kein Zeitlimit, `retries`, Schwelle; `marko.ts` unberührt; `sxtupoj.ts` nur Start-Pfade; 047/048 unverändert und grün; Wort aus R-12 und Name des privaten Schriften-Repos 0 / 0.
 
