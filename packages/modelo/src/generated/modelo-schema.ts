@@ -2012,6 +2012,7 @@ export interface Agordo {
   };
   neutral?: {
     toenung?: number;
+    farbe?: AgordoColor;
   };
   regler?: {
     helligkeit?: number;

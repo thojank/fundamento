@@ -7,7 +7,7 @@ Acht Tickets, ein Strang (Spec: „höchstens 8 Tickets, ein PR“). Kein Ticket
 | Ticket | Spec | Inhalt | Hängt ab von | Stand |
 |---|---|---|---|---|
 | LNS-1.1 | T1 + T2 (Daten) | Leinwand ohne Rahmen: Anordnung, sieben Farbknoten, runde Kanten auf Spuren, Verträge | – | erledigt |
-| LNS-1.2 | T3 (Modelo/agordilo/Schreibweg) | `neutral.farbe`: Schema, Ableitung, Schreibweg | – | offen |
+| LNS-1.2 | T3 (Modelo/agordilo/Schreibweg) | `neutral.farbe`: Schema, Ableitung, Schreibweg | – | erledigt |
 | LNS-1.3 | T6 | Markenliste auf der Startseite | – | offen |
 | LNS-2.1 | T2 (UI) + T3 (Leinwand) | Farbknoten: „abgeleitet / von Hand / zurück zur Ableitung“, Kante und eigene Farbe für Neutral | 1.1, 1.2 | offen |
 | LNS-2.2 | T4 | Leinwand-Zustand: Datei, Schreiben, Laden, „Anordnung zurücksetzen“ | 1.1, 1.3 | offen |
@@ -150,11 +150,49 @@ Die Zeilen beziehen sich auf `642ab220`, jeweils vorher → nachher und Grund.
 
 ### LNS-1.2 im Einzelnen
 
+- [x] **Prüfsummen zuerst (Abnahme 4):** Vor jeder Änderung (Quellstand = `642ab220`, Baum sauber für `agordilo`/`modelo`) SHA-256 von `derivation.palettes` (JSON) und vom ganzen Paket (`deriveAspekto(...).files`, Pfad + Bytes, Raporto eingeschlossen) gerechnet und festgeschrieben:
+  - `packages/agordilo/src/neutralfarbe-055.test.ts` (`PINNED_642AB220`): `modelo/test/fixtures/valid/{aspekto-provo, aspekto-provo-kompakta, aspekto-dukolora}/agordo.json` (die eingebetteten Agordoj in `…/<name>/<name>/aspekto.json` sind gleich, eigener Test), `agordilo/fixtures/stufe1-provo.json#/agordo`.
+  - `packages/metiejo/src/neutral-skribo-055.test.ts` (`PINNED_642AB220`): `startAgordo("provo", "leer"|"komuna"|"komuna-0-2")` und `nodredaktilo/belegung/leinwand.agordo.json`. Abweichung vom Plan: diese vier stehen in metiejo, nicht in agordilo. Grund: `startAgordo` liegt in metiejo, und der Test-Hash von `agordilo#test` deckt `packages/nodredaktilo/**` nicht (Spec 040 T-5, `turbo-inputs.test.ts`), der von `metiejo#test` schon (devDependency).
+  - Unter `packages/modelo/data/**` liegt kein `aspekto.json` mit Agordo, und `packages/aspekto-komuna*/aspekto.json` tragen keinen Agordo (geprüft): dort gibt es nichts festzuschreiben.
+- [x] **Schema:** genau `Agordo.properties.neutral.properties.farbe: { "$ref": "#/$defs/AgordoColor" }`. `pnpm --filter @fundamento/modelo generate:types` schreibt eine Zeile in `src/generated/modelo-schema.ts` (`farbe?: AgordoColor;`); `config-schema.ts` byte-gleich; `--check` sauber. Test: SHA-256 des Schemas ohne `neutral.properties.farbe` = SHA-256 von `642ab220` (`bfe6c747…`).
+- [x] **Ableitung** (`agordilo/src/palettes.ts`): `origin` um `"neutralfarbe"` erweitert. Neue Funktion `neutralToenung(agordo)` = `toenung ?? (farbe ? 1 : 0)`. `paletteSources`: ohne `farbe` exakt der alte Ausdruck (`(toenung ?? 0) · lead.c · NEUTRAL_SHARE`, `origin: "toenung"`), mit `farbe` `{ hue: own.h, chroma: neutralToenung · own.c, origin: "neutralfarbe" }` (ohne `NEUTRAL_SHARE`).
+- [x] **explain** (`agordilo/src/explain.ts`, D-6): beide Suchen (`#rampSuggestion` ≈ :256 und `#tintSuggestion` ≈ :351) bauen `neutral: { ...agordo.neutral, toenung }`; die `apply`-Patches bleiben `{ neutral: { toenung } }`. `originLabel` kennt `"neutralfarbe"` („own neutral colour (neutral.farbe)“). Zusätzlich (über D-6 hinaus): beide Suchen starten bei `neutralToenung(agordo)` statt `toenung ?? 0`, damit „(now …)“ mit eigener Farbe ohne Tönung 1,00 nennt, also den Wert der Ableitung. Ohne `farbe` identisch.
+- [x] **Schreibweg** (`metiejo/src/grafeo-skribo.ts`): Körper `{ neutral: { farbe: string | null } }` (genau der Schlüssel `farbe`, sonst 400). Lokale Typen `NeutralSxangxo` und `SkriboSxangxo = LeinwandSxangxo | NeutralSxangxo`; `sxangxoEl`/`feldDe` nehmen `SkriboSxangxo`. Wert wie die Knotenfarben: `farboHex` muss lesen, sonst 422 `{ feld: "neutral.farbe", satz: NELEGEBLA_SATZ }`; gespeichert getrimmt, wie getippt. `toenung: 1` nur wenn keine da ist. `null` entfernt `farbe`, lässt die Tönung, ein leeres `neutral` entfällt. Kein Check, keine Regel. Eine Schema-Ablehnung unter `/neutral/farbe` gibt ebenfalls `NELEGEBLA_SATZ`. `servilo.ts` blieb unberührt (die Route reicht den Körper durch).
+- [x] **Tests:** `neutralfarbe-055` (16), `neutral-skribo-055` (13), `neutral-studio-055` (3).
+- [x] **Rot zuerst:** alle Ableitungs-, explain-, Historie- und Schema-Tests von `neutralfarbe-055` waren vor der Änderung rot (Schema lehnte `farbe` ab, `Unexpected member "farbe"`; Schema-Diff-Test: `farbe` fehlt). `neutral-skribo-055`: Schreibweg-Tests rot (400 statt 200/422). Grün beim ersten Lauf und darum mit Pflanzung geprüft (je Pflanzung rot gesehen, zurückgesetzt, mit `cmp` gegen eine Sicherung bestätigt):
+  - P1 `palettes.ts` alter Zweig `hue: lead.h + 1e-9` → alle 5 agordilo-Prüfsummen und der Test „Tönungs-Zweig“ rot.
+  - P2 `explain.ts` `#rampSuggestion` ohne Spread → „ramp suggestion“ rot. P3 `#tintSuggestion` ohne Spread → „Tönung suggestion“ rot. P4 beide Suchen mit `toenung ?? 0` → „(now 1.00)“-Test rot.
+  - P5 `regler.ts` `reglerDiff` listet `neutral.farbe` → D-7-Test rot (agordilo); P11 dieselbe Pflanzung, agordilo-`dist` neu gebaut → D-7-Test in `neutral-studio-055` rot.
+  - P6a `NEUTRAL_SHARE` im eigenen Zweig, P6b Vorgabe-Tönung 0, P6c Tönung ignoriert, P6d `origin: "toenung"` → je die zugehörigen Ableitungstests rot.
+  - P7 Schema mit zweitem neuen Feld `neutral.properties.farbton` → Schema-Diff-Test und Ablehnungstest rot.
+  - P8 `grafeo-skribo.ts` nimmt `neutral` mit weiteren Schlüsseln an → „malformed“ rot.
+  - P9 Schreibweg schreibt `farbe` nicht → Schreibweg-Tests und alle drei Studio-Tests rot (Pflanzpunkt für die Gruppe „Speichern“ des Studios; `marko.ts` ist nicht frei, darum dort keine Pflanzung).
+  - P10 wie P1 mit neu gebautem agordilo-`dist` → die 4 metiejo-Prüfsummen (`startAgordo` ×3, Belegung) rot.
+  - P12 `servilo.ts` `patched`: `const group = {}` (ohne Zusammenführen) → Studio-Regler-Test und Speichern-Test rot. Zurückgesetzt mit der exakten Umkehr der Zeile (nicht durch Kopie, weil `servilo.ts` geteilt ist); die Zeile steht danach wie auf `642ab220`.
+- [x] **Läufe:** `pnpm --filter @fundamento/modelo generate:types` → `git diff --stat -- packages/modelo`: nur `schema/modelo.schema.json` (+3) und `src/generated/modelo-schema.ts` (+1); `generate:types --check` „up to date“ (beide). `FM_AUSGABE=knapp pnpm --filter @fundamento/agordilo test neutralfarbe-055 fixtures explain palettes` → 18/0. Ganze agordilo-Suite → 167/0. `FM_AUSGABE=knapp pnpm --filter @fundamento/modelo test contracts` → 326/0. Ganze modelo-Suite → 4974/2 rot, beide aus den damals ungestageten Löschungen von LNS-1.1 (`fazo.tsx`, `bilder-054.ts`: `neutrale-namen` ENOENT, `turbo-inputs`), nach dem Commit `7b5864ab` erneut gelaufen: 31/0. `FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo test neutral-skribo-055 neutral-studio-055 grafeo-skribo-054` → 35/0. Zusätzlich metiejo `grafeo studio` → 239/0. Lint: agordilo, modelo, metiejo grün (metiejo: 1 fremde Warnung `komponentoj.ts:42`). Keine Datei unter `packages/modelo/data/**` oder `packages/mcp/**` geändert. Diff-Suche (Wort aus R-12, Name des privaten Schriften-Repos, zur Laufzeit aus `oldNames()`): 0 / 0 über alle neuen Zeilen und neuen Dateien.
+
 ### LNS-1.2: geänderte ältere Tests
+
+- `packages/metiejo/src/grafeo-skribo-054.test.ts:525` (auf Anweisung des Orchestrators in die Zone von LNS-1.2 übernommen). Vorher: `expect((await bildoDe("funkcio")).nodoj.some((n) => n.id === "farbo-warning")).toBe(false);` Nachher (Biome bricht sie auf :525–527 um): `expect(((await bildoDe("funkcio")).nodoj.find((n) => n.id === "farbo-warning") as BildoFarbo).stato).toBe("abgeleitet");` Grund: Spec 055 Teil C, die vier Funktionsfarben-Knoten stehen immer da (LNS-1.1); nach `wert: null` bleibt der Knoten mit `stato: "abgeleitet"`. `BildoFarbo` war schon importiert. Sonst nichts an der Datei geändert.
 
 ### LNS-1.2: für den PR-Text
 
+- Schema: genau ein neues optionales Feld `Agordo.neutral.farbe` (`$ref AgordoColor`); erzeugte Typen eine Zeile. Keine Datei unter `packages/modelo/data`, kein Kern-Token, keine Regel, keine Grenze; `toenung` bleibt `0..1`.
+- Ableitung: mit `neutral.farbe` Farbton und Buntheit aus der Farbe, skaliert mit der Tönung (Vorgabe 1), ohne `NEUTRAL_SHARE`; `origin: "neutralfarbe"`. Ohne das Feld byte-gleich (Prüfsummen von `642ab220` für 8 Agordoj in `neutralfarbe-055` und `neutral-skribo-055`).
+- `explain` behält `neutral.farbe` in beiden Suchen; Patches bleiben `{ neutral: { toenung } }`.
+- Schreibweg `POST /api/marko/:name/leinwand` nimmt `{ neutral: { farbe: string | null } }`: 200 `{ rev, gespeichert }` (rev+1, `toenung: 1` nur wenn keine da), 422 `{ feld: "neutral.farbe", satz }` bei unlesbarer Farbe (Entwurf und rev unverändert), 400 bei anderer Form. Kein Check.
+- Geänderter älterer Test: `grafeo-skribo-054.test.ts:525` (siehe oben).
+
 ### LNS-1.2: Befunde
+
+- **R-1 (MCP-Ausgabeschema):** `packages/mcp/schema/tools/preview_agordo.output.json:289` lässt für `source.origin` nur `leitfarbe, zusatzfarbe, default, toenung` zu; `mcp/src/tools.ts:634` reicht `origin` durch. Ein Agordo mit `neutral.farbe` liefert dort `"neutralfarbe"` und verletzt das eigene Ausgabeschema (für `sekundo` gibt es dort keinen Eintrag, `tools.ts` geht nur über `PALETTES`). MCP ist tabu: Maintainer erweitert die Aufzählung samt Fixtures.
+- **R-2 (kontrakto-038):** `packages/mcp/test/fixtures/kontrakto/input-schemas.json` enthält das Agordo-Schema dreimal (`preview_agordo`, `propose_agordo`, `save_agordo`, ≈ :848, :1530, :2210). Diese Einträge werden rot; LNS-4.1 listet sie einzeln nach dem lokalen Lauf von `kontrakto-038`. Hier nicht gelaufen (MCP außerhalb der Zone).
+- **D-7 (Historie):** `historioEintrag`/`reglerDiff` listen `neutral.farbe` nicht. Ein Speichern, das nur `neutral.farbe` ändert, hängt `{ wunsch: "Hand", diff: [] }` an (Test in `neutralfarbe-055` und End-zu-End in `neutral-studio-055` über `/studio/:name/speichern`). Wie heute bei `zweitfarbe` und `zusatzfarben`. Unverändert gelassen.
+- **Studio (`neutral-studio-055`, nur lesend): grün.** Der Live-Regler der Tönung (`POST /api/marko/:name/entwurf` `{ neutral: { toenung } }`, `patched` führt `neutral` feldweise zusammen) behält `farbe`; `POST /studio/:name/speichern` schreibt `neutral.farbe` unverändert in `agordo.json`. Das Studio zeigt das Feld nicht (gewollt).
+- **Verstehen:** `metiejo/src/grafeo.ts:653–662` kennt `origin: "neutralfarbe"` nicht und fällt auf `[]` zurück. Unverändert (Abnahme 9).
+- **`readAgordo` prüft die Helligkeit von `neutral.farbe` nicht:** `agordilo/src/agordo.ts` `colourPointers` liest nur `leitfarbe` und `zusatzfarben` (auch `zweitfarbe` nicht). Ein Agordo mit `neutral.farbe: "oklch(1.5 0.1 20)"` liest also über das Schema-Muster; die Ableitung nutzt davon nur Farbton und Buntheit. Der Schreibweg lehnt solche Werte über `farboHex` ab. Datei außerhalb der Zone, nicht geändert.
+- **Explain-Startwert:** Beide Suchen starten mit eigener Farbe ohne Tönung bei 1 (`neutralToenung`), nicht bei 0. Über D-6 hinaus, aber nötig, damit Satz und Suche zur Ableitung passen; ohne `farbe` identisch.
+- **Turbo-Cache bei Pflanzungen:** Nach dem Zurücksetzen einer Pflanzung stellte `turbo run build --filter=@fundamento/agordilo` die alte `dist` einmal nicht wieder her (Cache-Treffer ohne Rückspielen). Mit `pnpm --filter @fundamento/agordilo build` und `turbo … --force` neu gebaut; `dist` und Cache-Eintrag stimmen wieder mit der Quelle.
 
 ## LNS-1.3 (T6): Markenliste auf der Startseite
 

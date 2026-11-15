@@ -4333,6 +4333,9 @@
               "type": "number",
               "minimum": 0,
               "maximum": 1
+            },
+            "farbe": {
+              "$ref": "#/$defs/AgordoColor"
             }
           },
           "additionalProperties": false

@@ -522,7 +522,9 @@ describe("Spec 054 T4: POST /api/marko/:name/leinwand on a server", () => {
       200,
     );
     expect(entwurfDe("funkcio").zusatzfarben).toBeUndefined();
-    expect((await bildoDe("funkcio")).nodoj.some((n) => n.id === "farbo-warning")).toBe(false);
+    expect(
+      ((await bildoDe("funkcio")).nodoj.find((n) => n.id === "farbo-warning") as BildoFarbo).stato,
+    ).toBe("abgeleitet");
     expect((await schreiben("toeno", { toenung: 0.35 })).status).toBe(200);
     expect(entwurfDe("toeno").neutral).toEqual({ toenung: 0.35 });
     const neutral = (await bildoDe("toeno")).nodoj.find((n) => n.id === "farbo-neutral");

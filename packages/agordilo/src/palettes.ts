@@ -87,7 +87,15 @@ export interface PaletteSource {
   hue: number;
   /** The chroma of the reference step before the calibration profile and saettigung. */
   chroma: number;
-  origin: "leitfarbe" | "zusatzfarbe" | "default" | "toenung" | "zweitfarbe";
+  origin: "leitfarbe" | "zusatzfarbe" | "default" | "toenung" | "zweitfarbe" | "neutralfarbe";
+}
+
+/**
+ * The Tönung the Neutral palette is derived with: as set, else 0 – or 1 with an own Neutral colour
+ * (Spec 055 T3), so a chosen colour shows at once.
+ */
+export function neutralToenung(agordo: Agordo): number {
+  return agordo.neutral?.toenung ?? (agordo.neutral?.farbe === undefined ? 0 : 1);
 }
 
 /** The sources of the palettes; the Zweitfarbe's only when the Agordo names one. */
@@ -152,13 +160,21 @@ export function paletteSources(agordo: Agordo, calibration: Calibration): Palett
           -STATUS_TURN_MAX,
           Math.min(STATUS_TURN_MAX, STATUS_TURN_SHARE * hueDifference(lead.h, accent.hue)),
         );
+  // Spec 055 T3: an own Neutral colour is the base of the Neutral palette – its hue, its chroma
+  // scaled by the Tönung, without NEUTRAL_SHARE (the colour is chosen on purpose). Without one,
+  // the tint of the lead colour exactly as before.
+  const own =
+    agordo.neutral?.farbe === undefined ? undefined : parseAgordoColor(agordo.neutral.farbe);
   const sources = {
     accent: { hue: lead.h, chroma: lead.c, origin: "leitfarbe" },
-    neutral: {
-      hue: lead.h,
-      chroma: (agordo.neutral?.toenung ?? 0) * lead.c * NEUTRAL_SHARE,
-      origin: "toenung",
-    },
+    neutral:
+      own === undefined
+        ? {
+            hue: lead.h,
+            chroma: (agordo.neutral?.toenung ?? 0) * lead.c * NEUTRAL_SHARE,
+            origin: "toenung",
+          }
+        : { hue: own.h, chroma: neutralToenung(agordo) * own.c, origin: "neutralfarbe" },
   } as PaletteSources;
   for (const status of STATUS_PALETTES) {
     const given = agordo.zusatzfarben?.[status];
