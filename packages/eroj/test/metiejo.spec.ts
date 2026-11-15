@@ -49,7 +49,7 @@ const choose = (page: Page, group: string, text: string) =>
 async function brand(page: Page, name: string): Promise<void> {
   await page.goto(`${base}/`);
   await page.locator('fm-kampo[name="name"] input').fill(name);
-  await page.getByRole("button", { name: "Anlegen" }).click();
+  await page.getByRole("button", { name: "Anlegen", exact: true }).click();
   await page.waitForURL(/\/marko\//);
 }
 
@@ -60,7 +60,7 @@ test.describe("Metiejo (Nachlese 10)", () => {
     await brand(page, "Quendolin");
     await page.goto(`${base}/`);
     const name = page.locator('fm-kampo[name="name"]');
-    await expect(page.getByRole("button", { name: "Anlegen" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anlegen", exact: true })).toBeVisible();
     await choose(page, 'fm-elekto[name="basis"]', "Vorhandene Marke öffnen");
     await expect(page.getByRole("button", { name: "Öffnen" })).toBeVisible();
     await expect(name).toBeHidden();
@@ -78,7 +78,7 @@ test.describe("Metiejo (Nachlese 10)", () => {
     );
     await expect(name).toBeVisible();
     expect(await name.evaluate((host) => host.hasAttribute("required"))).toBe(true);
-    await expect(page.getByRole("button", { name: "Anlegen" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anlegen", exact: true })).toBeVisible();
   });
 
   test("N-1, N-4, N-6, N-7, N-8: the switch in the header, one focus ring, the purpose, the combination and the preview in German", async ({

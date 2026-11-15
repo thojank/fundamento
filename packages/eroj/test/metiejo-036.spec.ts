@@ -46,7 +46,7 @@ test.afterAll(() => {
 async function entryQuestions(page: Page, name: string, notoj: string[]): Promise<void> {
   await page.goto(`${base}/`);
   await page.locator('fm-kampo[name="name"] input').fill(name);
-  await page.getByRole("button", { name: "Anlegen" }).click();
+  await page.getByRole("button", { name: "Anlegen", exact: true }).click();
   await page.waitForURL(/\/marko\//);
   const slug = name.toLowerCase();
   await page.goto(`${base}/asistanto/${slug}/komenco`);

@@ -85,7 +85,7 @@ async function brandWithMaterial(
 ): Promise<string> {
   await page.goto(`${base}/`);
   await page.locator('fm-kampo[name="name"] input').fill(name);
-  await page.getByRole("button", { name: "Anlegen" }).click();
+  await page.getByRole("button", { name: "Anlegen", exact: true }).click();
   await page.waitForURL(/\/marko\//);
   const id = name.toLowerCase();
   const read = await request.post(`${base}/api/marko/${id}/materialo`, {
