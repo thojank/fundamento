@@ -45,7 +45,7 @@ test.afterAll(() => {
 async function brandWithPill(page: Page, name: string): Promise<string> {
   await page.goto(`${base}/`);
   await page.locator('fm-kampo[name="name"] input').fill(name);
-  await page.getByRole("button", { name: "Anlegen" }).click();
+  await page.getByRole("button", { name: "Anlegen", exact: true }).click();
   await page.waitForURL(/\/marko\//);
   const slug = decodeURIComponent(new URL(page.url()).pathname.split("/")[2] ?? "");
   const chosen = await page.request.post(`${base}/marko/${encodeURIComponent(slug)}/form`, {
