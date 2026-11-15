@@ -56,13 +56,6 @@ export type Kabloj = Partial<Record<FarboRolo, FarboRolo | null>>;
  */
 export type FarboStato = "leer" | "startwert" | "von-hand" | "aus-material" | "abgeleitet";
 
-/**
- * Transitional (Spec 055 T1): the Bildo has no phase nodes any more, so no value has this type.
- * Only `nodredaktilo/src/gestalten/kunteksto.ts` still names it (its `FazoFlowNodo`); it goes
- * once that file drops the name.
- */
-export type BildoFazo = never;
-
 export interface BildoMarko {
   id: "marko";
   speco: "marko";
@@ -74,7 +67,7 @@ export interface BildoFarbo {
   speco: "farbo";
   fazo: "fazo-4";
   rolo: FarboRolo;
-  /** As in the Agordo (hex or oklch text); absent = empty. Neutral has none. */
+  /** As in the Agordo (hex or oklch text); absent = empty. Neutral: its own colour `neutral.farbe`. */
   wert?: string;
   /**
    * `#rrggbb` to draw: the own value, or derived (Neutral: its light step 100; an empty Akzent: the
@@ -84,8 +77,16 @@ export interface BildoFarbo {
   stato: FarboStato;
   /** The kind of the output: Neutral gives its Tönung (Maß), every other node a colour. */
   elir: "farbo" | "mezuro";
-  /** Only Neutral: `neutral.toenung`, 0 when the Agordo has none. */
+  /**
+   * Only Neutral: the effective Tönung (agordilo `neutralToenung`): `neutral.toenung`, else 1 with
+   * an own colour and 0 without one.
+   */
   toenung?: number;
+  /**
+   * Only Neutral (Spec 055 T3): where its palette comes from – derived from Primär (the Bildo then
+   * carries the fixed edge Primär → Neutral, D-18) or its own colour `neutral.farbe` (`wert`).
+   */
+  herkunft?: "primaer" | "eigene";
 }
 
 export interface Stufo {
@@ -168,7 +169,9 @@ export interface Bildo {
 export type LeinwandSxangxo =
   | { farbe: { rolle: Exclude<FarboRolo, "neutral">; wert: string | null } }
   | { toenung: number }
-  | { stufe: { token: string; wert: string | null; schema?: Schema } };
+  | { stufe: { token: string; wert: string | null; schema?: Schema } }
+  /** Spec 055 T3: the own Neutral colour (`neutral.farbe`); null goes back to the derivation. */
+  | { neutral: { farbe: string | null } };
 
 // ---------------------------------------------------------------------------------------------
 // Canvas state and Stände (Spec 055 T4, T5: contracts; the file and routes come with LNS-2.2/3.1)

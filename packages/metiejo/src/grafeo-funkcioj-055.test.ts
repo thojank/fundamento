@@ -23,11 +23,13 @@ import {
   KATALOGO_054,
   type Kabloj,
   kablojDe,
+  type LeinwandSxangxo,
   ligoId,
   ligojKun,
   ROLO_PALETRO,
   STATUS_ROLOJ,
 } from "./grafeo-gestalten-sicht.js";
+import { leinwandSchreiben, paletroStufojDe } from "./grafeo-skribo.js";
 import { hexOf } from "./sxtupoj.js";
 import { type Bases, loadBases, startAgordo } from "./vorschau.js";
 
@@ -122,6 +124,36 @@ describe("Spec 055 T2: the four Funktionsfarben from the start (Abnahme 2, data)
     const { bildo } = fallDe(ohne);
     expect("zusatzfarben" in ohne).toBe(false);
     expect(farbo(bildo, "warning").stato).toBe("abgeleitet");
+  });
+
+  it("„zurück zur Ableitung“ ({farbe: {rolle, wert: null}}) on the write path keeps the node", () => {
+    const stufoj = paletroStufojDe(bases.calibration);
+    const zurueck = (agordo: Agordo, rolle: "warning" | "info") => {
+      const sxangxo: LeinwandSxangxo = { farbe: { rolle, wert: null } };
+      const rezulto = leinwandSchreiben(agordo, sxangxo, stufoj);
+      if (rezulto.speco !== "ok") throw new Error(JSON.stringify(rezulto));
+      return rezulto.agordo;
+    };
+    const leer = zurueck(WARNUNG, "warning");
+    const zwei = zurueck(
+      { ...LEER, zusatzfarben: { warning: "#d99a00", info: "#2a6fdb" } },
+      "info",
+    );
+    const { bildo, palettes } = fallDe(leer);
+    expect({
+      leer: "zusatzfarben" in leer,
+      zwei: zwei.zusatzfarben,
+      knoten: [farbo(bildo, "warning").stato, farbo(bildo, "warning").hex],
+      zweiKnoten: [
+        farbo(fallDe(zwei).bildo, "info").stato,
+        farbo(fallDe(zwei).bildo, "warning").stato,
+      ],
+    }).toEqual({
+      leer: false,
+      zwei: { warning: "#d99a00" },
+      knoten: ["abgeleitet", basisHex(palettes, "warning")],
+      zweiKnoten: ["abgeleitet", "von-hand"],
+    });
   });
 });
 

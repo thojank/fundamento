@@ -101,10 +101,10 @@ import {
   kablojEl,
   kablojTeksto,
   paletrojDe,
-  serializeBildo,
   wirksamerAgordo,
 } from "./grafeo-gestalten.js";
 import { gestaltenScreen, LEINWAND_CSS_HREF } from "./grafeo-gestalten-ekrano.js";
+import type { LeinwandStato } from "./grafeo-gestalten-sicht.js";
 import { leinwandSchreiben, paletroStufojDe } from "./grafeo-skribo.js";
 import { CLIENT_SCRIPT, escapeHtml, grafeoScreen, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
@@ -119,6 +119,15 @@ import {
 import { knownFonts } from "./kontrolo.js";
 import { kreiloScreen } from "./kreilo/ekrano.js";
 import { describeKaraktero, kreiloProponoj } from "./kreilo/kreilo.js";
+import {
+  LEINWAND_STATO_FELD,
+  LEINWAND_STATO_SATZ,
+  leinwandStatoLegi,
+  leinwandStatoRekomenco,
+  leinwandStatoSkribi,
+  parseLeinwandStato,
+  serializeLeinwandAntwort,
+} from "./leinwand-stato.js";
 import { markenListeDe } from "./marken-liste.js";
 import {
   createMarko,
@@ -531,7 +540,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const paketoStiloj = new Map<string, string>();
   // Spec 054 (T2): the Bildo of a brand per rev (without kabloj), and the Belegung of the view
   // Gestalten with its stylesheet, read and derived once per process on its first need.
-  const leinwandBildoj = new Map<string, { rev: number; korpo: string }>();
+  // Spec 055 (T4, D-14): the answer also carries the canvas state, so an entry holds only for the
+  // same rev and the same bytes of `leinwand.json` (null: no file).
+  const leinwandBildoj = new Map<string, { rev: number; dosiero: string | null; korpo: string }>();
+  /**
+   * Spec 055 (D-14): drops the cached `/api/leinwand` answer of a brand. Every route that writes
+   * `leinwand.json` calls it (PUT/DELETE `leinwand-stato`; LNS-3.1: „Öffnen“ of a Stand).
+   */
+  const leinwandBildoForigi = (name: string): void => {
+    leinwandBildoj.delete(name);
+  };
   let belegung: Agordo | null | undefined;
   const belegungOf = (): Agordo | null => {
     belegung ??= leinwandBelegung();
@@ -1648,8 +1666,16 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         sendHtml(response, "<!doctype html><title>400</title><p>Parameter kabloj unlesbar.", 400);
         return;
       }
-      const cached = kablojTeksto(kabloj) === "" ? leinwandBildoj.get(markoName) : undefined;
-      if (cached?.rev === draft.rev) {
+      // Spec 055 (T4): the canvas state beside the draft. Without a `kabloj` query its `kabloj`
+      // apply (D-15: as {} when their effective Agordo does not read); a query keeps 054's meaning.
+      const dosiero = leinwandStatoLegi(options.workdir, markoName);
+      const dosieroBajtoj = dosiero.speco === "mankas" ? null : dosiero.bajtoj;
+      let stato = dosiero.speco === "stato" ? dosiero.stato : null;
+      const dosieroKabloj =
+        stato !== null && !url.searchParams.has("kabloj") ? stato.kabloj : undefined;
+      const senKabloj = kablojTeksto(kabloj) === "" && kablojTeksto(dosieroKabloj ?? {}) === "";
+      const cached = senKabloj ? leinwandBildoj.get(markoName) : undefined;
+      if (cached?.rev === draft.rev && cached.dosiero === dosieroBajtoj) {
         response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(cached.korpo);
         return;
       }
@@ -1667,10 +1693,18 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       const start = startAgordo(markoName, "leer", bases);
-      const wirksam = wirksamerAgordo(read.agordo, start, kabloj);
+      // Spec 055 (D-15): the file's kabloj take effect only when their effective Agordo reads;
+      // else the answer is the one for kabloj {} (no 422 from file content), stato included.
+      let wirksameKabloj = kabloj;
+      if (dosieroKabloj !== undefined && kablojTeksto(dosieroKabloj) !== "") {
+        if (readAgordo(wirksamerAgordo(read.agordo, start, dosieroKabloj)).agordo !== undefined)
+          wirksameKabloj = dosieroKabloj;
+        else if (stato !== null) stato = { ...stato, kabloj: {} };
+      }
+      const wirksam = wirksamerAgordo(read.agordo, start, wirksameKabloj);
       // Spec 054 (T7): a view whose effective Agordo does not read answers like a draft that does
       // not read (the value of a source can be one the target field cannot carry).
-      const wirksamRead = kablojTeksto(kabloj) === "" ? read : readAgordo(wirksam);
+      const wirksamRead = kablojTeksto(wirksameKabloj) === "" ? read : readAgordo(wirksam);
       if (wirksamRead.agordo === undefined) {
         const eraroj = wirksamRead.issues.map(({ path: where, rule, message }) => ({
           path: where,
@@ -1683,9 +1717,40 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       const palettes = paletrojDe(wirksam, bases);
-      const korpo = serializeBildo(gestaltenDe(read.agordo, { start, kabloj, palettes, rev }));
-      if (kablojTeksto(kabloj) === "") leinwandBildoj.set(markoName, { rev, korpo });
+      const bildo = gestaltenDe(read.agordo, { start, kabloj: wirksameKabloj, palettes, rev });
+      const korpo = serializeLeinwandAntwort(bildo, stato, dosiero.speco === "unlesbar");
+      if (senKabloj) leinwandBildoj.set(markoName, { rev, dosiero: dosieroBajtoj, korpo });
       response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(korpo);
+      return;
+    }
+    // Spec 055 (T4): the canvas state of a brand. PUT writes the whole state, DELETE is
+    // „Anordnung zurücksetzen“ (the added nodes stay, without places; kabloj {}). Only the shape
+    // counts: no check, no rule; the draft, its rev and the Kroniko stay. An unreadable file is
+    // first renamed to its backup name. 404 as /api/marko/*; 422 `{feld, satz}` for a wrong shape;
+    // 200 `{gespeichert}`. Before the generic /api/marko/* handlers.
+    const leinwandStatoVojo = /^\/api\/marko\/([a-z0-9-]+)\/leinwand-stato$/.exec(path);
+    if (leinwandStatoVojo !== null && (method === "PUT" || method === "DELETE")) {
+      const [, name = ""] = leinwandStatoVojo;
+      if (draftOf(name) === undefined) {
+        sendJson(response, { satz: "Diese Marke gibt es nicht." }, 404);
+        return;
+      }
+      let nova: LeinwandStato;
+      if (method === "PUT") {
+        const lego = parseLeinwandStato(await readBody(request));
+        if (!("stato" in lego)) {
+          sendJson(response, { feld: LEINWAND_STATO_FELD, satz: LEINWAND_STATO_SATZ }, 422);
+          return;
+        }
+        nova = lego.stato;
+      } else {
+        const nun = leinwandStatoLegi(options.workdir, name);
+        nova = leinwandStatoRekomenco(nun.speco === "stato" ? nun.stato : null);
+      }
+      const zeit = new Date();
+      leinwandStatoSkribi(options.workdir, name, nova, zeit);
+      leinwandBildoForigi(name);
+      sendJson(response, { gespeichert: zeit.toISOString() });
       return;
     }
     // Spec 054 (T4/T5): the canvas's own write path – one change (a node's colour, the Tönung, a

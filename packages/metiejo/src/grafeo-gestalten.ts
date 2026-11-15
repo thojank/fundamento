@@ -9,6 +9,7 @@ import {
   type DerivedPalettes,
   type DerivedStep,
   derivationBasis,
+  neutralToenung,
   REFERENCE_STEPS,
 } from "@fundamento/agordilo";
 import { serializeCanonicalJson } from "@fundamento/modelo";
@@ -22,6 +23,7 @@ import {
   type FarboRolo,
   type Kabloj,
   ligoId,
+  NEUTRAL_FARBO_ENIR,
   ROLO_ETIKEDOJ,
   ROLO_PALETRO,
   STATUS_ROLOJ,
@@ -64,19 +66,20 @@ export function paletrojDe(agordo: Agordo, bases: Bases): DerivedPalettes | unde
   }
 }
 
-/** The colour value a node holds in the stored Agordo; Neutral holds none. */
+/** The colour value a node holds in the stored Agordo; Neutral: its own colour, if any. */
 function wertDe(agordo: Agordo, rolo: FarboRolo): string | undefined {
   if (rolo === "primaer") return agordo.leitfarbe;
   if (rolo === "akzent") return agordo.zweitfarbe?.farbe;
-  if (rolo === "neutral") return undefined;
+  if (rolo === "neutral") return agordo.neutral?.farbe;
   return agordo.zusatzfarben?.[rolo];
 }
 
 /**
  * The effective Agordo for `kabloj` (tech spec, table „Wirksamer Agordo“): per row the value of its
  * source node in the stored Agordo, or what the row falls back to without one – Primär the start
- * value, Akzent no Zweitfarbe, a Funktionsfarbe no field, Neutral no Tönung. A source without a
- * value, or of the wrong kind, counts as null. `festgelegt` and every other field stay as they are;
+ * value, Akzent no Zweitfarbe, a Funktionsfarbe no field, Neutral no `neutral` at all (Spec 055
+ * D-16: neither Tönung nor own colour, so a detached row is never more colourful than an attached
+ * one). A source without a value, or of the wrong kind, counts as null. `festgelegt` and every other field stay as they are;
  * the input is never changed.
  */
 export function wirksamerAgordo(agordo: Agordo, start: Agordo, kabloj: Kabloj): Agordo {
@@ -86,9 +89,8 @@ export function wirksamerAgordo(agordo: Agordo, start: Agordo, kabloj: Kabloj): 
     if (quelle === undefined) continue;
     if (ziel === "neutral") {
       if (quelle === "neutral") continue;
-      const { toenung: _gone, ...neutral } = next.neutral ?? {};
       const { neutral: _old, ...rest } = next;
-      next = Object.keys(neutral).length === 0 ? rest : { ...rest, neutral };
+      next = rest;
       continue;
     }
     const wert = quelle === null ? undefined : wertDe(agordo, quelle);
@@ -158,13 +160,18 @@ function farbojDe(
           elir: "farbo",
         }),
   );
-  const toenung = agordo.neutral?.toenung;
+  // Neutral (Spec 055 T3): derived from Primär, or its own colour `neutral.farbe`; „abgeleitet“
+  // only without both an own colour and a Tönung. Its swatch is the light step 100 either way.
+  const farbe = agordo.neutral?.farbe;
   out.push(
     nodo("neutral", {
+      ...(farbe === undefined ? {} : { wert: farbe }),
       hex: stepHex(palettes, "neutral", "100"),
-      stato: toenung === undefined ? "leer" : "von-hand",
+      stato:
+        farbe === undefined && agordo.neutral?.toenung === undefined ? "abgeleitet" : "von-hand",
       elir: "mezuro",
-      toenung: toenung ?? 0,
+      toenung: neutralToenung(agordo),
+      herkunft: farbe === undefined ? "primaer" : "eigene",
     }),
   );
   for (const rolo of STATUS_ROLOJ) {
@@ -230,12 +237,21 @@ function vicojDe(
   });
 }
 
-/** The edges that follow from the Agordo: Marke → colour → own row, Palette → previews. */
+/**
+ * The edges that follow from the Agordo: Marke → colour → own row, Palette → previews, and (Spec
+ * 055 D-18) the fixed edge Primär → Neutral in Primär's colour while Neutral is derived from it.
+ */
 function ligojDe(farboj: readonly BildoFarbo[], vorschauen: readonly string[]): BildoLigo[] {
   const ligo = (de: string, al: string, art: BildoLigo["art"], hex?: string): BildoLigo =>
     hex === undefined || hex === ""
       ? { id: ligoId(de, al), de, al, art }
       : { id: ligoId(de, al), de, al, art, hex };
+  const primaer = farboj.find((farbo) => farbo.rolo === "primaer");
+  const neutral = farboj.find((farbo) => farbo.rolo === "neutral");
+  const festaj: BildoLigo[] =
+    primaer === undefined || neutral?.herkunft !== "primaer"
+      ? []
+      : [{ ...ligo(`${primaer.id}.el`, NEUTRAL_FARBO_ENIR, "farbo", primaer.hex), fest: true }];
   return [
     ...farboj.map((farbo) => ligo("marko.el", `${farbo.id}.en`, "marko")),
     ...farboj.map((farbo) =>
@@ -246,6 +262,7 @@ function ligojDe(farboj: readonly BildoFarbo[], vorschauen: readonly string[]): 
         farbo.elir === "farbo" ? farbo.hex : undefined,
       ),
     ),
+    ...festaj,
     ...vorschauen.map((id) => ligo("paletro.el", `${id}.en`, "marko")),
   ];
 }

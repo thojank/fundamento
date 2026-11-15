@@ -3,11 +3,12 @@
 // it: the current Bildo, the one write path, the session's edges and what follows from them, the
 // removal of session-only nodes, the focus request of „Akzent setzen“ and the raise of a node while
 // it shows a hint. Node components receive their own node as React Flow `data.nodo`.
+// Spec 055 (T4): `rekomenci` starts the session again from the stored canvas state („Anordnung
+// zurücksetzen“, and „Öffnen“ of a Stand).
 
 import type {
   Bildo,
   BildoFarbo,
-  BildoFazo,
   BildoLigo,
   BildoMarko,
   BildoPaletro,
@@ -34,22 +35,16 @@ export interface VorschauDatumo {
 
 /**
  * The `data` of every node: its node from the Bildo – or, for a node that lives only in the
- * session (an empty Funktionsfarbe from „+ Knoten“, a further preview), a node of the same shape –
+ * session and the canvas state (a further preview), a node of the same shape –
  * and whether it is such a session node (`sitzung: true`; it can be removed with `forigi`).
  */
 export type NodoDatumoj<N> = { nodo: N; sitzung: boolean };
 
-export type FazoFlowNodo = Node<NodoDatumoj<BildoFazo>, "fazo">;
 export type MarkoFlowNodo = Node<NodoDatumoj<BildoMarko>, "marko">;
 export type FarboFlowNodo = Node<NodoDatumoj<BildoFarbo>, "farbo">;
 export type PaletroFlowNodo = Node<NodoDatumoj<BildoPaletro>, "paletro">;
 export type VorschauFlowNodo = Node<NodoDatumoj<VorschauDatumo>, "vorschau">;
-export type GestaltenFlowNodo =
-  | FazoFlowNodo
-  | MarkoFlowNodo
-  | FarboFlowNodo
-  | PaletroFlowNodo
-  | VorschauFlowNodo;
+export type GestaltenFlowNodo = MarkoFlowNodo | FarboFlowNodo | PaletroFlowNodo | VorschauFlowNodo;
 
 /** The capabilities of the shell (plan §2.3). */
 export interface GestaltenValoro {
@@ -81,6 +76,23 @@ export interface GestaltenValoro {
   hervorheben: (nodeId: string, on: boolean) => void;
   /** The canvas's own scheme (the switch „Leinwand hell | dunkel“); previews keep their own. */
   skemo: Schema;
+  /**
+   * Spec 055 (T4): starts the session again from what the server stores. Waits for a state write
+   * in flight (a scheduled one is dropped), reloads the Bildo without `kabloj` (the server applies
+   * the stored state's), and takes the stored state as the new session: places → moved places,
+   * `kabloj` → the session's edges (`sitzungDeKabloj`), added nodes → session nodes, the number of
+   * the next further preview past the highest one. The old session is discarded. „Anordnung
+   * zurücksetzen“ calls it after `statoForigi`; „Öffnen“ of a Stand (LNS-3.1) after the server
+   * replaced draft and state. Resolves once the new session is set (also when the load failed:
+   * then the canvas stays as it was).
+   */
+  rekomenci: () => Promise<void>;
+  /**
+   * Spec 055 (T4): resolves once no write of the canvas state is in flight; a scheduled one is
+   * dropped. Call it before a request that replaces `leinwand.json` on the server (LNS-3.1:
+   * „Öffnen“), so a late write of the old session cannot land after it.
+   */
+  statoAtendi: () => Promise<void>;
 }
 
 export const GestaltenKunteksto = createContext<GestaltenValoro | null>(null);

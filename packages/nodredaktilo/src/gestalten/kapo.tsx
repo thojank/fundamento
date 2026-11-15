@@ -3,8 +3,12 @@
 // about changed connections (`LigoHinweis`, T7), „gespeichert HH:MM“ (nothing before the first
 // write of this session), the switch „Leinwand hell | dunkel“ and „Im Studio öffnen“. No cost hint,
 // no menus „Datei“/„Bearbeiten“, no judgment. Controls are Eroj in the neutral Belegung.
+// Spec 055 (T4, plan §2.4, Option A): right of the notice the calm line „Anordnung ließ sich nicht
+// lesen, Startanordnung“ (while the stored state does not read, until the next write), „gespeichert
+// HH:MM“ or calmly NE_KONSERVITA_SATZ, the slot `staende` for „Stand speichern“ and „Stände“
+// (LNS-3.1), then „Anordnung zurücksetzen“, before „Leinwand hell | dunkel“.
 
-import type { Schema } from "@fundamento/metiejo/gestalten";
+import { NE_KONSERVITA_SATZ, type Schema } from "@fundamento/metiejo/gestalten";
 import type { ReactNode } from "react";
 import { ROLOJ, useStilo } from "./roloj.js";
 
@@ -53,8 +57,15 @@ const STILO = `
 .nr-g-segmento > fm-ligilo { padding-inline: var(--fm-spacing-medium); }
 .nr-g-gespeichert { font-family: var(--fm-font-family-code); font-size: var(--fm-typography-caption-font-size); color: ${ROLOJ.mallauta}; }
 .nr-g-kapo-etikedo { font-size: var(--fm-typography-caption-font-size); color: ${ROLOJ.mallauta}; }
+.nr-g-stato-unlesbar { font-size: var(--fm-typography-caption-font-size); color: ${ROLOJ.mallauta}; }
 .nr-g-ligo-hinweis { display: inline-flex; align-items: center; gap: var(--fm-spacing-medium); font-size: var(--fm-typography-caption-font-size); color: ${ROLOJ.mallauta}; }
 `;
+
+/** The last write of this session: saved at a time („gespeichert HH:MM“), or not saved. */
+export type Konservo = { speco: "ok"; teksto: string } | { speco: "ne" };
+
+/** The calm line while the stored canvas state does not read (product spec, Randfälle). */
+export const STATO_UNLESBAR_SATZ = "Anordnung ließ sich nicht lesen, Startanordnung";
 
 export interface KapoProps {
   marko: string;
@@ -63,8 +74,20 @@ export interface KapoProps {
   menuoMalfermita: boolean;
   /** Opens or closes the list „+ Knoten“. */
   menuo: () => void;
-  /** „gespeichert HH:MM“ of the last write in this session, or null before the first. */
-  gespeichert: string | null;
+  /**
+   * The last write in this session (a colour or the canvas state): „gespeichert HH:MM“, or
+   * NE_KONSERVITA_SATZ when it failed; null before the first.
+   */
+  gespeichert: Konservo | null;
+  /** Whether the stored canvas state did not read (calm line until the next successful write). */
+  statoUnlesbar: boolean;
+  /** „Anordnung zurücksetzen“: start places, the Agordo's connections, added nodes stay. */
+  anordnungZuruecksetzen: () => void;
+  /**
+   * The slot for „Stand speichern“ and „Stände“ (LNS-3.1), right after „gespeichert …“ and before
+   * „Anordnung zurücksetzen“ (plan §2.4). Null: nothing there.
+   */
+  staende?: ReactNode;
   skemo: Schema;
   /** Sets the canvas's own scheme. */
   elektiSkemon: (skemo: Schema) => void;
@@ -97,6 +120,9 @@ export function Kapo({
   menuoMalfermita,
   menuo,
   gespeichert,
+  statoUnlesbar,
+  anordnungZuruecksetzen,
+  staende = null,
   skemo,
   elektiSkemon,
   ligoHinweis,
@@ -136,11 +162,30 @@ export function Kapo({
       </div>
       <div className="nr-g-grupo">
         {ligoHinweis}
+        {statoUnlesbar ? (
+          <span className="nr-g-stato-unlesbar" data-nr-stato-unlesbar="">
+            {STATO_UNLESBAR_SATZ}
+          </span>
+        ) : null}
         {gespeichert === null ? null : (
-          <span className="nr-g-gespeichert" aria-live="polite" data-nr-gespeichert="">
-            {gespeichert}
+          <span
+            className="nr-g-gespeichert"
+            aria-live="polite"
+            data-nr-gespeichert={gespeichert.speco === "ok" ? "" : "ne"}
+          >
+            {gespeichert.speco === "ok" ? gespeichert.teksto : NE_KONSERVITA_SATZ}
           </span>
         )}
+        {staende}
+        <fm-butono
+          size="small"
+          emphasis="medium"
+          data-nr-anordnung-zuruecksetzen=""
+          onClick={anordnungZuruecksetzen}
+        >
+          Anordnung zurücksetzen
+        </fm-butono>
+        <span className="nr-g-trenilo" />
         <span className="nr-g-kapo-etikedo">Leinwand</span>
         <span className="nr-g-segmento" data-nr-skemoj="">
           {SKEMOJ.map((s) => (

@@ -169,7 +169,7 @@ describe("Spec 054 T1: ligojKun – the edges of the session after a new Bildo",
     ]);
     expect(
       ligoj
-        .filter((l) => l.de === "farbo-primaer.el")
+        .filter((l) => l.de === "farbo-primaer.el" && l.fest !== true)
         .map((l) => l.al)
         .sort(),
     ).toEqual(["paletro.en.info", "paletro.en.primaer", "paletro.en.warning"]);

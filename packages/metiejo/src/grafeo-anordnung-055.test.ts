@@ -239,7 +239,8 @@ describe("Spec 055 T1: edge lanes in the column gaps (D-4)", () => {
       ),
     ];
     const befunde: string[] = [];
-    for (const ligo of ligoj) {
+    // The fixed edge Primär → Neutral (D-18) is one vertical piece between the two nodes, no lane.
+    for (const ligo of ligoj.filter((l) => l.fest !== true)) {
       const finoj = finojDe(ligo, kadroj);
       if (finoj === undefined) {
         befunde.push(`${ligo.id}: unknown end`);

@@ -51,17 +51,6 @@ const FARBO_ROLLEN: readonly Exclude<FarboRolo, "neutral">[] = [
   "info",
 ];
 
-/**
- * Spec 055 T3: the own Neutral colour, set (a readable colour) or taken back (null). A local type
- * of the server until LNS-2.1 folds it into `LeinwandSxangxo` (grafeo-gestalten-sicht.ts).
- */
-export interface NeutralSxangxo {
-  neutral: { farbe: string | null };
-}
-
-/** Every change the write path reads: the canvas's changes and the own Neutral colour. */
-export type SkriboSxangxo = LeinwandSxangxo | NeutralSxangxo;
-
 /** What the write path answers: the next Agordo, a refusal of one field, or a malformed body. */
 export type SkriboRezulto =
   | { speco: "ok"; agordo: Agordo }
@@ -215,7 +204,7 @@ function kunToenung(agordo: Agordo, toenung: unknown): Agordo {
 const isObjekto = (x: unknown): x is Record<string, unknown> =>
   typeof x === "object" && x !== null && !Array.isArray(x);
 
-type Legita = { speco: "ok"; sxangxo: SkriboSxangxo } | { speco: "malformita"; mesagxo: string };
+type Legita = { speco: "ok"; sxangxo: LeinwandSxangxo } | { speco: "malformita"; mesagxo: string };
 
 /**
  * The shape of the body: exactly one of `farbe`, `toenung`, `stufe`, `neutral`, with a known role,
@@ -282,7 +271,7 @@ export function sxangxoEl(korpo: unknown): Legita {
  * The field a refusal names: `farbe.primaer`, `toenung`, `stufe.color.palette.accent.500`,
  * `neutral.farbe`.
  */
-export function feldDe(sxangxo: SkriboSxangxo): string {
+export function feldDe(sxangxo: LeinwandSxangxo): string {
   if ("farbe" in sxangxo) return `farbe.${sxangxo.farbe.rolle}`;
   if ("stufe" in sxangxo) return `stufe.${sxangxo.stufe.token}`;
   if ("neutral" in sxangxo) return "neutral.farbe";

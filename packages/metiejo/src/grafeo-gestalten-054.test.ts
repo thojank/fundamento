@@ -197,7 +197,7 @@ describe("Spec 054 T1: Marke and colour nodes come from the stored Agordo", () =
     expect(farbo(bildo, "akzent").stato).toBe("leer");
     expect(farbo(bildo, "akzent").wert).toBeUndefined();
     expect(farbo(bildo, "neutral")).toMatchObject({
-      stato: "leer",
+      stato: "abgeleitet",
       elir: "mezuro",
       toenung: 0,
       hex: neutral100?.hex,
@@ -485,6 +485,12 @@ describe("Spec 054 T1: the edges that follow from the Agordo", () => {
         ]),
         "paletro.el>vorschau-hell.en:marko:",
         "paletro.el>vorschau-dunkel.en:marko:",
+        // Spec 055 D-18: the fixed edge Primär → Neutral while Neutral is derived from Primär.
+        ...farboj.flatMap((n) =>
+          n.rolo === "neutral" && n.herkunft === "primaer"
+            ? [`farbo-primaer.el>farbo-neutral.en.farbo:farbo:${farbo(bildo, "primaer").hex}`]
+            : [],
+        ),
       ].sort();
       const ist = bildo.ligoj.map((l) => `${l.de}>${l.al}:${l.art}:${l.hex ?? ""}`).sort();
       if (JSON.stringify(ist) !== JSON.stringify(soll)) befunde.push(`${nomo}: ${ist.join(" ")}`);

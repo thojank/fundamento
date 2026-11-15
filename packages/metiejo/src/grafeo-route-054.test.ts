@@ -21,9 +21,10 @@ import { join } from "node:path";
 import { readAgordo } from "@fundamento/agordilo";
 import { buildModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { gestaltenDe, paletrojDe, serializeBildo, wirksamerAgordo } from "./grafeo-gestalten.js";
+import { gestaltenDe, paletrojDe, wirksamerAgordo } from "./grafeo-gestalten.js";
 import { gestaltenScreen } from "./grafeo-gestalten-ekrano.js";
 import { grafeoScreen } from "./html.js";
+import { serializeLeinwandAntwort } from "./leinwand-stato.js";
 import { PROVO_DOSIERO, provoAgordo } from "./test-doubles/grafeo-047.js";
 import { type TestServilo, testServilo } from "./test-doubles/servilo-044.js";
 import { komunaCss, loadBases, previewCss, startAgordo } from "./vorschau.js";
@@ -297,7 +298,10 @@ describe("Spec 054 T2: the two views and the data of a brand's canvas", () => {
     const agordo = provoAgordo();
     const start = startAgordo("provo", "leer");
     const palettes = paletrojDe(wirksamerAgordo(agordo, start, {}), bases);
-    const erwartet = serializeBildo(gestaltenDe(agordo, { start, kabloj: {}, palettes, rev: 1 }));
+    const erwartet = serializeLeinwandAntwort(
+      gestaltenDe(agordo, { start, kabloj: {}, palettes, rev: 1 }),
+      null,
+    );
     const dir = join(mit.workdir, "provo");
     const vorher = dosierojDe(dir);
     for (const server of [mit, ohne]) {
