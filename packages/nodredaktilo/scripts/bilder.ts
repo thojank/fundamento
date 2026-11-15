@@ -64,7 +64,12 @@ interface Marke {
 const MARKEN: readonly Marke[] = [
   { marke: "komuna", seite: "/aspekto/komuna/grafeo", api: "/api/grafeo?aspekto=komuna" },
   { marke: "ekzemplo", seite: "/aspekto/ekzemplo/grafeo", api: "/api/grafeo?aspekto=ekzemplo" },
-  { marke: "provo", seite: "/marko/provo/grafeo", api: "/api/grafeo?marko=provo" },
+  // Spec 054: a brand's canvas opens Gestalten; the 047 view is Verstehen.
+  {
+    marke: "provo",
+    seite: "/marko/provo/grafeo?ansicht=verstehen",
+    api: "/api/grafeo?marko=provo",
+  },
 ];
 
 type Wert<T> = T | typeof NICHT_GEMESSEN;
@@ -465,7 +470,7 @@ async function misseMarke(
   grafeo: Grafeo,
   bilder: string,
 ): Promise<MarkenMessung> {
-  const url = `${basis}${marke.seite}?scheme=light`;
+  const url = `${basis}${marke.seite}${marke.seite.includes("?") ? "&" : "?"}scheme=light`;
 
   // The three images on one page: collapsed, farbe/komponenten open, one ero sub-group open.
   let geerbtBild: Vorhanden<Wert<GeerbtBild>> = NICHT_GEMESSEN;

@@ -8,12 +8,19 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 const grafeoSicht = fileURLToPath(new URL("../metiejo/src/grafeo-sicht.ts", import.meta.url));
+// Spec 054 (MP-1, T1): the data of the view Gestalten, import-free like grafeo-sicht.ts.
+const gestaltenSicht = fileURLToPath(
+  new URL("../metiejo/src/grafeo-gestalten-sicht.ts", import.meta.url),
+);
 
 // biome-ignore lint/style/noDefaultExport: Vite loads its config from the default export.
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: { "@fundamento/metiejo/grafeo": grafeoSicht },
+    alias: {
+      "@fundamento/metiejo/grafeo": grafeoSicht,
+      "@fundamento/metiejo/gestalten": gestaltenSicht,
+    },
   },
   // Library mode leaves `process.env.NODE_ENV` in place; the browser has no `process`.
   define: { "process.env.NODE_ENV": JSON.stringify("production") },

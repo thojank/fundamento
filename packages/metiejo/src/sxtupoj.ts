@@ -330,11 +330,26 @@ function fields(input: ScreenInput): string {
                   `<data slot="options" value="${escapeHtml(name)}">${escapeHtml(name)}</data>`,
               )
               .join("")}</fm-elektilo>`;
+      // Spec 054 (E-10, D-1): the block „Neue Marke auf der Leinwand“ with its own action, a direct
+      // child of the form (only such a submit button sends it). The form never sends its submitter,
+      // so a classic script, registered while the page is parsed (before the module metiejo.js),
+      // notes a click on this action and adds ziel=leinwand to the values of that one submit.
+      const leinwand = `<fm-titolo level="2">Neue Marke auf der Leinwand</fm-titolo><fm-teksto>Nur mit dem Namen oben: Die Marke beginnt leer und öffnet sich direkt zum freien Gestalten.</fm-teksto><fm-butono type="submit" emphasis="medium" data-mt-ziel="leinwand">Auf der Leinwand anlegen</fm-butono><script>{
+  const form = document.currentScript.parentElement;
+  const action = form.querySelector(":scope > fm-butono[data-mt-ziel]");
+  let ziel = false;
+  action.addEventListener("click", () => { ziel = true; });
+  document.addEventListener("click", () => { ziel = false; });
+  form.addEventListener("submit", (event) => {
+    if (ziel && event.detail && event.detail.values) event.detail.values.ziel = "leinwand";
+    ziel = false;
+  });
+}</script>`;
       return `<fm-kampo name="name" required autocomplete="off" placeholder="Quendolin">Name der Marke<span slot="help">So, wie du ihn schreibst. Kennung: <output data-mt-kennung aria-live="polite">–</output></span></fm-kampo><fm-elekto name="basis" value="leer">Womit fängst du an?<data slot="options" value="leer">Leer: nur der Name und eine Leitfarbe zum Ändern</data><data slot="options" value="komuna">Beispiel komuna: die Farbe und die Schriften der Referenz</data><data slot="options" value="komuna-0-2">Beispiel komuna-0-2: die Referenz, wie sie vor den neuen Grundlagen aussah</data>${
         input.markoj.length === 0
           ? ""
           : '<data slot="options" value="oeffnen">Vorhandene Marke öffnen</data>'
-      }</fm-elekto>${open}`;
+      }</fm-elekto>${open}${leinwand}`;
     }
     case "farbe": {
       if (marko === undefined) return "";

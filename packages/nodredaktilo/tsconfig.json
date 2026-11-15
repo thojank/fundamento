@@ -8,7 +8,8 @@
     "types": ["node", "vite/client"],
     "noEmit": true,
     "paths": {
-      "@fundamento/metiejo/grafeo": ["../metiejo/src/grafeo-sicht.ts"]
+      "@fundamento/metiejo/grafeo": ["../metiejo/src/grafeo-sicht.ts"],
+      "@fundamento/metiejo/gestalten": ["../metiejo/src/grafeo-gestalten-sicht.ts"]
     }
   },
   "include": ["src", "scripts", "vite.config.ts"]
