@@ -190,7 +190,9 @@ describe("Spec 054 T7: connections change Palette and preview, never the Agordo"
   it("plugging Primär into the row Warnung derives that row from Primär with its Basis (AK-18)", async () => {
     const ohne = await bildoDe("/api/leinwand?marko=wirkso");
     const primaer = farboDe(ohne, "farbo-primaer");
-    expect(vicoDe(ohne, "warning")?.fonto).toBe(null);
+    // Spec 055 (T2, D-17): the derived node Warnung is the row's source but feeds no colour.
+    expect(vicoDe(ohne, "warning")?.fonto).toBe("warning");
+    expect(vicoDe(ohne, "warning")?.basis).toBeUndefined();
 
     const mit = await bildoDe("/api/leinwand?marko=wirkso&kabloj=warning:primaer");
     expect(mit.kabloj).toEqual({ warning: "primaer" });

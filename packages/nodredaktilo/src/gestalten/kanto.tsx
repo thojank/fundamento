@@ -1,14 +1,18 @@
-// Spec 054 (MP-1, T3, T7): the edge of the view Gestalten. Thin and right-angled
-// (`getSmoothStepPath` with `borderRadius: 0`), in the colour of its source: a colour edge carries
-// the brand colour (inline, from the Bildo), a Marke edge the text role at half strength, a Maß edge
-// its kind's role. Stronger under the pointer, dashed and muted from an empty or detached colour
-// node. Edges into the palette rows run on slightly shifted verticals so parallel ones stay apart.
-// On a new rev an edge whose source changed carries a short light (`lumo`), only without
-// `prefers-reduced-motion: reduce` (the rule lives under `no-preference` in BAZA_STILO).
+// Spec 054 (MP-1, T3, T7): the edge of the view Gestalten. Thin and right-angled, in the colour of
+// its source: a colour edge carries the brand colour (inline, from the Bildo), a Marke edge the text
+// role at half strength, a Maß edge its kind's role. Stronger under the pointer, dashed and muted
+// from an empty or detached colour node.
+// Spec 055 (T1, plan D-4, D-5): the corners are round (`getSmoothStepPath` with the radius of
+// `--fm-radius-role-surface`, which the canvas reads once and hands in as `radiuso`; React Flow
+// writes each corner as a `Q` segment), and the vertical piece runs on the edge's lane in the gap
+// between two columns (`spuroX`), so no edge crosses a node at the start places.
+// On a new rev an edge whose source changed carries a short light (`lumo`) along the same path,
+// only without `prefers-reduced-motion: reduce` (the rule lives under `no-preference` in BAZA_STILO).
 // T7 (E-11): a selected edge carries „×“ in its middle (an Ero, `nodrag nopan`); it detaches the
 // edge through React Flow's own deletion (`deleteElements`, the same way as Entf on the canvas).
+// A fixed edge (055 D-18, `fest`: Primär → Neutral) is never selected and never shows „×“.
 
-import type { Anschlussart, BildoLigo } from "@fundamento/metiejo/gestalten";
+import { type Anschlussart, type BildoLigo, spuroX } from "@fundamento/metiejo/gestalten";
 import {
   BaseEdge,
   type Edge,
@@ -26,13 +30,13 @@ export type KantoDatumoj = {
   matt: boolean;
   /** Changes when the edge should light up once (a new rev touched its source); 0 = never. */
   lumo: number;
-  /** The shift of the vertical segment in px (palette rows fan out around the middle row). */
-  sxovo: number;
+  /** The corner radius in px (`--fm-radius-role-surface`, read once by the canvas). */
+  radiuso: number;
 };
 
 export type KantoFlowLigo = Edge<KantoDatumoj, "kanto">;
 
-/** The „×“ of a selected edge: a small round button in the middle of its vertical segment. */
+/** The „×“ of a selected edge: a small round button in the middle of its vertical piece. */
 const STILO = `
 .nr-g-kanto-x {
   position: absolute;
@@ -68,7 +72,9 @@ export function Kanto({
 }: EdgeProps<KantoFlowLigo>) {
   useStilo("kanto", STILO);
   const { deleteElements } = useReactFlow();
-  const sxovo = data?.sxovo ?? 0;
+  const ligo = data?.ligo;
+  // D-4: the lane of the vertical piece; without one (the fixed top → bottom edge) React Flow's own.
+  const centerX = ligo === undefined ? undefined : spuroX(ligo.de, ligo.al, sourceX, targetX);
   const [vojo, mezoX, mezoY] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -76,11 +82,11 @@ export function Kanto({
     targetX,
     targetY,
     targetPosition,
-    borderRadius: 0,
-    centerX: (sourceX + targetX) / 2 + sxovo,
+    borderRadius: data?.radiuso ?? 0,
+    ...(centerX === undefined ? {} : { centerX }),
   });
-  const ligo = data?.ligo;
   const art = ligo?.art ?? "marko";
+  const fest = ligo?.fest === true;
   const lumo = data?.lumo ?? 0;
   return (
     <>
@@ -93,9 +99,10 @@ export function Kanto({
         data-nr-art={art}
         data-nr-matt={data?.matt === true ? "" : undefined}
         data-nr-gewaehlt={selected === true ? "" : undefined}
+        data-nr-fest={fest ? "" : undefined}
       />
       {lumo === 0 ? null : <path key={lumo} className="nr-g-lumo" pathLength={100} d={vojo} />}
-      {selected === true ? (
+      {selected === true && !fest ? (
         <EdgeLabelRenderer>
           <div
             className={`nr-g-kanto-x ${NODRAG} ${NOPAN}`}

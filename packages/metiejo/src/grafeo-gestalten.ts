@@ -17,8 +17,8 @@ import {
   type BildoFarbo,
   type BildoLigo,
   type BildoNodo,
+  type DerivedPaletteName,
   FARBO_ROLOJ,
-  FAZOJ,
   type FarboRolo,
   type Kabloj,
   ligoId,
@@ -26,6 +26,7 @@ import {
   ROLO_PALETRO,
   STATUS_ROLOJ,
   type Stufo,
+  senValora,
   type Vico,
   vorschauHref,
 } from "./grafeo-gestalten-sicht.js";
@@ -113,7 +114,19 @@ const stepsOf = (palettes: DerivedPalettes | undefined, palette: string): Derive
 const stepHex = (palettes: DerivedPalettes | undefined, palette: string, step: string): string =>
   palettes?.steps.find((entry) => entry.palette === palette && entry.step === step)?.hex ?? "";
 
-/** The colour nodes from the stored Agordo: Primär, Akzent, Neutral, then the Funktionsfarben it has. */
+/** The light value of the Basis of a derived palette (the step that carries its colour), or "". */
+const basisHex = (palettes: DerivedPalettes | undefined, paletro: DerivedPaletteName): string =>
+  stepHex(
+    palettes,
+    paletro,
+    REFERENCE_STEPS[CALIBRATED_RAMP[paletro] as keyof typeof REFERENCE_STEPS],
+  );
+
+/**
+ * The colour nodes from the stored Agordo: Primär, Akzent, Neutral, then always the four
+ * Funktionsfarben (Spec 055 T2) – „von Hand“ with a value in `zusatzfarben`, else „abgeleitet“ with
+ * the light Basis of their derived palette (empty without a derivation).
+ */
 function farbojDe(
   agordo: Agordo,
   start: Agordo,
@@ -156,8 +169,15 @@ function farbojDe(
   );
   for (const rolo of STATUS_ROLOJ) {
     const wert = wertDe(agordo, rolo);
-    if (wert === undefined) continue;
-    out.push(nodo(rolo, { wert, hex: hexOf(wert), stato: "von-hand", elir: "farbo" }));
+    out.push(
+      wert === undefined
+        ? nodo(rolo, {
+            hex: basisHex(palettes, ROLO_PALETRO[rolo]),
+            stato: "abgeleitet",
+            elir: "farbo",
+          })
+        : nodo(rolo, { wert, hex: hexOf(wert), stato: "von-hand", elir: "farbo" }),
+    );
   }
   return out;
 }
@@ -201,7 +221,8 @@ function vicojDe(
       stufoj: stufojDe(palettes, paletro),
     };
     if (fonto !== undefined && fonto.hex !== "") vico.fontoHex = fonto.hex;
-    if (paletro !== "neutral" && fonto !== undefined && fonto.stato !== "leer") {
+    // A derived source (Spec 055 D-17) is set, but like an empty one it carries no colour.
+    if (paletro !== "neutral" && fonto !== undefined && !senValora(fonto.stato)) {
       const basis = REFERENCE_STEPS[CALIBRATED_RAMP[paletro] as keyof typeof REFERENCE_STEPS];
       if (vico.stufoj.some((stufo) => stufo.stufo === basis)) vico.basis = basis;
     }
@@ -230,9 +251,9 @@ function ligojDe(farboj: readonly BildoFarbo[], vorschauen: readonly string[]): 
 }
 
 /**
- * The Bildo of the view Gestalten (T1): six phases first, then Marke, the colour nodes of the
- * stored Agordo, the Palette of the effective one, and two previews (light, dark); the edges that
- * follow from the stored Agordo. No Regulo, no report, no problem count.
+ * The Bildo of the view Gestalten (054 T1, 055 T1): Marke, the seven colour nodes of the stored
+ * Agordo, the Palette of the effective one, and two previews (light, dark) – nodes only, no phase
+ * frames; the edges that follow from the stored Agordo. No Regulo, no report, no problem count.
  */
 export function gestaltenDe(agordo: Agordo, e: GestaltenEingaben): Bildo {
   const farboj = farbojDe(agordo, e.start, e.palettes);
@@ -246,7 +267,6 @@ export function gestaltenDe(agordo: Agordo, e: GestaltenEingaben): Bildo {
     }),
   );
   const nodoj: BildoNodo[] = [
-    ...FAZOJ.map((fazo) => ({ ...fazo })),
     { id: "marko", speco: "marko", fazo: "fazo-4" },
     ...farboj,
     {

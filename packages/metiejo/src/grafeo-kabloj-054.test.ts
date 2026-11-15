@@ -193,15 +193,24 @@ describe("Spec 054 T1: ligojKun – the edges of the session after a new Bildo",
   });
 
   it("drops edges at nodes that no longer exist, keeps those of session nodes", () => {
+    // Spec 055 (T2): the Funktionsfarben are always in the Bildo; a Bildo without the node stands
+    // in for a node that is gone.
+    const bildoOhne = (id: string): Bildo => ({
+      ...bildoLeer,
+      nodoj: bildoLeer.nodoj.filter((n) => n.id !== id),
+      ligoj: bildoLeer.ligoj.filter((l) => !l.id.includes(`${id}.`)),
+    });
+    const ohneWarnung = bildoOhne("farbo-warning");
+    const ohneErfolg = bildoOhne("farbo-success");
     const zuWarnung: LigoSitzung = {
       ...LEERE_SITZUNG,
       gezogen: [{ de: "farbo-warning.el", al: "paletro.en.primaer" }],
     };
     // Warnung was removed („↺“): the next Bildo has no such node.
-    expect(ligojKun(zuWarnung, bildoLeer).some((l) => l.de === "farbo-warning.el")).toBe(false);
+    expect(ligojKun(zuWarnung, ohneWarnung).some((l) => l.de === "farbo-warning.el")).toBe(false);
     // The drawn edge is gone, so the Agordo's edge at that input stays.
     expect(
-      ligojKun(zuWarnung, bildoLeer)
+      ligojKun(zuWarnung, ohneWarnung)
         .filter((l) => l.al === "paletro.en.primaer")
         .map((l) => l.de),
     ).toEqual(["farbo-primaer.el"]);
@@ -215,9 +224,9 @@ describe("Spec 054 T1: ligojKun – the edges of the session after a new Bildo",
       ],
       nodoj: [],
     };
-    expect(ligojKun(leererKnoten, bildoLeer)).toEqual(bildoLeer.ligoj);
-    const mit = ligojKun({ ...leererKnoten, nodoj: ["farbo-success", "vorschau-3"] }, bildoLeer);
-    expect(mit.slice(bildoLeer.ligoj.length).map((l) => [l.id, l.art, l.hex])).toEqual([
+    expect(ligojKun(leererKnoten, ohneErfolg)).toEqual(ohneErfolg.ligoj);
+    const mit = ligojKun({ ...leererKnoten, nodoj: ["farbo-success", "vorschau-3"] }, ohneErfolg);
+    expect(mit.slice(ohneErfolg.ligoj.length).map((l) => [l.id, l.art, l.hex])).toEqual([
       [ligoId("marko.el", "farbo-success.en"), "marko", undefined],
       [ligoId("farbo-success.el", "paletro.en.success"), "farbo", undefined],
       [ligoId("paletro.el", "vorschau-3.en"), "marko", undefined],
@@ -464,16 +473,17 @@ describe("Spec 054 T1: aldonebloj – the catalog „+ Knoten“ (AK-21 pure)", 
         .map((e) => [`${e.grupo} · ${e.nomo}`, e.stato]),
     );
 
-  it("an empty brand: four Funktionsfarben to create, Akzent to set, a further preview", () => {
+  // Spec 055 (T2): the four Funktionsfarben are on the canvas from the start („auf der Leinwand“).
+  it("an empty brand: four Funktionsfarben on the canvas, Akzent to set, a further preview", () => {
     expect(stand(bildoLeer.nodoj)).toEqual({
       "Eingabe · Marke": "da",
       "Gestalt · Farbe · Primär": "da",
       "Gestalt · Farbe · Akzent": "setzen",
       "Gestalt · Farbe · Neutral": "da",
-      "Gestalt · Farbe · Erfolg": "anlegen",
-      "Gestalt · Farbe · Warnung": "anlegen",
-      "Gestalt · Farbe · Fehler": "anlegen",
-      "Gestalt · Farbe · Hinweis": "anlegen",
+      "Gestalt · Farbe · Erfolg": "da",
+      "Gestalt · Farbe · Warnung": "da",
+      "Gestalt · Farbe · Fehler": "da",
+      "Gestalt · Farbe · Hinweis": "da",
       "Gestalt · Palette": "da",
       "Vorschau · Komponenten": "weitere",
     });
@@ -483,7 +493,7 @@ describe("Spec 054 T1: aldonebloj – the catalog „+ Knoten“ (AK-21 pure)", 
     const s = stand(bildoFarbig.nodoj);
     expect(s["Gestalt · Farbe · Akzent"]).toBe("da");
     expect(s["Gestalt · Farbe · Warnung"]).toBe("da");
-    expect(s["Gestalt · Farbe · Erfolg"]).toBe("anlegen");
+    expect(s["Gestalt · Farbe · Erfolg"]).toBe("da");
   });
 
   it("a brand with every Funktionsfarbe: nothing left to create; a session node counts as there", () => {
@@ -500,13 +510,7 @@ describe("Spec 054 T1: aldonebloj – the catalog „+ Knoten“ (AK-21 pure)", 
       eroj
         .filter((e) => e.stato === "anlegen" || e.stato === "setzen")
         .map((e) => [e.nomo, e.nodo]),
-    ).toEqual([
-      ["Farbe · Akzent", "farbo-akzent"],
-      ["Farbe · Erfolg", "farbo-success"],
-      ["Farbe · Warnung", "farbo-warning"],
-      ["Farbe · Fehler", "farbo-danger"],
-      ["Farbe · Hinweis", "farbo-info"],
-    ]);
+    ).toEqual([["Farbe · Akzent", "farbo-akzent"]]);
   });
 
   it("everything of a later run is „spaeter“, grouped by purpose in the catalog's order", () => {

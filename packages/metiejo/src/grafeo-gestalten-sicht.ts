@@ -1,9 +1,12 @@
 // Spec 054 (MP-1, T1): the data of the view Gestalten that server and canvas share – the Bildo
-// types, the fixed places ARANGXO_054 with the place rule, the connection rules of the session,
-// the effective view `kabloj` as text, the catalog „+ Knoten“, the preview address and the calm
-// German sentences. Like grafeo-sicht.ts this module has no import at all – not even a type – so
-// the browser bundle of @fundamento/nodredaktilo takes it through an alias (047 D-2). Pure and
-// deterministic: no clock, no randomness, no storage; outputs follow fixed orders.
+// types, the fixed places with the place rule, the connection rules of the session, the effective
+// view `kabloj` as text, the catalog „+ Knoten“, the preview address and the calm German sentences.
+// Spec 055 (MP-1b, T1): no phase frames any more – every item is a node at an absolute start place
+// (ARANGXO_055, with the maximum height of each node kind), every edge runs on its lane in the gap
+// between two columns, and the contracts of the canvas state and the Stände live here too.
+// Like grafeo-sicht.ts this module has no import at all – not even a type – so the browser bundle
+// of @fundamento/nodredaktilo takes it through an alias (047 D-2). Pure and deterministic: no
+// clock, no randomness, no storage; outputs follow fixed orders.
 
 // ---------------------------------------------------------------------------------------------
 // Data model (tech spec „Datenmodell der Ansicht Gestalten“)
@@ -24,6 +27,10 @@ export type FarboRolo =
   | "danger"
   | "info";
 
+/**
+ * The purpose tag a node carries (Spec 055 T1: the former phase ids). Never drawn and never used
+ * for placement; the catalog „+ Knoten“ groups by its own `grupo`.
+ */
 export type FazoId = "fazo-1" | "fazo-2" | "fazo-3" | "fazo-4" | "fazo-5" | "fazo-6";
 
 /** The palettes the derivation writes (agordilo `DerivedPaletteName`, restated: no import here). */
@@ -42,17 +49,19 @@ export type Schema = "hell" | "dunkel";
 /** Per palette row the colour node that feeds it, or null. Only deviations from the Agordo. */
 export type Kabloj = Partial<Record<FarboRolo, FarboRolo | null>>;
 
-/** What a colour node shows: no field in the Agordo, the start value, set by hand, from material. */
-export type FarboStato = "leer" | "startwert" | "von-hand" | "aus-material";
+/**
+ * What a colour node shows: no field in the Agordo, the start value, set by hand, from material,
+ * or derived (Spec 055 T2: a Funktionsfarbe without a value shows the Basis of its palette). In the
+ * pure rules „abgeleitet“ counts like „leer“: a node without a value of its own (plan D-17).
+ */
+export type FarboStato = "leer" | "startwert" | "von-hand" | "aus-material" | "abgeleitet";
 
-export interface BildoFazo {
-  id: FazoId;
-  speco: "fazo";
-  nr: 1 | 2 | 3 | 4 | 5 | 6;
-  titolo: string;
-  /** MP-1 fills only phases 4 and 5; the others show „kommt später“. */
-  malplena: boolean;
-}
+/**
+ * Transitional (Spec 055 T1): the Bildo has no phase nodes any more, so no value has this type.
+ * Only `nodredaktilo/src/gestalten/kunteksto.ts` still names it (its `FazoFlowNodo`); it goes
+ * once that file drops the name.
+ */
+export type BildoFazo = never;
 
 export interface BildoMarko {
   id: "marko";
@@ -122,11 +131,12 @@ export interface BildoVorschau {
   href: string;
 }
 
-export type BildoNodo = BildoFazo | BildoMarko | BildoFarbo | BildoPaletro | BildoVorschau;
+export type BildoNodo = BildoMarko | BildoFarbo | BildoPaletro | BildoVorschau;
 
 /**
  * An edge between two ports: `marko.el`, `farbo-<rolo>.en`, `farbo-<rolo>.el`, `paletro.en.<rolo>`,
- * `paletro.el`, `vorschau-<id>.en`. `hex` on colour edges: the colour of the source.
+ * `paletro.el`, `vorschau-<id>.en`, `farbo-neutral.en.farbo`. `hex` on colour edges: the colour of
+ * the source.
  */
 export interface BildoLigo {
   id: string;
@@ -134,6 +144,12 @@ export interface BildoLigo {
   al: string;
   art: Anschlussart;
   hex?: string;
+  /**
+   * Spec 055 (plan D-18): a fixed edge (Primär → Neutral while Neutral is derived). It has no „×“,
+   * is neither selectable for deletion nor reconnectable, and is no entry of `Kabloj`; a person
+   * cannot draw it (`validaLigo` refuses colour → colour).
+   */
+  fest?: true;
 }
 
 export interface Bildo {
@@ -142,7 +158,7 @@ export interface Bildo {
   ableitung: "ok" | "fehlt";
   /** The effective view of this answer; {} = as in the Agordo. */
   kabloj: Kabloj;
-  /** Phases first, then their nodes (R-13: a child after its parent). */
+  /** Marke, the seven colour nodes, Palette, the two previews – nodes only, no frames. */
   nodoj: BildoNodo[];
   /** The edges that follow from the Agordo: the start of every session and of „zurücksetzen“. */
   ligoj: BildoLigo[];
@@ -153,6 +169,51 @@ export type LeinwandSxangxo =
   | { farbe: { rolle: Exclude<FarboRolo, "neutral">; wert: string | null } }
   | { toenung: number }
   | { stufe: { token: string; wert: string | null; schema?: Schema } };
+
+// ---------------------------------------------------------------------------------------------
+// Canvas state and Stände (Spec 055 T4, T5: contracts; the file and routes come with LNS-2.2/3.1)
+
+/**
+ * One node of the canvas state (`marken/<name>/leinwand.json`). A fixed node carries `id`, `x`, `y`.
+ * An added node (today only `vorschau-<n>`, n ≥ 3) carries `speco` and `schema` as well, a place
+ * only once it has one (absent = its start slot), and `inhalt`, which 055 passes on unchanged
+ * (reserved for Spec 056).
+ */
+export interface LeinwandStatoKnoto {
+  id: string;
+  x?: number;
+  y?: number;
+  speco?: "vorschau";
+  schema?: Schema;
+  inhalt?: Record<string, unknown>;
+}
+
+/** The whole canvas state as the file holds it (canonical JSON, `version: 1`). */
+export interface LeinwandStato {
+  version: 1;
+  knoten: LeinwandStatoKnoto[];
+  /** As `Bildo.kabloj`: only the rows that differ from the Agordo. */
+  kabloj: Kabloj;
+}
+
+/**
+ * The answer of `GET /api/leinwand`: the Bildo plus the stored state (null without a file or when
+ * it cannot be read) and `statoUnlesbar` when a file exists but cannot be read.
+ */
+export type LeinwandAntwort = Bildo & {
+  stato: Omit<LeinwandStato, "version"> | null;
+  statoUnlesbar?: true;
+};
+
+/** One row of the list „Stände“: `lesbar: false` for a file that cannot be read (no colours). */
+export interface StandZeile {
+  id: string;
+  name: string;
+  /** ISO time of saving. */
+  zeit: string;
+  lesbar: boolean;
+  farben?: { primaer: string; akzent?: string; neutral: string };
+}
 
 // ---------------------------------------------------------------------------------------------
 // Fixed orders and labels
@@ -168,8 +229,22 @@ export const FARBO_ROLOJ: readonly FarboRolo[] = [
   "info",
 ];
 
-/** The Funktionsfarben, in the order they take the slots below Neutral. */
+/** The Funktionsfarben, in the order they stand below Akzent. */
 export const STATUS_ROLOJ: readonly FarboRolo[] = ["success", "warning", "danger", "info"];
+
+/**
+ * The colour column from top to bottom (product spec A): Neutral directly below Primär. A node's
+ * index here is also its lane between the column and the Palette (plan D-4).
+ */
+export const FARBO_KOLUMNO: readonly FarboRolo[] = [
+  "primaer",
+  "neutral",
+  "akzent",
+  "success",
+  "warning",
+  "danger",
+  "info",
+];
 
 export const ROLO_ETIKEDOJ: Readonly<Record<FarboRolo, string>> = {
   neutral: "Neutral",
@@ -192,15 +267,6 @@ export const ROLO_PALETRO: Readonly<Record<FarboRolo, DerivedPaletteName>> = {
   info: "info",
 };
 
-export const FAZOJ: readonly BildoFazo[] = [
-  { id: "fazo-1", speco: "fazo", nr: 1, titolo: "Ausgangslage", malplena: true },
-  { id: "fazo-2", speco: "fazo", nr: 2, titolo: "Kern", malplena: true },
-  { id: "fazo-3", speco: "fazo", nr: 3, titolo: "Stimme", malplena: true },
-  { id: "fazo-4", speco: "fazo", nr: 4, titolo: "Gesicht", malplena: false },
-  { id: "fazo-5", speco: "fazo", nr: 5, titolo: "Vorschau und Probe", malplena: false },
-  { id: "fazo-6", speco: "fazo", nr: 6, titolo: "Einsatz", malplena: true },
-];
-
 // ---------------------------------------------------------------------------------------------
 // Shared sentences (product spec, verbatim)
 
@@ -212,7 +278,7 @@ export const NE_KONEKTITA_SATZ =
   "Nicht verbunden. Ziehe eine Verbindung von der Palette oder der Marke hierher.";
 
 // ---------------------------------------------------------------------------------------------
-// Fixed places (E-9): from the mockup's GRUPPEN, PLATZ, fnPlatz and vorschauPlatz
+// Start places (Spec 055 T1, plan §2.2, D-2): absolute, from the mockup's startplaetze()
 
 export interface Pozicio {
   x: number;
@@ -223,77 +289,96 @@ export interface Platz extends Pozicio {
   largxo: number;
 }
 
-export interface FazoPlatz extends Platz {
-  alteco: number;
-}
+/** The node kinds by their maximum height (plan D-2). */
+export type AltecoSpeco =
+  | "marko"
+  | "farbo-granda"
+  | "farbo-neutral"
+  | "farbo-kompakta"
+  | "paletro"
+  | "vorschau";
 
 /**
- * Place and size of the phases (absolute), and the start places of the nodes relative to their
- * phase. The mockup lays the phases at y 96 with a height of 1016; a node's place there minus its
- * phase's origin is its place here. Never computed from the graph, never stored.
+ * The start places of the fixed nodes (absolute, flow units = px at zoom 1) with their widths, the
+ * maximum height of each node kind, the slots of further previews and the lanes of the edges. Four
+ * columns left to right: Marke → the seven colours (FARBO_KOLUMNO) → Palette → previews. The
+ * maximum heights include room for what Spec 055 adds to a node (Neutral: its sentence and the open
+ * field of an own colour; a Funktionsfarbe: „zurück zur Ableitung“). The browser check (plan D-19)
+ * is binding: a real height above its maximum is fixed in the node or by a larger gap, never by a
+ * smaller maximum. Never computed from the graph.
  */
-export const ARANGXO_054 = {
-  fazoj: {
-    "fazo-1": { x: 24, y: 96, largxo: 150, alteco: 1016 },
-    "fazo-2": { x: 186, y: 96, largxo: 150, alteco: 1016 },
-    "fazo-3": { x: 348, y: 96, largxo: 150, alteco: 1016 },
-    "fazo-4": { x: 510, y: 96, largxo: 910, alteco: 1016 },
-    "fazo-5": { x: 1432, y: 96, largxo: 420, alteco: 1016 },
-    "fazo-6": { x: 1864, y: 96, largxo: 150, alteco: 1016 },
-  } satisfies Record<FazoId, FazoPlatz>,
-  /** The fixed nodes, relative to their phase. */
+export const ARANGXO_055 = {
   nodoj: {
-    marko: { x: 24, y: 91, largxo: 190 },
-    "farbo-primaer": { x: 260, y: 54, largxo: 264 },
-    "farbo-akzent": { x: 260, y: 244, largxo: 264 },
-    "farbo-neutral": { x: 260, y: 434, largxo: 264 },
-    paletro: { x: 576, y: 54, largxo: 316 },
-    "vorschau-hell": { x: 24, y: 54, largxo: 372 },
-    "vorschau-dunkel": { x: 24, y: 524, largxo: 372 },
+    marko: { x: 24, y: 48, largxo: 190 },
+    "farbo-primaer": { x: 300, y: 24, largxo: 264 },
+    "farbo-neutral": { x: 300, y: 252, largxo: 264 },
+    "farbo-akzent": { x: 300, y: 570, largxo: 264 },
+    "farbo-success": { x: 300, y: 778, largxo: 264 },
+    "farbo-warning": { x: 300, y: 892, largxo: 264 },
+    "farbo-danger": { x: 300, y: 1006, largxo: 264 },
+    "farbo-info": { x: 300, y: 1120, largxo: 264 },
+    paletro: { x: 700, y: 24, largxo: 316 },
+    "vorschau-hell": { x: 1136, y: 24, largxo: 372 },
+    "vorschau-dunkel": { x: 1136, y: 524, largxo: 372 },
   } satisfies Record<string, Platz>,
-  /** The Funktionsfarben present take these slots in STATUS_ROLOJ order: y + index · dy. */
-  funkcioj: { x: 260, y: 630, largxo: 264, dy: 100 },
-  /** Further previews of the session, the k-th (0-based) at x + k · dx, y + k · dy. */
-  weitereVorschauen: { x: 54, y: 104, largxo: 372, dx: 30, dy: 30 },
+  /** The maximum height per node kind (D-2); `altecoDe` gives it per node id. */
+  alteco: {
+    marko: 72,
+    "farbo-granda": 190,
+    "farbo-neutral": 300,
+    "farbo-kompakta": 96,
+    paletro: 520,
+    vorschau: 480,
+  } satisfies Record<AltecoSpeco, number>,
+  /** Further previews below the two fixed ones: the k-th (0-based) at x, y + k · dy. */
+  weitereVorschauen: { x: 1136, y: 1024, largxo: 372, dy: 500 },
+  /** The lanes of the vertical edge pieces in px (plan D-4, see `spuroX`). */
+  spuroj: {
+    /** Marke → colour: one shared lane right of Marke, at sourceX + 34. */
+    marko: 34,
+    /** Palette → preview: one shared lane right of the Palette, at sourceX + 46. */
+    paletro: 46,
+    /** Colour → row: targetX − farboRando − (6 − index in FARBO_KOLUMNO) · farboDx. */
+    farboRando: 22,
+    farboDx: 12,
+  },
 } as const;
 
-const FIKSAJ = ARANGXO_054.nodoj as Readonly<Record<string, Platz>>;
-const FAZO_PLATZOJ = ARANGXO_054.fazoj as Readonly<Record<string, FazoPlatz>>;
+const FIKSAJ = ARANGXO_055.nodoj as Readonly<Record<string, Platz>>;
 
 const isStatusNodo = (id: string): boolean => STATUS_ROLOJ.some((rolo) => id === `farbo-${rolo}`);
 const isWeitereVorschau = (id: string): boolean => id.startsWith("vorschau-") && !(id in FIKSAJ);
 
-/** The width a node starts with (the mockup's); 0 for an unknown id. Phases: their width. */
+/** The width a node starts with (the mockup's); 0 for an unknown id. */
 export function largxoDe(id: string): number {
-  return (
-    FAZO_PLATZOJ[id]?.largxo ??
-    FIKSAJ[id]?.largxo ??
-    (isStatusNodo(id)
-      ? ARANGXO_054.funkcioj.largxo
-      : isWeitereVorschau(id)
-        ? ARANGXO_054.weitereVorschauen.largxo
-        : 0)
-  );
+  return FIKSAJ[id]?.largxo ?? (isWeitereVorschau(id) ? ARANGXO_055.weitereVorschauen.largxo : 0);
+}
+
+/** The kind of a node by its maximum height; undefined for an unknown id. */
+export function altecoSpecoDe(id: string): AltecoSpeco | undefined {
+  if (id === "marko" || id === "paletro" || id === "farbo-neutral") return id;
+  if (id === "farbo-primaer" || id === "farbo-akzent") return "farbo-granda";
+  if (isStatusNodo(id)) return "farbo-kompakta";
+  if (id.startsWith("vorschau-")) return "vorschau";
+  return undefined;
+}
+
+/** The maximum height of a node (D-2); 0 for an unknown id. */
+export function altecoDe(id: string): number {
+  const speco = altecoSpecoDe(id);
+  return speco === undefined ? 0 : ARANGXO_055.alteco[speco];
 }
 
 /**
- * The places of the current nodes (E-9): a node or phase in `verschoben` keeps that place, every
- * other one gets its start place from ARANGXO_054 for the current nodes – phases absolute, every
- * other node relative to its phase, so nodes move with their phase. Present Funktionsfarben fill
- * their slots in the fixed order; further previews (`vorschau-*` beyond hell/dunkel) are offset in
- * the order they come. Entries for nodes that are gone drop out. An id without a start place
- * starts at the origin of its phase.
+ * The absolute places of the current nodes: a node in `verschoben` (moved in the session, or stored
+ * with the canvas state) keeps that place; every fixed node gets its start place from ARANGXO_055;
+ * further previews (`vorschau-*` beyond hell/dunkel) take the slots below the fixed ones in the
+ * order they come. Entries for nodes that are gone drop out. An unknown id starts at the origin.
  */
 export function poziciojKun(
   verschoben: ReadonlyMap<string, Pozicio>,
-  nodoj: readonly { id: string; fazo?: FazoId }[],
+  nodoj: readonly { id: string }[],
 ): Map<string, Pozicio> {
-  const ids = new Set(nodoj.map((n) => n.id));
-  const statusSlot = new Map(
-    STATUS_ROLOJ.map((rolo) => `farbo-${rolo}`)
-      .filter((id) => ids.has(id))
-      .map((id, index) => [id, index] as const),
-  );
   const weitereSlot = new Map(
     nodoj
       .map((n) => n.id)
@@ -304,20 +389,13 @@ export function poziciojKun(
   for (const { id } of nodoj) {
     if (out.has(id)) continue;
     const moved = verschoben.get(id);
-    if (moved !== undefined) {
-      out.set(id, { x: moved.x, y: moved.y });
-      continue;
-    }
-    const platz = FAZO_PLATZOJ[id] ?? FIKSAJ[id];
-    const status = statusSlot.get(id);
+    const platz = FIKSAJ[id];
     const weitere = weitereSlot.get(id);
-    if (platz !== undefined) out.set(id, { x: platz.x, y: platz.y });
-    else if (status !== undefined) {
-      const { x, y, dy } = ARANGXO_054.funkcioj;
-      out.set(id, { x, y: y + status * dy });
-    } else if (weitere !== undefined) {
-      const { x, y, dx, dy } = ARANGXO_054.weitereVorschauen;
-      out.set(id, { x: x + weitere * dx, y: y + weitere * dy });
+    if (moved !== undefined) out.set(id, { x: moved.x, y: moved.y });
+    else if (platz !== undefined) out.set(id, { x: platz.x, y: platz.y });
+    else if (weitere !== undefined) {
+      const { x, y, dy } = ARANGXO_055.weitereVorschauen;
+      out.set(id, { x, y: y + weitere * dy });
     } else out.set(id, { x: 0, y: 0 });
   }
   return out;
@@ -344,6 +422,8 @@ const RANGO: Readonly<Record<string, number>> = { marko: 0, farbo: 1, paletro: 2
 export function anschlussDe(port: string): Anschluss | undefined {
   if (port === "marko.el") return { nodo: "marko", direkto: "el", art: "marko" };
   if (port === "paletro.el") return { nodo: "paletro", direkto: "el", art: "marko" };
+  // Spec 055 (D-18): the colour input at the top of Neutral, the end of the fixed edge from Primär.
+  if (port === NEUTRAL_FARBO_ENIR) return { nodo: "farbo-neutral", direkto: "en", art: "farbo" };
   const farbo = /^farbo-([a-z]+)\.(el|en)$/.exec(port);
   if (farbo !== null) {
     const [, rolo = "", direkto] = farbo;
@@ -367,6 +447,51 @@ const specoDe = (nodo: string): string => nodo.split("-")[0] ?? nodo;
 /** The id of the edge between two ports. */
 export function ligoId(de: string, al: string): string {
   return `${de}>${al}`;
+}
+
+/** Spec 055 (D-18): the port at the top of Neutral where the fixed edge from Primär ends. */
+export const NEUTRAL_FARBO_ENIR = "farbo-neutral.en.farbo";
+
+/**
+ * Spec 055 (D-18): the handle at the bottom of Primär the fixed edge leaves from. A handle id of
+ * the canvas only: it never stands in the Bildo, in `kabloj` or in the canvas state.
+ */
+export const FESTA_TENILO = "farbo-primaer.el.unten";
+
+/**
+ * The handle ids an edge is drawn between: its port ids, except for the fixed Primär → Neutral
+ * edge, which leaves Primär at the bottom (`FESTA_TENILO`) and ends at the top of Neutral.
+ */
+export function tenilojDe(ligo: BildoLigo): { de: string; al: string } {
+  if (ligo.fest === true && ligo.de === "farbo-primaer.el" && ligo.al === NEUTRAL_FARBO_ENIR) {
+    return { de: FESTA_TENILO, al: ligo.al };
+  }
+  return { de: ligo.de, al: ligo.al };
+}
+
+/**
+ * The x of the vertical piece of the edge `de` → `al` (plan D-4), from the x of its two ends as the
+ * canvas reports them. A colour → row edge takes the lane of its source node (index in
+ * FARBO_KOLUMNO, Primär leftmost), also when it was drawn onto another row; the Marke edges share
+ * one lane right of Marke, the Palette → preview edges one right of the Palette. Undefined for any
+ * other edge (the fixed Primär → Neutral edge runs top → bottom as one vertical piece).
+ */
+export function spuroX(
+  de: string,
+  al: string,
+  sourceX: number,
+  targetX: number,
+): number | undefined {
+  const el = anschlussDe(de);
+  const en = anschlussDe(al);
+  if (el?.direkto !== "el" || en?.direkto !== "en") return undefined;
+  const { spuroj } = ARANGXO_055;
+  if (el.nodo === "marko") return sourceX + spuroj.marko;
+  if (el.nodo === "paletro") return sourceX + spuroj.paletro;
+  if (en.nodo !== "paletro") return undefined;
+  const indekso = FARBO_KOLUMNO.findIndex((rolo) => el.nodo === `farbo-${rolo}`);
+  if (indekso < 0) return undefined;
+  return targetX - spuroj.farboRando - (FARBO_KOLUMNO.length - 1 - indekso) * spuroj.farboDx;
 }
 
 /**
@@ -411,7 +536,7 @@ export interface LigoSitzung {
   geloest: readonly string[];
   /** Edges the session drew, oldest first; at the same input the later one wins. */
   gezogen: readonly { de: string; al: string }[];
-  /** Nodes that live only in the session (an empty Funktionsfarbe, a further preview). */
+  /** Nodes that live only in the session (today: further previews). */
   nodoj: readonly string[];
 }
 
@@ -448,10 +573,18 @@ export function ligojKun(sitzung: LigoSitzung, bildo: Bildo): BildoLigo[] {
   return out;
 }
 
-/** Whether a colour node exists and carries a value: an empty one feeds nothing. */
+/**
+ * Whether a colour node's state means it has no value of its own: empty, or derived (Spec 055
+ * D-17: a Funktionsfarbe without a value shows its derived Basis but feeds no other row).
+ */
+export function senValora(stato: string | undefined): boolean {
+  return stato === "leer" || stato === "abgeleitet";
+}
+
+/** Whether a colour node exists and carries a value: an empty or derived one feeds nothing. */
 function kolora(nodoj: ReadonlyMap<string, { stato?: string }>, rolo: FarboRolo): boolean {
   const nodo = nodoj.get(`farbo-${rolo}`);
-  return nodo !== undefined && nodo.stato !== "leer";
+  return nodo !== undefined && !senValora(nodo.stato);
 }
 
 /**

@@ -117,6 +117,7 @@ const MARKOJ = {
   startwert: "Startwert",
   "von-hand": "von Hand",
   "aus-material": "aus Material",
+  abgeleitet: "abgeleitet",
 } as const;
 
 /** The head's port line: below the swatch for the tall nodes, in the head line for compact ones. */

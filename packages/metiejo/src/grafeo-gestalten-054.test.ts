@@ -17,16 +17,14 @@ import { buildModelo } from "@fundamento/modelo";
 import { beforeAll, describe, expect, it } from "vitest";
 import { gestaltenDe, paletrojDe, serializeBildo, wirksamerAgordo } from "./grafeo-gestalten.js";
 import {
-  ARANGXO_054,
+  ARANGXO_055,
   type Bildo,
   type BildoFarbo,
   type BildoNodo,
   type BildoPaletro,
   FARBO_ROLOJ,
   type FarboRolo,
-  type FazoId,
   type Kabloj,
-  largxoDe,
   type Pozicio,
   poziciojKun,
   ROLO_PALETRO,
@@ -135,39 +133,20 @@ describe("Spec 054 T1: the fixtures are valid Agordoj", () => {
 });
 
 describe("Spec 054 T1: phases are nodes (AK-20, R-13)", () => {
-  it("has six phases, 1/2/3/6 empty, listed before every other node", () => {
+  // Spec 055 (T1): the phase frames are gone; `fazo` stays on the nodes as a purpose tag only.
+  it("has no phase nodes any more (Spec 055 T1)", () => {
     const { bildo } = fall("FARBIG");
-    const fazoj = bildo.nodoj.filter((entry) => entry.speco === "fazo");
-    expect(
-      fazoj.map((entry) => entry.speco === "fazo" && [entry.id, entry.nr, entry.malplena]),
-    ).toEqual([
-      ["fazo-1", 1, true],
-      ["fazo-2", 2, true],
-      ["fazo-3", 3, true],
-      ["fazo-4", 4, false],
-      ["fazo-5", 5, false],
-      ["fazo-6", 6, true],
-    ]);
-    expect(fazoj.map((entry) => entry.speco === "fazo" && entry.titolo)).toEqual([
-      "Ausgangslage",
-      "Kern",
-      "Stimme",
-      "Gesicht",
-      "Vorschau und Probe",
-      "Einsatz",
-    ]);
-    expect(bildo.nodoj.slice(0, 6)).toEqual(fazoj);
+    expect(bildo.nodoj.filter((entry) => (entry.speco as string) === "fazo")).toEqual([]);
   });
 
-  it("gives every other node a phase that exists, and every node a unique id", () => {
+  it("gives every node a purpose tag of phase 4 or 5, and every node a unique id", () => {
     const befunde: string[] = [];
     for (const [nomo, { bildo }] of faelle) {
-      const fazoj = new Set(bildo.nodoj.filter((n) => n.speco === "fazo").map((n) => n.id));
       const ids = bildo.nodoj.map((n) => n.id);
       if (new Set(ids).size !== ids.length) befunde.push(`${nomo}: duplicate node ids`);
       for (const n of bildo.nodoj) {
-        if (n.speco === "fazo") continue;
-        if (!fazoj.has(n.fazo)) befunde.push(`${nomo}: ${n.id} has no phase`);
+        const tag: string = n.fazo;
+        if (tag !== "fazo-4" && tag !== "fazo-5") befunde.push(`${nomo}: ${n.id} has no tag`);
       }
     }
     expect(befunde).toEqual([]);
@@ -175,9 +154,7 @@ describe("Spec 054 T1: phases are nodes (AK-20, R-13)", () => {
 
   it("puts Marke, the colours and the Palette in phase 4 and the previews in phase 5", () => {
     const { bildo } = fall("ALLE");
-    const fazoDe = Object.fromEntries(
-      bildo.nodoj.flatMap((n) => (n.speco === "fazo" ? [] : [[n.id, n.fazo]])),
-    );
+    const fazoDe = Object.fromEntries(bildo.nodoj.map((n) => [n.id, n.fazo]));
     expect(fazoDe).toEqual({
       marko: "fazo-4",
       "farbo-primaer": "fazo-4",
@@ -226,9 +203,14 @@ describe("Spec 054 T1: Marke and colour nodes come from the stored Agordo", () =
       hex: neutral100?.hex,
     });
     expect(farbo(bildo, "neutral").wert).toBeUndefined();
+    // Spec 055 (T2): the four Funktionsfarben are always there, derived without a value.
     expect(
-      bildo.nodoj.map((n) => n.id).filter((id) => /^farbo-(success|warning|danger|info)$/.test(id)),
-    ).toEqual([]);
+      bildo.nodoj.flatMap((n) =>
+        n.speco === "farbo" && /^farbo-(success|warning|danger|info)$/.test(n.id)
+          ? [[n.id, n.stato]]
+          : [],
+      ),
+    ).toEqual(["success", "warning", "danger", "info"].map((r) => [`farbo-${r}`, "abgeleitet"]));
   });
 
   it("set colours: by hand, the Tönung, a Funktionsfarbe only when the Agordo has it", () => {
@@ -255,7 +237,8 @@ describe("Spec 054 T1: Marke and colour nodes come from the stored Agordo", () =
       stato: "von-hand",
       elir: "farbo",
     });
-    expect(bildo.nodoj.some((n) => n.id === "farbo-success")).toBe(false);
+    // Spec 055 (T2): a Funktionsfarbe without a value is on the canvas, derived.
+    expect(farbo(bildo, "success").stato).toBe("abgeleitet");
   });
 
   it("a Zweitfarbe with herkunft is „aus Material“; an oklch value keeps its text and draws as hex", () => {
@@ -416,7 +399,12 @@ describe("Spec 054 T1: the palette rows (AK-24, AK-25 data)", () => {
       );
       for (const vico of paletro(bildo).vicoj) {
         const fonto = vico.fonto === null ? undefined : farboj.get(vico.fonto);
-        const kolora = vico.rolo !== "neutral" && fonto !== undefined && fonto.stato !== "leer";
+        // Spec 055 (D-17): a derived Funktionsfarbe carries no colour of its own, like an empty one.
+        const kolora =
+          vico.rolo !== "neutral" &&
+          fonto !== undefined &&
+          fonto.stato !== "leer" &&
+          fonto.stato !== "abgeleitet";
         const soll =
           kolora && vico.paletro !== "neutral"
             ? REFERENCE_STEPS[CALIBRATED_RAMP[vico.paletro] as keyof typeof REFERENCE_STEPS]
@@ -450,7 +438,8 @@ describe("Spec 054 T1: the palette rows (AK-24, AK-25 data)", () => {
       expect(bildo.kabloj).toEqual({ warning: "primaer" });
     }
     const leer = paletro(fall("LEER").bildo).vicoj.find((v) => v.rolo === "warning");
-    expect(leer?.fonto).toBeNull();
+    // Spec 055 (D-17): the derived node Warnung is the row's source, but feeds no colour (no Basis).
+    expect(leer?.fonto).toBe("warning");
     expect(leer?.basis).toBeUndefined();
     expect(fall("FARBIG-akzent-geloest").bildo.kabloj).toEqual({ akzent: null });
   });
@@ -546,92 +535,34 @@ describe("Spec 054 T1: no judgment in the Bildo (AK-9 data)", () => {
   });
 });
 
-describe("Spec 054 T1: ARANGXO_054 – fixed places from the mockup", () => {
-  it("lays the phases left to right without overlap, the empty ones narrow (≈ ⅙ of phase 4)", () => {
-    const fazoj = Object.entries(ARANGXO_054.fazoj) as [
-      FazoId,
-      (typeof ARANGXO_054.fazoj)[FazoId],
-    ][];
-    expect(fazoj.map(([id]) => id)).toEqual([
-      "fazo-1",
-      "fazo-2",
-      "fazo-3",
-      "fazo-4",
-      "fazo-5",
-      "fazo-6",
-    ]);
-    const befunde: string[] = [];
-    for (let i = 1; i < fazoj.length; i += 1) {
-      const [idA, a] = fazoj[i - 1] ?? [];
-      const [idB, b] = fazoj[i] ?? [];
-      if (a === undefined || b === undefined) continue;
-      if (a.x + a.largxo > b.x) befunde.push(`${idA} overlaps ${idB}`);
-      if (a.y !== b.y || a.alteco !== b.alteco)
-        befunde.push(`${idA} and ${idB} differ in y or height`);
-    }
-    const gesicht = ARANGXO_054.fazoj["fazo-4"].largxo;
-    for (const id of ["fazo-1", "fazo-2", "fazo-3", "fazo-6"] as const) {
-      const anteil = ARANGXO_054.fazoj[id].largxo / gesicht;
-      if (anteil < 1 / 7 || anteil > 1 / 5)
-        befunde.push(`${id} is ${anteil.toFixed(3)} of phase 4`);
-    }
-    expect(befunde).toEqual([]);
-  });
-
-  it("places the fixed nodes inside their phase, Marke first, then colours, then Palette", () => {
-    const { bildo } = fall("ALLE");
-    const pozicioj = poziciojKun(new Map(), bildo.nodoj);
-    const befunde: string[] = [];
-    for (const n of bildo.nodoj) {
-      if (n.speco === "fazo") continue;
-      const p = pozicioj.get(n.id);
-      const fazo = ARANGXO_054.fazoj[n.fazo];
-      const largxo = largxoDe(n.id);
-      if (p === undefined) {
-        befunde.push(`${n.id} has no place`);
-        continue;
-      }
-      if (p.x < 0 || p.x + largxo > fazo.largxo || p.y < 0 || p.y > fazo.alteco) {
-        befunde.push(`${n.id} lies outside ${n.fazo}`);
-      }
-    }
-    expect(befunde).toEqual([]);
-    const x = (id: string) => pozicioj.get(id)?.x ?? Number.NaN;
-    expect(x("marko")).toBeLessThan(x("farbo-primaer"));
-    expect(x("farbo-primaer")).toBeLessThan(x("paletro"));
-  });
-});
-
+// Spec 055 (T1): the describe „ARANGXO_054 – fixed places from the mockup“ (phases without overlap,
+// nodes inside their phase) is gone with the phases; grafeo-anordnung-055 checks ARANGXO_055.
 describe("Spec 054 T1: poziciojKun – places in the session (AK-15 pure)", () => {
   const ids = (m: ReadonlyMap<string, Pozicio>) => [...m.keys()].sort();
+  const start = (id: keyof typeof ARANGXO_055.nodoj) => ({
+    x: ARANGXO_055.nodoj[id].x,
+    y: ARANGXO_055.nodoj[id].y,
+  });
 
-  it("without moves gives every node its start place, phases absolute, nodes relative", () => {
+  it("without moves gives every node its start place (Spec 055: absolute)", () => {
     const { bildo } = fall("FARBIG");
     const pozicioj = poziciojKun(new Map(), bildo.nodoj);
     expect(ids(pozicioj)).toEqual(bildo.nodoj.map((n) => n.id).sort());
-    expect(pozicioj.get("fazo-4")).toEqual({
-      x: ARANGXO_054.fazoj["fazo-4"].x,
-      y: ARANGXO_054.fazoj["fazo-4"].y,
-    });
-    const { x, y } = ARANGXO_054.nodoj.marko;
-    expect(pozicioj.get("marko")).toEqual({ x, y });
-    expect(pozicioj.get("farbo-warning")).toEqual({
-      x: ARANGXO_054.funkcioj.x,
-      y: ARANGXO_054.funkcioj.y,
-    });
+    expect(pozicioj.get("marko")).toEqual(start("marko"));
+    expect(pozicioj.get("farbo-warning")).toEqual(start("farbo-warning"));
   });
 
-  it("fills the Funktionsfarben slots below Neutral in the order Erfolg, Warnung, Fehler, Hinweis", () => {
+  it("places the Funktionsfarben below Neutral in the order Erfolg, Warnung, Fehler, Hinweis", () => {
     const pozicioj = poziciojKun(new Map(), fall("ALLE").bildo.nodoj);
-    const { x, y, dy } = ARANGXO_054.funkcioj;
-    expect(["success", "warning", "danger", "info"].map((r) => pozicioj.get(`farbo-${r}`))).toEqual(
-      [0, 1, 2, 3].map((i) => ({ x, y: y + i * dy })),
+    const ys = ["success", "warning", "danger", "info"].map(
+      (r) => pozicioj.get(`farbo-${r}`)?.y ?? Number.NaN,
     );
+    expect([...ys].sort((a, b) => a - b)).toEqual(ys);
     const neutral = pozicioj.get("farbo-neutral")?.y ?? Number.POSITIVE_INFINITY;
-    expect(y).toBeGreaterThan(neutral);
-    // Only the present ones count: Hinweis alone takes the first slot.
-    const nur = poziciojKun(new Map(), [{ id: "farbo-info", fazo: "fazo-4" }]);
-    expect(nur.get("farbo-info")).toEqual({ x, y });
+    expect(ys[0]).toBeGreaterThan(neutral);
+    // Spec 055: every Funktionsfarbe has its own place; Hinweis alone keeps it.
+    const nur = poziciojKun(new Map(), [{ id: "farbo-info" }]);
+    expect(nur.get("farbo-info")).toEqual(start("farbo-info"));
   });
 
   it("keeps a moved node in place over a new Bildo and gives a new node its start place", () => {
@@ -640,20 +571,17 @@ describe("Spec 054 T1: poziciojKun – places in the session (AK-15 pure)", () =
     const nachher = poziciojKun(verschoben, fall("FARBIG").bildo.nodoj);
     expect(vorher.get("marko")).toEqual({ x: 5, y: 700 });
     expect(nachher.get("marko")).toEqual({ x: 5, y: 700 });
-    expect(nachher.get("farbo-warning")).toEqual({
-      x: ARANGXO_054.funkcioj.x,
-      y: ARANGXO_054.funkcioj.y,
-    });
+    expect(nachher.get("farbo-warning")).toEqual(start("farbo-warning"));
     expect(nachher.get("farbo-primaer")).toEqual(vorher.get("farbo-primaer"));
   });
 
   it("drops entries for nodes that no longer exist", () => {
     const verschoben = new Map<string, Pozicio>([
-      ["farbo-warning", { x: 1, y: 2 }],
+      ["fazo-4", { x: 1, y: 2 }],
       ["vorschau-7", { x: 3, y: 4 }],
     ]);
     const pozicioj = poziciojKun(verschoben, fall("LEER").bildo.nodoj);
-    expect(pozicioj.has("farbo-warning")).toBe(false);
+    expect(pozicioj.has("fazo-4")).toBe(false);
     expect(pozicioj.has("vorschau-7")).toBe(false);
     expect(ids(pozicioj)).toEqual(
       fall("LEER")
@@ -662,38 +590,15 @@ describe("Spec 054 T1: poziciojKun – places in the session (AK-15 pure)", () =
     );
   });
 
-  it("lets the nodes follow a moved phase, and a new node appears inside the moved phase", () => {
-    const start = poziciojKun(new Map(), fall("LEER").bildo.nodoj);
-    const verschoben = new Map<string, Pozicio>([["fazo-4", { x: 900, y: 400 }]]);
-    const nachher = poziciojKun(verschoben, fall("FARBIG").bildo.nodoj);
-    const absolut = (m: ReadonlyMap<string, Pozicio>, id: string, fazo: string) => ({
-      x: (m.get(fazo)?.x ?? Number.NaN) + (m.get(id)?.x ?? Number.NaN),
-      y: (m.get(fazo)?.y ?? Number.NaN) + (m.get(id)?.y ?? Number.NaN),
-    });
-    expect(nachher.get("fazo-4")).toEqual({ x: 900, y: 400 });
-    const dx = 900 - ARANGXO_054.fazoj["fazo-4"].x;
-    const dy = 400 - ARANGXO_054.fazoj["fazo-4"].y;
-    const a = absolut(start, "marko", "fazo-4");
-    expect(absolut(nachher, "marko", "fazo-4")).toEqual({ x: a.x + dx, y: a.y + dy });
-    expect(absolut(nachher, "farbo-warning", "fazo-4")).toEqual({
-      x: 900 + ARANGXO_054.funkcioj.x,
-      y: 400 + ARANGXO_054.funkcioj.y,
-    });
-  });
-
-  it("places further previews slightly offset over the fixed ones", () => {
-    const nodoj = [
-      ...fall("LEER").bildo.nodoj,
-      { id: "vorschau-3", fazo: "fazo-5" as const },
-      { id: "vorschau-4", fazo: "fazo-5" as const },
-    ];
+  it("places further previews in the slots below the fixed ones (Spec 055)", () => {
+    const nodoj = [...fall("LEER").bildo.nodoj, { id: "vorschau-3" }, { id: "vorschau-4" }];
     const pozicioj = poziciojKun(new Map(), nodoj);
-    const { x, y, dx, dy } = ARANGXO_054.weitereVorschauen;
+    const { x, y, dy } = ARANGXO_055.weitereVorschauen;
     expect(pozicioj.get("vorschau-3")).toEqual({ x, y });
-    expect(pozicioj.get("vorschau-4")).toEqual({ x: x + dx, y: y + dy });
+    expect(pozicioj.get("vorschau-4")).toEqual({ x, y: y + dy });
     const hell = pozicioj.get("vorschau-hell");
     const dunkel = pozicioj.get("vorschau-dunkel");
-    expect(hell?.x).toBe(ARANGXO_054.nodoj["vorschau-hell"].x);
+    expect(hell?.x).toBe(ARANGXO_055.nodoj["vorschau-hell"].x);
     expect((dunkel?.y ?? 0) > (hell?.y ?? 0)).toBe(true);
   });
 });

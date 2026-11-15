@@ -119,6 +119,7 @@ import {
 import { knownFonts } from "./kontrolo.js";
 import { kreiloScreen } from "./kreilo/ekrano.js";
 import { describeKaraktero, kreiloProponoj } from "./kreilo/kreilo.js";
+import { markenListeDe } from "./marken-liste.js";
 import {
   createMarko,
   listMarkoj,
@@ -683,6 +684,8 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       regler,
       ikonoGewichte,
       ...(name === undefined ? {} : { averto: avertoOf(fremdaOf(name)) }),
+      // Spec 055 T6: the start lists the brands beside its form (also when it answers a problem).
+      ...(key === "start" ? { markenListe: markenListeDe(options.workdir, bases) } : {}),
       ...extra,
     };
     if (name !== undefined && draft !== undefined && marko !== undefined) {
