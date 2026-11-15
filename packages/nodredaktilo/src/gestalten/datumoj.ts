@@ -6,6 +6,9 @@
 // Spec 055 (T4): `sxargi` also hands on the stored canvas state of the answer; `statoSkribi` writes
 // the whole state (`PUT /api/marko/:name/leinwand-stato`), `statoForigi` is „Anordnung
 // zurücksetzen“ (`DELETE`). Neither touches the Agordo.
+// Spec 055 (T5): the named Stände – `staendeSxargi` lists them, `standKonservi` saves the draft and
+// the canvas state as a new Stand, `standMalfermi` opens one (the server backs the current state up
+// first). The answers carry no judgement; a Stand whose Agordo does not read answers its calm line.
 
 import {
   type Bildo,
@@ -14,6 +17,7 @@ import {
   type LeinwandAntwort,
   type LeinwandStato,
   type LeinwandSxangxo,
+  type StandZeile,
 } from "@fundamento/metiejo/gestalten";
 
 /** One issue of an invalid draft (as `/api/grafeo` and `/api/leinwand` answer 422). */
@@ -172,4 +176,94 @@ export function gespeichertTeksto(iso: string): string {
     minute: "2-digit",
   });
   return `gespeichert ${horo}`;
+}
+
+/** The Stände of a brand (Spec 055 T5). */
+export const staendeFonto = (marko: string): string =>
+  `/api/marko/${encodeURIComponent(marko)}/staende`;
+
+/** The list of the Stände (newest first), or a problem. */
+export type StaendeRespondo = { speco: "listo"; staende: StandZeile[] } | { speco: "problemo" };
+
+/** What saving a Stand answered: its id, name and time, or a problem. */
+export type StandKonservo =
+  | { speco: "ok"; id: string; name: string; zeit: string }
+  | { speco: "problemo" };
+
+/**
+ * What opening a Stand answered: the new rev (and the id of the backup, if one was made), the
+ * calm line of a Stand that cannot be opened (422 `{satz}`: nothing changed), or a problem.
+ */
+export type StandMalfermo =
+  | { speco: "ok"; rev: number; sicherung?: string }
+  | { speco: "ne-malfermebla"; satz: string }
+  | { speco: "problemo" };
+
+const isStandZeile = (x: unknown): x is StandZeile =>
+  isObjekto(x) &&
+  typeof x.id === "string" &&
+  typeof x.name === "string" &&
+  typeof x.zeit === "string" &&
+  typeof x.lesbar === "boolean";
+
+async function petiJson(
+  url: string,
+  init?: RequestInit,
+): Promise<{ status: number; korpo: unknown } | undefined> {
+  try {
+    const respondo = await fetch(url, {
+      ...init,
+      headers: { "content-type": "application/json", accept: "application/json" },
+    });
+    return { status: respondo.status, korpo: await respondo.json().catch(() => undefined) };
+  } catch {
+    return undefined;
+  }
+}
+
+/** `GET /api/marko/:name/staende`: the rows of the list. */
+export async function staendeSxargi(marko: string): Promise<StaendeRespondo> {
+  const r = await petiJson(staendeFonto(marko));
+  if (r?.status !== 200 || !Array.isArray(r.korpo)) return { speco: "problemo" };
+  return { speco: "listo", staende: r.korpo.filter(isStandZeile) };
+}
+
+/** `POST /api/marko/:name/staende`: saves a Stand; without a name the server proposes one. */
+export async function standKonservi(marko: string, name?: string): Promise<StandKonservo> {
+  const r = await petiJson(staendeFonto(marko), {
+    method: "POST",
+    body: JSON.stringify(name === undefined ? {} : { name }),
+  });
+  const k = r?.korpo;
+  if (r?.status === 201 && isObjekto(k)) {
+    const { id, name: nomo, zeit } = k;
+    if (typeof id === "string" && typeof nomo === "string" && typeof zeit === "string")
+      return { speco: "ok", id, name: nomo, zeit };
+  }
+  return { speco: "problemo" };
+}
+
+/** `POST /api/marko/:name/staende/:id/oeffnen`: the Stand becomes draft and canvas state. */
+export async function standMalfermi(marko: string, id: string): Promise<StandMalfermo> {
+  const r = await petiJson(`${staendeFonto(marko)}/${encodeURIComponent(id)}/oeffnen`, {
+    method: "POST",
+  });
+  const k = r?.korpo;
+  if (r?.status === 200 && isObjekto(k) && typeof k.rev === "number") {
+    return {
+      speco: "ok",
+      rev: k.rev,
+      ...(typeof k.sicherung === "string" ? { sicherung: k.sicherung } : {}),
+    };
+  }
+  if (r?.status === 422 && isObjekto(k) && typeof k.satz === "string")
+    return { speco: "ne-malfermebla", satz: k.satz };
+  return { speco: "problemo" };
+}
+
+const du = (zahl: number): string => String(zahl).padStart(2, "0");
+
+/** A time as „15.11.2026, 14:32“ in the local time of the browser (the list, the proposal). */
+export function standZeitTeksto(zeit: Date): string {
+  return `${du(zeit.getDate())}.${du(zeit.getMonth() + 1)}.${zeit.getFullYear()}, ${du(zeit.getHours())}:${du(zeit.getMinutes())}`;
 }

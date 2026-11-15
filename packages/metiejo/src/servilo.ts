@@ -152,6 +152,18 @@ import { NORDSTELO_DIR, type NordsteloHistorio, nordsteloScreen } from "./nordst
 import { transkribi } from "./parolo/parolo.js";
 import { type PrivataDeps, privataState, uploadFont } from "./privata.js";
 import {
+  farbenDeBases,
+  leinwandAnstatauxigi,
+  nunaLeinwando,
+  STAND_ID_MUSTRO,
+  STAND_NE_MALFERMEBLA_SATZ,
+  sicherungNomo,
+  staendeListe,
+  standEnhavo,
+  standLegi,
+  standSkribi,
+} from "./staende.js";
+import {
   composeDraft,
   isStudioPage,
   kombinationOf,
@@ -1751,6 +1763,93 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       leinwandStatoSkribi(options.workdir, name, nova, zeit);
       leinwandBildoForigi(name);
       sendJson(response, { gespeichert: zeit.toISOString() });
+      return;
+    }
+    // Spec 055 (T5): the named Stände of a brand. GET lists them (newest first, swatches,
+    // `lesbar: false` for a file that does not read; [] without `staende/`). POST saves the draft
+    // and the canvas state as a new Stand (201 `{id, name, zeit}`; an empty name takes the
+    // proposal). „Öffnen“ backs the current state up unless it is byte-identical to the Stand,
+    // then makes the Stand the draft (setDraft: rev+1, Kroniko) and the canvas state, and drops the
+    // cached Bildo (D-14); agordo.json and its historio stay. 404 for an unknown brand or id (a
+    // malformed id before any disk access); 422 `{satz}` for a Stand that does not read, with
+    // nothing written. Never a rule. Before the generic /api/marko/* handlers.
+    const staendeVojo = /^\/api\/marko\/([a-z0-9-]+)\/staende$/.exec(path);
+    const oeffnenVojo = /^\/api\/marko\/([a-z0-9-]+)\/staende\/([^/]+)\/oeffnen$/.exec(path);
+    if (
+      (staendeVojo !== null && (method === "GET" || method === "POST")) ||
+      (oeffnenVojo !== null && method === "POST")
+    ) {
+      const [, name = "", id] = staendeVojo ?? oeffnenVojo ?? [];
+      const nenia = (): void => sendJson(response, { satz: "Diese Marke gibt es nicht." }, 404);
+      if (id !== undefined && !STAND_ID_MUSTRO.test(id)) {
+        sendJson(response, { satz: "Diesen Stand gibt es nicht." }, 404);
+        return;
+      }
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        nenia();
+        return;
+      }
+      if (id === undefined && method === "GET") {
+        sendJson(response, staendeListe(options.workdir, name, farbenDeBases(bases)));
+        return;
+      }
+      if (id === undefined) {
+        let body: unknown;
+        try {
+          body = JSON.parse((await readBody(request)) || "{}");
+        } catch {
+          body = undefined;
+        }
+        const nomo = isRecord(body) ? body.name : undefined;
+        if (!isRecord(body) || (nomo !== undefined && typeof nomo !== "string")) {
+          sendJson(response, { satz: "Diesen Namen kann Fundamento nicht lesen." }, 400);
+          return;
+        }
+        const stand = standSkribi(
+          options.workdir,
+          name,
+          {
+            ...(nomo === undefined ? {} : { name: nomo }),
+            agordo: draft.agordo,
+            leinwand: nunaLeinwando(options.workdir, name),
+          },
+          new Date(),
+        );
+        sendJson(response, { id: stand.id, name: stand.name, zeit: stand.zeit }, 201);
+        return;
+      }
+      const lego = standLegi(options.workdir, name, id);
+      if (lego.speco === "mankas") {
+        sendJson(response, { satz: "Diesen Stand gibt es nicht." }, 404);
+        return;
+      }
+      if (lego.speco === "unlesbar") {
+        sendJson(response, { satz: STAND_NE_MALFERMEBLA_SATZ }, 422);
+        return;
+      }
+      const { stand } = lego;
+      const zeit = new Date();
+      const nun = leinwandStatoLegi(options.workdir, name);
+      const nunaStato = nun.speco === "stato" ? nun.stato : null;
+      const sama =
+        nun.speco !== "unlesbar" &&
+        standEnhavo(draft.agordo, nunaStato) === standEnhavo(stand.agordo, stand.leinwand);
+      const sicherung = sama
+        ? undefined
+        : standSkribi(
+            options.workdir,
+            name,
+            { name: sicherungNomo(stand.name), agordo: draft.agordo, leinwand: nunaStato },
+            zeit,
+          );
+      setDraft(name, draft, stand.agordo, "regilo");
+      leinwandAnstatauxigi(options.workdir, name, stand.leinwand, zeit);
+      leinwandBildoForigi(name);
+      sendJson(response, {
+        rev: draft.rev,
+        ...(sicherung === undefined ? {} : { sicherung: sicherung.id }),
+      });
       return;
     }
     // Spec 054 (T4/T5): the canvas's own write path – one change (a node's colour, the Tönung, a

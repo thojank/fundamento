@@ -94,6 +94,7 @@ import { MarkoNodo } from "./nodoj/marko.js";
 import { PaletroNodo } from "./nodoj/paletro.js";
 import { VorschauNodo } from "./nodoj/vorschau.js";
 import { BAZA_STILO, GESTALTEN_STILO, useStilo } from "./roloj.js";
+import { Staende } from "./staende.js";
 import {
   kablojDeSesio,
   kunLoesen,
@@ -862,6 +863,7 @@ function Fluo({
           gespeichert={gespeichert}
           statoUnlesbar={statoUnlesbar}
           anordnungZuruecksetzen={() => void anordnungZuruecksetzen()}
+          staende={<Staende dauxrigi={skribilo.dauxrigi} />}
           skemo={skemo}
           elektiSkemon={elektiSkemon}
           ligoHinweis={ligojSxangxitaj ? <LigoHinweis zuruecksetzen={zuruecksetzen} /> : null}
