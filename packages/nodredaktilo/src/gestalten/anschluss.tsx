@@ -10,6 +10,10 @@
 // others recede; a refused port simply stays back, without any message. Grabbing an input that
 // carries an edge picks that edge up at its end (React Flow's reconnect anchor of the edge), so it
 // can be moved to another input or dropped into empty space, which detaches it.
+// Spec 055 (plan D-18): a port can sit centred on the node's top or bottom edge (`rando`) and carry
+// a handle id of its own (`tenilo`): the fixed Primär → Neutral edge leaves Primär at the bottom
+// (`FESTA_TENILO`) and ends at the top of Neutral (`farbo-neutral.en.farbo`). Nobody draws from
+// such an output, and a fixed edge is never picked up at its end.
 
 import { anschlussDe, validaLigo } from "@fundamento/metiejo/gestalten";
 import { Handle, Position, useConnection } from "@xyflow/react";
@@ -28,8 +32,11 @@ const STILO = `
   z-index: 2;
 }
 .react-flow .react-flow__handle.nr-g-anschluss.target[data-nr-plena] { pointer-events: all; cursor: grab; }
+.react-flow .react-flow__handle.nr-g-anschluss.bottom[data-nr-ziel],
+.react-flow .react-flow__handle.nr-g-anschluss.bottom[data-nr-quelle] { transform: translate(-50%, 50%) scale(1.5); }
 @media (prefers-reduced-motion: no-preference) {
   .react-flow .react-flow__handle.nr-g-anschluss { transition: transform var(--fm-motion-duration-fast) var(--fm-motion-easing-standard), opacity var(--fm-motion-duration-fast) var(--fm-motion-easing-standard); }
+  .react-flow .react-flow__handle.nr-g-anschluss.bottom:hover { transform: translate(-50%, 50%) scale(1.5); }
 }
 `;
 
@@ -40,7 +47,13 @@ export interface AnschlussProps {
   supro: number;
   /** The colour of a colour port (`#rrggbb` from the Bildo); without one it takes a calm role. */
   hex?: string | undefined;
+  /** D-18: the port sits centred on the top (`supro`) or bottom (`subo`) edge; `supro` is unused. */
+  rando?: "supro" | "subo" | undefined;
+  /** D-18: the handle id when it differs from the port id (`FESTA_TENILO`); never drawn from. */
+  tenilo?: string | undefined;
 }
+
+const RANDO_POZICIO = { supro: Position.Top, subo: Position.Bottom } as const;
 
 /** The port an edge is being drawn from (or, while one is moved, the end that stays), else null. */
 const elConnection = (c: { inProgress: boolean; fromHandle: { id?: string | null } | null }) =>
@@ -72,7 +85,7 @@ function prenuLigon(ligo: string, evento: MouseEvent<HTMLDivElement>): void {
   );
 }
 
-export function Anschluss({ port, supro, hex }: AnschlussProps) {
+export function Anschluss({ port, supro, hex, rando, tenilo }: AnschlussProps) {
   useStilo("anschluss", STILO);
   const { verbunden, ligoj } = useGestalten();
   const de = useConnection(elConnection);
@@ -90,23 +103,24 @@ export function Anschluss({ port, supro, hex }: AnschlussProps) {
       stato = "ziel";
     else stato = "zurueck";
   }
-  const ena = el ? undefined : ligoj.find((l) => l.al === port);
+  // A fixed edge (D-18) stays where it is: its end is never picked up.
+  const ena = el ? undefined : ligoj.find((l) => l.al === port && l.fest !== true);
   const stilo = {
-    top: supro,
+    ...(rando === undefined ? { top: supro } : {}),
     "--nr-g-art": artKoloro(anschluss.art, hex),
-    "--nr-g-x": el ? "50%" : "-50%",
+    "--nr-g-x": el && rando === undefined ? "50%" : "-50%",
   } as CSSProperties;
   return (
     <Handle
-      id={port}
+      id={tenilo ?? port}
       type={el ? "source" : "target"}
-      position={el ? Position.Right : Position.Left}
-      isConnectableStart={el}
+      position={rando === undefined ? (el ? Position.Right : Position.Left) : RANDO_POZICIO[rando]}
+      isConnectableStart={el && tenilo === undefined}
       isConnectableEnd={!el}
       className="nr-g-anschluss"
       style={stilo}
       onMouseDown={ena === undefined ? undefined : (evento) => prenuLigon(ena.id, evento)}
-      data-nr-anschluss={port}
+      data-nr-anschluss={tenilo ?? port}
       data-nr-art={anschluss.art}
       data-nr-plena={plena ? "" : undefined}
       data-nr-ziel={stato === "ziel" ? "" : undefined}

@@ -18,6 +18,7 @@ import { AVERTO_EKSPORTO, meldungenOf } from "./asistanto/averto.js";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
 import { markoLabel } from "./ident.js";
 import type { Klartext } from "./klartext.js";
+import { type MarkenZeile, staendeText, zeitpunktText } from "./marken-liste.js";
 import { readTiparoj, searchTiparoj, type Tiparo } from "./tiparoj.js";
 import { loadBases } from "./vorschau.js";
 
@@ -146,6 +147,8 @@ export interface ScreenInput {
   marko?: MarkoView;
   /** The brands of the working directory (step 1: open one). */
   markoj: string[];
+  /** Spec 055 T6: step 1 only, the Markenliste beside the form; absent, the start is as before. */
+  markenListe?: MarkenZeile[];
   /** A problem to show at the top (a name that is none …). */
   problem?: string;
   /** A message to show at the top (Gespeichert …). */
@@ -506,7 +509,67 @@ function expertSection(input: ScreenInput): string {
   )}</fm-teksto></section>`;
 }
 
+/**
+ * Spec 055 T6 (Option B): the layout of the start with its Markenliste – the form and the list side
+ * by side while both fit, the list below the form on a narrow screen (intrinsic, no media query),
+ * the cards in an auto-filling grid. The form keeps 38rem: the options of its choice do not wrap,
+ * and the longest (komuna-0-2) is about 37rem wide. Tokens and rem only, as LAYOUT_CSS; only the
+ * swatches take their colour from the brand, inline.
+ */
+const MARKEN_CSS = `.mt-sxtupo[data-mt-marken] { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-xlarge); align-items: start; }
+.mt-sxtupo[data-mt-marken] > fm-formularo { flex: 0 1 38rem; min-inline-size: 0; }
+.mt-marken { flex: 999 1 min(100%, 28rem); min-inline-size: 0; display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
+.mt-marken-karten { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: var(--fm-spacing-medium); }
+.mt-marken-karten > li { display: flex; min-inline-size: 0; }
+.mt-marken-karten fm-karto { flex: 1 1 auto; min-inline-size: 0; }
+.mt-marken-farben { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; block-size: 5rem; }
+.mt-marken-farbe[data-mt-farbe="primaer"] { grid-row: span 2; }
+.mt-marken-farbe[data-mt-leer] { border: var(--fm-border-width-default) dashed var(--fm-color-border-default); background-color: transparent; }`;
+
+const FARBO_NOMOJ = { primaer: "Primär", akzent: "Akzent", neutral: "Neutral" } as const;
+
+/** One swatch: the brand's colour inline (content, not styling, D-8), or dashed and empty. */
+function markenFarbeHtml(rolo: keyof typeof FARBO_NOMOJ, hex: string | undefined): string {
+  return hex === undefined || hex === ""
+    ? `<span class="mt-marken-farbe" data-mt-farbe="${rolo}" data-mt-leer></span>`
+    : `<span class="mt-marken-farbe" data-mt-farbe="${rolo}" style="background-color: ${escapeHtml(hex)}"></span>`;
+}
+
+/** One brand as a card: name, swatches, „zuletzt geändert“, the Stände and the link to its canvas. */
+function markenKarteHtml(zeile: MarkenZeile): string {
+  const farben = zeile.farben;
+  if (!zeile.lesbar || farben === undefined) {
+    return `<li><fm-karto level="3" emphasis="low" data-mt-unlesbar><span slot="heading">${escapeHtml(zeile.name)}</span><fm-teksto kind="caption">lässt sich nicht lesen</fm-teksto></fm-karto></li>`;
+  }
+  const roloj = (["primaer", "akzent", "neutral"] as const).map((rolo) => ({
+    rolo,
+    hex: farben[rolo],
+  }));
+  const beschreibung = roloj
+    .map(
+      ({ rolo, hex }) => `${FARBO_NOMOJ[rolo]} ${hex === undefined || hex === "" ? "leer" : hex}`,
+    )
+    .join(", ");
+  const name = escapeHtml(zeile.etikedo);
+  return `<li><fm-karto level="3" data-mt-marko="${escapeHtml(zeile.name)}"><span slot="heading">${name}</span><span slot="media" class="mt-marken-farben" role="img" aria-label="${escapeHtml(beschreibung)}">${roloj
+    .map(({ rolo, hex }) => markenFarbeHtml(rolo, hex))
+    .join(
+      "",
+    )}</span><fm-teksto kind="caption">zuletzt geändert ${escapeHtml(zeitpunktText(zeile.geaendert))}</fm-teksto><fm-teksto kind="caption">${staendeText(zeile.staende)}</fm-teksto><fm-ligilo slot="actions" to="/marko/${encodeURIComponent(zeile.name)}/grafeo" placement="standalone">Leinwand von ${name}</fm-ligilo></fm-karto></li>`;
+}
+
+/** Spec 055 T6: the Markenliste of the start, outside the form (D-11), Eroj only (D-12). */
+function markenListeHtml(zeilen: readonly MarkenZeile[]): string {
+  const inhalt =
+    zeilen.length === 0
+      ? "<fm-teksto data-mt-marken-leer>Noch keine Marke. Lege oben die erste an.</fm-teksto>"
+      : `<ul class="mt-marken-karten">${zeilen.map(markenKarteHtml).join("")}</ul>`;
+  return `<style>${MARKEN_CSS}</style><section class="mt-marken" data-mt-marken-liste><fm-titolo level="2">Angefangene Marken</fm-titolo>${inhalt}</section>`;
+}
+
 function preview(input: ScreenInput): string {
+  if (input.sxtupo === "start" && input.markenListe !== undefined)
+    return markenListeHtml(input.markenListe);
   if (input.marko === undefined) return "";
   const full = input.sxtupo === "vorschau";
   const src = `/marko/${encodeURIComponent(input.marko.name)}/vorschau?sxtupo=${input.sxtupo}&breite=${full ? "alle" : "mittel"}`;
@@ -553,7 +616,7 @@ ${notices(input)}
 <fm-titolo slot="title" level="1" focusable>${escapeHtml(sxtupo.question)}</fm-titolo>
 <fm-teksto slot="subtitle">${escapeHtml(sxtupo.hint)}</fm-teksto>
 ${expertLink}
-<section class="mt-sxtupo"${input.sxtupo === "vorschau" || input.marko === undefined ? " data-mt-plena" : ""}>
+<section class="mt-sxtupo"${input.sxtupo === "start" && input.markenListe !== undefined ? " data-mt-marken" : input.sxtupo === "vorschau" || input.marko === undefined ? " data-mt-plena" : ""}>
 <fm-formularo label="${escapeHtml(sxtupo.title)}" data-action="${action}">
 ${problems(input)}
 ${fields(input)}

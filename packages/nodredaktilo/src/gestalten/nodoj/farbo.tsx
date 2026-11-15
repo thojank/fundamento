@@ -8,19 +8,34 @@
 // network error or a 5xx gives NE_KONSERVITA_SATZ. Ports: input `farbo-<rolo>.en` (Marke), output
 // `farbo-<rolo>.el` (Farbe; Neutral: Maß). Self-contained: its rules live here (`useStilo`).
 //
+// Spec 055 (T2, T3): every node says where its colour comes from in the head („abgeleitet“ /
+// „von Hand“). A Funktionsfarbe without a value shows its derived Basis, in the field only as the
+// placeholder; with a value it offers „zurück zur Ableitung“ (`{farbe: {rolle, wert: null}}`), and it
+// is never removed. Neutral says „aus Primär abgeleitet“ (the fixed edge from Primär's bottom port
+// ends at its top port, plan D-18) or „eigene Farbe“; „Eigene Farbe setzen“ opens field and picker
+// like Primär's, „abbrechen“ closes them without a write, „zurück zur Ableitung“ takes the own
+// colour back (`{neutral: {farbe: null}}`); the slider „Tönung“ stays in both states. Without a
+// derivation a node without a value shows an empty, dashed swatch – never red.
+//
 // Marks for scripts: `[data-nr-farbo-kampo=<rolo>]` (field), `[data-nr-farbo-elektilo=<rolo>]`
-// (picker), `[data-nr-farbo-forigi=akzent]` („×“), `[data-nr-farbo-zurueck=<rolo>]` („↺“),
-// `[data-nr-akzent-setzen]`, `[data-nr-toenung]` (slider), `[data-nr-farbo-satz=<rolo>]` (the
-// sentence while it shows), `[data-nr-neutral-hinweis]`; `data-nr-skribas` on the body while a write
-// runs.
+// (picker), `[data-nr-farbo-forigi=akzent]` („×“ of Akzent), `[data-nr-farbo-zurueck=<rolo>]`
+// („zurück zur Ableitung“ of a Funktionsfarbe or of Neutral), `[data-nr-akzent-setzen]`,
+// `[data-nr-toenung]` (slider), `[data-nr-toenung-wert]` (its value), `[data-nr-farbo-satz=<rolo>]`
+// (the sentence while it shows), `[data-nr-farbo-stato=<stato>]` (head tag),
+// `[data-nr-neutral-herkunft=primaer|eigene]` (Neutral's sentence), `[data-nr-neutral-eigene]`
+// („Eigene Farbe setzen“), `[data-nr-neutral-abbrechen]`; `data-nr-skribas` on the body while a
+// write runs.
 
 import {
   type BildoFarbo,
   type FarboRolo,
+  FESTA_TENILO,
   type LeinwandSxangxo,
   NE_KONSERVITA_SATZ,
+  NEUTRAL_FARBO_ENIR,
   ROLO_ETIKEDOJ,
   STATUS_ROLOJ,
+  senValora,
 } from "@fundamento/metiejo/gestalten";
 import type { NodeProps } from "@xyflow/react";
 import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
@@ -100,6 +115,30 @@ const STILO = `
   color: ${ROLOJ.mallauta};
 }
 .nr-g-farbo-satz { white-space: normal; }
+/* Neutral's origin: a small square in the colour of its base (Primär, or the own colour). */
+.nr-g-farbo-herkunft {
+  display: flex;
+  align-items: center;
+  gap: var(--fm-spacing-small);
+  margin: 0;
+  padding: var(--fm-spacing-small) var(--fm-spacing-large) 0;
+  font-size: var(--fm-typography-caption-font-size);
+  line-height: var(--fm-typography-caption-line-height);
+  color: ${ROLOJ.teksto};
+}
+.nr-g-farbo-herkunft::before {
+  content: "";
+  flex: none;
+  inline-size: var(--fm-spacing-medium);
+  block-size: var(--fm-spacing-medium);
+  border-radius: var(--fm-radius-small);
+  background: var(--nr-g-herkunft, ${ROLOJ.mallauta});
+}
+/* Room within the maximum heights of plan D-2 (compact 96, Neutral 300 with the field open). */
+.nr-g-farbo-knopfoj { flex-wrap: wrap; padding-block-start: var(--fm-spacing-small); }
+.nr-g-farbo-linio[data-nr-kompakta] { padding-block-start: var(--fm-spacing-small); }
+.nr-g-farbo-feld[data-nr-farbo-feld="neutral"] { block-size: var(--fm-size-control-large); }
+.nr-g-farbo-valoro { flex: none; font-family: var(--fm-font-family-code); font-size: var(--fm-typography-caption-font-size); color: ${ROLOJ.teksto}; }
 /* The thumb is centred on the track's ends: room so it never covers the label. */
 .nr-g-farbo-linio > fm-glitilo { flex: 1; min-inline-size: 0; margin-inline: var(--fm-spacing-medium) var(--fm-spacing-small); }
 .nr-g-farbo-etikedo { flex: none; font-size: var(--fm-typography-caption-font-size); color: ${ROLOJ.mallauta}; }
@@ -117,6 +156,7 @@ const MARKOJ = {
   startwert: "Startwert",
   "von-hand": "von Hand",
   "aus-material": "aus Material",
+  abgeleitet: "abgeleitet",
 } as const;
 
 /** The head's port line: below the swatch for the tall nodes, in the head line for compact ones. */
@@ -129,8 +169,8 @@ const elektiloValoro = (hex: string): string | undefined =>
 /** A text as compared: trimmed, a hex value in lower case. */
 const normala = (teksto: string): string => teksto.trim().toLowerCase();
 
-/** „Tönung 0,35“ */
-const toenungTeksto = (toenung: number): string => `Tönung ${toenung.toFixed(2).replace(".", ",")}`;
+/** „0,35“: a Tönung in German number format. */
+const toenungTeksto = (toenung: number): string => toenung.toFixed(2).replace(".", ",");
 
 /** The text of an Ero field (its value is reflected as the attribute while a person types). */
 function tekstoDe(el: HTMLElement): string {
@@ -296,12 +336,13 @@ function Elektilo({
 
 /** Primär, Akzent and the Funktionsfarben: a value in the Agordo, written as text or picked. */
 function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
-  const { abgehaengt, fokusPor, fokusFarita, forigi } = useGestalten();
+  const { abgehaengt, fokusPor, fokusFarita } = useGestalten();
   const { skribi, satz, skribas, forgesi } = useSkribo(nodo.id);
   const rolo = nodo.rolo as Exclude<FarboRolo, "neutral">;
   const kompakta = STATUS_ROLOJ.includes(rolo);
   const lose = abgehaengt(nodo.id);
-  const leer = nodo.stato === "leer";
+  // Empty: no field in the Agordo, or nothing to show (`ableitung: "fehlt"`): a dashed swatch.
+  const leer = nodo.stato === "leer" || nodo.hex === "";
   const wert = nodo.wert ?? "";
   // `null` = nobody typed: the field shows the value of the current Bildo.
   const [redaktita, setRedaktita] = useState<string | null>(null);
@@ -331,14 +372,6 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
     if (respondo === null) setRedaktita(null);
   };
 
-  // A Funktionsfarbe without a value leaves the canvas. If it came from „+ Knoten“, the session
-  // still holds it (hidden while the Bildo carries the node) and would bring it back empty once the
-  // value is gone: `forigi` drops that entry first (it does nothing for a node of the Bildo alone).
-  const forigiValoron = () => {
-    if (kompakta) forigi(nodo.id);
-    void skribiWert(null);
-  };
-
   const preni = (teksto: string) => {
     const t = teksto.trim();
     if (skribas || sendita.current === t) return;
@@ -348,7 +381,8 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
       return;
     }
     sendita.current = t;
-    // An empty field removes Akzent and a Funktionsfarbe; Primär keeps its value (it needs one).
+    // An empty field removes Akzent and takes a Funktionsfarbe back to its derivation; Primär
+    // keeps its value (it needs one).
     if (t === "") {
       if (rolo === "primaer") {
         setRedaktita(null);
@@ -359,8 +393,7 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
         setRedaktita(null);
         return;
       }
-      if (kompakta) forigiValoron();
-      else void skribiWert(null);
+      void skribiWert(null);
       return;
     }
     void skribiWert(t);
@@ -373,20 +406,16 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
     preni(hex);
   };
 
-  // „↺“ (Funktionsfarbe): back to the derivation – the value goes, and with it the node.
+  // „zurück zur Ableitung“ (Funktionsfarbe with a value): the value goes, the node stays.
   const zurueck = () => {
-    if (skribas) return;
-    if (sitzung && nodo.wert === undefined) {
-      forigi(nodo.id);
-      return;
-    }
-    forigiValoron();
+    if (!skribas) void skribiWert(null);
   };
 
-  const marko = lose ? "abgehängt" : leer && kompakta ? "abgeleitet" : MARKOJ[nodo.stato];
+  const marko = lose ? "abgehängt" : MARKOJ[nodo.stato];
   const supro = kompakta ? FARBO_ANSCHLUSS_SUPRO.kompakta : FARBO_ANSCHLUSS_SUPRO.granda;
   const etikedo = ROLO_ETIKEDOJ[rolo];
-  const placeholder = leer && kompakta && nodo.hex !== "" ? nodo.hex : "#RRGGBB";
+  // A derived Funktionsfarbe shows its Basis only as the placeholder, never as a value.
+  const placeholder = kompakta && senValora(nodo.stato) && nodo.hex !== "" ? nodo.hex : "#RRGGBB";
 
   const kampo = (
     <Kampo
@@ -410,7 +439,9 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
       style={{ "--nr-g-farbo": nodo.hex } as CSSProperties}
     >
       <NodoKapo signo={{ art: "farbo", hex: nodo.hex, plena: true }} nomo={`Farbe · ${etikedo}`}>
-        <Etikedo>{marko}</Etikedo>
+        <span data-nr-farbo-stato={nodo.stato}>
+          <Etikedo>{marko}</Etikedo>
+        </span>
       </NodoKapo>
       <div className="nr-g-farbo-korpo" data-nr-skribas={skribas ? "" : undefined}>
         {kompakta ? null : (
@@ -428,7 +459,7 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
             ) : null}
           </div>
         )}
-        <div className="nr-g-farbo-linio">
+        <div className="nr-g-farbo-linio" data-nr-kompakta={kompakta ? "" : undefined}>
           {kompakta ? <span className="nr-g-farbo-klein" aria-hidden="true" /> : null}
           {kampo}
           {elektilo}
@@ -447,7 +478,7 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
               ×
             </fm-butono>
           ) : null}
-          {kompakta ? (
+          {kompakta && nodo.wert !== undefined ? (
             <fm-butono
               className={`${NODRAG} nr-g-farbo-fino`}
               size="small"
@@ -469,6 +500,16 @@ function KoloroNodo({ nodo, sitzung }: { nodo: BildoFarbo; sitzung: boolean }) {
       </div>
       <Anschluss port={`${nodo.id}.en`} supro={supro} />
       <Anschluss port={`${nodo.id}.el`} supro={supro} hex={nodo.hex} />
+      {rolo === "primaer" ? (
+        // D-18: the bottom port the fixed edge to Neutral leaves from; nobody draws from it.
+        <Anschluss
+          port={`${nodo.id}.el`}
+          tenilo={FESTA_TENILO}
+          rando="subo"
+          supro={0}
+          hex={nodo.hex}
+        />
+      ) : null}
     </NodoSxelo>
   );
 }
@@ -532,15 +573,33 @@ function Glitilo({
   );
 }
 
-/** Neutral: the swatch of the derived neutral step 100 and the Tönung, its only field (E-5, B-1). */
+/**
+ * Neutral: the swatch of its light step 100, where it comes from (Primär or an own colour), the own
+ * colour behind „Eigene Farbe setzen“, and the Tönung in both states (E-5, Spec 055 T3).
+ */
 function NeutralNodo({ nodo }: { nodo: BildoFarbo }) {
-  const { abgehaengt } = useGestalten();
-  const { skribi, satz, skribas } = useSkribo(nodo.id);
+  const { abgehaengt, bildo } = useGestalten();
+  const { skribi, satz, skribas, forgesi } = useSkribo(nodo.id);
   const lose = abgehaengt(nodo.id);
   const toenung = nodo.toenung ?? 0;
-  // While the thumb moves, the head shows its value; it writes when the thumb rests.
+  const eigene = nodo.herkunft === "eigene";
+  const wert = nodo.wert ?? "";
+  const primaer = bildo.nodoj.find((n) => n.id === "farbo-primaer");
+  const primaerHex = primaer?.speco === "farbo" && primaer.hex !== "" ? primaer.hex : undefined;
+  // While the thumb moves, its value shows beside it; it writes when the thumb rests.
   const [movata, setMovata] = useState<number | null>(null);
-  const preni = (valoro: number) => {
+  // „Eigene Farbe setzen“ pressed while Neutral still derives from Primär.
+  const [malfermita, setMalfermita] = useState(false);
+  const offen = eigene || malfermita;
+  // `null` = nobody typed: the field shows the own colour of the current Bildo.
+  const [redaktita, setRedaktita] = useState<string | null>(null);
+  /** The last text sent, so Enter and the blur after it write once. */
+  const sendita = useRef<string | null>(null);
+  const [fokuso, setFokuso] = useState(false);
+  /** Set while „abbrechen“ is pressed: the field's blur in between writes nothing. */
+  const fermante = useRef(false);
+
+  const preniToenung = (valoro: number) => {
     const ronda = Math.round(valoro * 100) / 100;
     if (ronda === toenung) {
       setMovata(null);
@@ -550,35 +609,175 @@ function NeutralNodo({ nodo }: { nodo: BildoFarbo }) {
     void skribi({ toenung: ronda }).then(() => setMovata(null));
   };
   const montrata = movata ?? toenung;
+
+  const skribiFarbe = async (valoro: string | null) => {
+    const respondo = await skribi({ neutral: { farbe: valoro } });
+    if (respondo === null) {
+      setRedaktita(null);
+      setMalfermita(false);
+    }
+  };
+
+  const redakti = useCallback(
+    (teksto: string | null) => {
+      setRedaktita(teksto);
+      sendita.current = null;
+      forgesi();
+    },
+    [forgesi],
+  );
+  const fokusita = useCallback(() => setFokuso(false), []);
+
+  const preni = (teksto: string) => {
+    const t = teksto.trim();
+    if (fermante.current || skribas || sendita.current === t) return;
+    if (normala(t) === normala(wert)) {
+      setRedaktita(null);
+      forgesi();
+      return;
+    }
+    sendita.current = t;
+    // An empty field takes an own colour back; without one there is nothing to write.
+    if (t === "") {
+      if (eigene) void skribiFarbe(null);
+      else {
+        setRedaktita(null);
+        forgesi();
+      }
+      return;
+    }
+    void skribiFarbe(t);
+  };
+
+  const elekti = (hex: string) => {
+    setRedaktita(hex);
+    sendita.current = null;
+    forgesi();
+    preni(hex);
+  };
+
+  const oeffnen = () => {
+    setMalfermita(true);
+    setFokuso(true);
+  };
+  const abbrechen = () => {
+    fermante.current = false;
+    setMalfermita(false);
+    setRedaktita(null);
+    sendita.current = null;
+    forgesi();
+  };
+  const zurueck = () => {
+    if (!skribas) void skribiFarbe(null);
+  };
+
   return (
     <NodoSxelo
       id={nodo.id}
       ringo={nodo.hex}
+      leer={nodo.hex === ""}
       abgehaengt={lose}
       style={{ "--nr-g-farbo": nodo.hex } as CSSProperties}
     >
       <NodoKapo signo={{ art: "mezuro", plena: true }} nomo="Farbe · Neutral">
-        <Etikedo>{lose ? "abgehängt" : toenungTeksto(montrata)}</Etikedo>
+        <span data-nr-farbo-stato={nodo.stato}>
+          <Etikedo>{lose ? "abgehängt" : MARKOJ[nodo.stato]}</Etikedo>
+        </span>
       </NodoKapo>
       <div className="nr-g-farbo-korpo" data-nr-skribas={skribas ? "" : undefined}>
         <div className="nr-g-farbo-feld" data-nr-farbo-feld="neutral" />
-        <div className="nr-g-farbo-linio">
-          <span className="nr-g-farbo-etikedo">Tönung</span>
-          <Glitilo
-            valoro={montrata}
-            movi={(n) => setMovata(Math.round(n * 100) / 100)}
-            preni={preni}
-          />
-        </div>
-        <p className="nr-g-farbo-hinweis" data-nr-neutral-hinweis="">
-          Eine bestimmte Neutralfarbe setzt du in der Palette.
+        <p
+          className="nr-g-farbo-herkunft"
+          data-nr-neutral-herkunft={eigene ? "eigene" : "primaer"}
+          style={
+            {
+              "--nr-g-herkunft": eigene ? nodo.hex || undefined : primaerHex,
+            } as CSSProperties
+          }
+        >
+          {eigene ? "eigene Farbe" : "aus Primär abgeleitet"}
         </p>
+        {offen ? (
+          <div className="nr-g-farbo-linio">
+            <Kampo
+              rolo="neutral"
+              teksto={redaktita ?? wert}
+              placeholder="#RRGGBB"
+              fokuso={fokuso}
+              fokusita={fokusita}
+              redakti={redakti}
+              preni={preni}
+            />
+            <Elektilo rolo="neutral" hex={elektiloValoro(wert) ?? nodo.hex} preni={elekti} />
+          </div>
+        ) : null}
         {satz === null ? null : (
           <p className="nr-g-farbo-satz" aria-live="polite" data-nr-farbo-satz="neutral">
             {satz}
           </p>
         )}
+        <div className="nr-g-farbo-linio">
+          <span className="nr-g-farbo-etikedo">Tönung</span>
+          <Glitilo
+            valoro={montrata}
+            movi={(n) => setMovata(Math.round(n * 100) / 100)}
+            preni={preniToenung}
+          />
+          <span className="nr-g-farbo-valoro" data-nr-toenung-wert="">
+            {toenungTeksto(montrata)}
+          </span>
+        </div>
+        <div className="nr-g-farbo-linio nr-g-farbo-knopfoj">
+          {offen ? null : (
+            <fm-butono
+              className={NODRAG}
+              size="small"
+              emphasis="low"
+              data-nr-neutral-eigene=""
+              onClick={oeffnen}
+            >
+              Eigene Farbe setzen
+            </fm-butono>
+          )}
+          {malfermita && !eigene ? (
+            <fm-butono
+              className={NODRAG}
+              size="small"
+              emphasis="low"
+              data-nr-neutral-abbrechen=""
+              // The field keeps the focus: its blur would write the text „abbrechen“ discards.
+              onMouseDown={(evento) => {
+                evento.preventDefault();
+                fermante.current = true;
+                setTimeout(() => {
+                  fermante.current = false;
+                });
+              }}
+              onClick={abbrechen}
+            >
+              abbrechen
+            </fm-butono>
+          ) : null}
+          {eigene ? (
+            <fm-butono
+              className={NODRAG}
+              size="small"
+              emphasis="low"
+              data-nr-farbo-zurueck="neutral"
+              onClick={zurueck}
+            >
+              zurück zur Ableitung
+            </fm-butono>
+          ) : null}
+        </div>
       </div>
+      {/* D-18: the top port where the fixed edge from Primär ends; hollow with an own colour. */}
+      <Anschluss
+        port={NEUTRAL_FARBO_ENIR}
+        rando="supro"
+        supro={0}
+        hex={eigene ? undefined : primaerHex}
+      />
       <Anschluss port={`${nodo.id}.en`} supro={FARBO_ANSCHLUSS_SUPRO.granda} />
       <Anschluss port={`${nodo.id}.el`} supro={FARBO_ANSCHLUSS_SUPRO.granda} />
     </NodoSxelo>

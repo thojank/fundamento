@@ -21,7 +21,6 @@ const SHELL = [
   "kanto.tsx",
   "roloj.ts",
   "datumoj.ts",
-  "nodoj/fazo.tsx",
   "nodoj/marko.tsx",
   "nodoj/farbo.tsx",
   "nodoj/paletro.tsx",

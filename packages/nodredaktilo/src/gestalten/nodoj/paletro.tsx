@@ -116,10 +116,15 @@ const NOTO =
 
 const tonungTeksto = (toenung: number): string => toenung.toFixed(2).replace(".", ",");
 
-/** What stands after a row's name (mockup): the node's swatch and Basis, or a calm state word. */
-function aldonajxo(vico: Vico, toenung: number): string | null {
-  if (vico.rolo === "neutral")
-    return vico.fonto === null ? "nicht verbunden · Tönung 0" : `Tönung ${tonungTeksto(toenung)}`;
+/**
+ * What stands after a row's name (mockup): the node's swatch and Basis, or a calm state word. The
+ * neutral row names its Tönung, with an own Neutral colour as „eigene Farbe · Tönung 1,00“.
+ */
+function aldonajxo(vico: Vico, toenung: number, eigeneNeutral: boolean): string | null {
+  if (vico.rolo === "neutral") {
+    if (vico.fonto === null) return "nicht verbunden · Tönung 0";
+    return `${eigeneNeutral ? "eigene Farbe · " : ""}Tönung ${tonungTeksto(toenung)}`;
+  }
   if (vico.basis !== undefined && vico.fontoHex !== undefined) return null;
   if (STATUS_ROLOJ.includes(vico.rolo)) return "abgeleitet";
   // A row without steps says its state („noch keine Farbe“, „nicht verbunden“) in place of the
@@ -195,6 +200,7 @@ export function PaletroNodo({ data }: NodeProps<PaletroFlowNodo>) {
 
   const neutral = bildo.nodoj.find((n) => n.id === "farbo-neutral");
   const toenung = neutral?.speco === "farbo" ? (neutral.toenung ?? 0) : 0;
+  const eigeneNeutral = neutral?.speco === "farbo" && neutral.herkunft === "eigene";
 
   const [offen, setOffen] = useState<Offen | null>(null);
   const fermi = useCallback(() => setOffen(null), []);
@@ -240,7 +246,7 @@ export function PaletroNodo({ data }: NodeProps<PaletroFlowNodo>) {
       </NodoKapo>
       <div className="nr-g-paletro-vicoj">
         {vicoj.map((vico) => {
-          const vorto = aldonajxo(vico, toenung);
+          const vorto = aldonajxo(vico, toenung, eigeneNeutral);
           const malferma = offen?.rolo === vico.rolo ? offen.stufo : null;
           const stufo =
             malferma === null ? undefined : vico.stufoj.find((s) => s.stufo === malferma);

@@ -1,8 +1,10 @@
 // Spec 054 (MP-1, T3, E-13, AK-21): the list „+ Knoten“. It draws `aldonebloj(KATALOGO_054, …)`
 // grouped by purpose in the catalog's order, each entry with the sign of its port kind and the word
-// for what it offers. Selectable are exactly `anlegen`, `setzen` and `weitere`; `da` and `spaeter`
-// stand muted and disabled. A selection closes the list (the canvas does the rest); Esc or a press
-// outside the list and its trigger closes it too.
+// for what it offers. Selectable are exactly `setzen` (Akzent) and `weitere` (a further preview);
+// `da` and `spaeter` stand muted and disabled. Spec 055 (T2): the four Funktionsfarben are always on
+// the canvas, so they read „auf der Leinwand“ and nothing creates them here any more. A selection
+// closes the list (the canvas does the rest); Esc or a press outside the list and its trigger closes
+// it too.
 
 import type { Aldoneblo, KatalogoGrupo } from "@fundamento/metiejo/gestalten";
 import { ALDON_ETIKEDOJ } from "@fundamento/metiejo/gestalten";
@@ -53,8 +55,7 @@ export interface MenuoProps {
 }
 
 /** Whether an entry can be selected. */
-export const elektebla = (a: Aldoneblo): boolean =>
-  a.stato === "anlegen" || a.stato === "setzen" || a.stato === "weitere";
+export const elektebla = (a: Aldoneblo): boolean => a.stato === "setzen" || a.stato === "weitere";
 
 export function Menuo({ aldonebloj, hexDe, elekti, fermi }: MenuoProps) {
   useStilo("menuo", STILO);

@@ -1,5 +1,6 @@
 // Spec 054 (MP-1, T4/T5): the write path of the canvas, pure. One change per request – the colour of
-// a node, the Tönung, or a palette step for light or dark – applied to the stored Agordo and read
+// a node, the Tönung, a palette step for light or dark, or (Spec 055 T3) the own Neutral colour
+// `neutral.farbe` – applied to the stored Agordo and read
 // against the schema (`readAgordo`). It refuses only what is no valid Agordo or no readable colour,
 // with the field and a calm German sentence; it never runs a check or a rule (E-1, E-6). The route
 // (`POST /api/marko/:name/leinwand` in servilo.ts) loads the draft, calls `leinwandSchreiben` and
@@ -173,6 +174,23 @@ function kunFarbo(
   return next;
 }
 
+/**
+ * Spec 055 T3: the own Neutral colour. A colour comes with Tönung 1 when the Agordo has none, so
+ * the slider shows the value the derivation uses; a Tönung set before stays. null removes the
+ * colour, keeps the Tönung, and drops `neutral` when nothing is left in it.
+ */
+function kunNeutralfarbo(agordo: Agordo, farbe: string | null): Agordo {
+  const next = structuredClone(agordo) as Agordo & Record<string, unknown>;
+  const { farbe: _alt, ...rest }: NonNullable<Agordo["neutral"]> = agordo.neutral ?? {};
+  if (farbe !== null) {
+    next.neutral = { toenung: rest.toenung ?? 1, farbe };
+    return next;
+  }
+  if (Object.keys(rest).length === 0) delete next.neutral;
+  else next.neutral = rest;
+  return next;
+}
+
 /** The Tönung, as `patched(a, { neutral: { toenung } })`: the value is left to the schema. */
 function kunToenung(agordo: Agordo, toenung: unknown): Agordo {
   const next = structuredClone(agordo) as unknown as Record<string, unknown>;
@@ -189,15 +207,17 @@ const isObjekto = (x: unknown): x is Record<string, unknown> =>
 type Legita = { speco: "ok"; sxangxo: LeinwandSxangxo } | { speco: "malformita"; mesagxo: string };
 
 /**
- * The shape of the body: exactly one of `farbe`, `toenung`, `stufe`, with a known role, a string
- * token and a value that is a string or null. The values themselves are read afterwards (422);
+ * The shape of the body: exactly one of `farbe`, `toenung`, `stufe`, `neutral`, with a known role,
+ * a string token and a value that is a string or null; `neutral` carries `farbe` and nothing else
+ * (Spec 055 T3). The values themselves are read afterwards (422);
  * `toenung` and `schema` are left as they came, so their bounds give a refusal with a field.
  */
 export function sxangxoEl(korpo: unknown): Legita {
   const malformita = (mesagxo: string): Legita => ({ speco: "malformita", mesagxo });
   if (!isObjekto(korpo)) return malformita("the body is no JSON object");
   const sxlosiloj = Object.keys(korpo);
-  if (sxlosiloj.length !== 1) return malformita("send exactly one change: farbe, toenung or stufe");
+  if (sxlosiloj.length !== 1)
+    return malformita("send exactly one change: farbe, toenung, stufe or neutral");
   const wertOk = (x: Record<string, unknown>): boolean =>
     "wert" in x && (x.wert === null || typeof x.wert === "string");
   if (isObjekto(korpo.farbe)) {
@@ -232,16 +252,29 @@ export function sxangxoEl(korpo: unknown): Legita {
       },
     };
   }
-  return malformita("send exactly one change: farbe, toenung or stufe");
+  if (isObjekto(korpo.neutral)) {
+    const { farbe } = korpo.neutral;
+    if (
+      Object.keys(korpo.neutral).join() !== "farbe" ||
+      (farbe !== null && typeof farbe !== "string")
+    )
+      return malformita("neutral needs farbe (a colour or null) and nothing else");
+    return { speco: "ok", sxangxo: { neutral: { farbe } } };
+  }
+  return malformita("send exactly one change: farbe, toenung, stufe or neutral");
 }
 
 // ---------------------------------------------------------------------------------------------
 // The write path
 
-/** The field a refusal names: `farbe.primaer`, `toenung`, `stufe.color.palette.accent.500`. */
+/**
+ * The field a refusal names: `farbe.primaer`, `toenung`, `stufe.color.palette.accent.500`,
+ * `neutral.farbe`.
+ */
 export function feldDe(sxangxo: LeinwandSxangxo): string {
   if ("farbe" in sxangxo) return `farbe.${sxangxo.farbe.rolle}`;
   if ("stufe" in sxangxo) return `stufe.${sxangxo.stufe.token}`;
+  if ("neutral" in sxangxo) return "neutral.farbe";
   return "toenung";
 }
 
@@ -273,6 +306,11 @@ export function leinwandSchreiben(
     const hex = wert === null ? null : farboHex(wert);
     if (hex === undefined) return rifuzo(NELEGEBLA_SATZ);
     next = kunStufo(agordo, token, hex, schema);
+  } else if ("neutral" in sxangxo) {
+    // No judgement (E-1): only whether the colour reads, as for the colour of a node.
+    const { farbe } = sxangxo.neutral;
+    if (farbe !== null && farboHex(farbe) === undefined) return rifuzo(NELEGEBLA_SATZ);
+    next = kunNeutralfarbo(agordo, farbe === null ? null : farbe.trim());
   } else {
     next = kunToenung(agordo, sxangxo.toenung);
   }
@@ -280,6 +318,7 @@ export function leinwandSchreiben(
   const legitaAgordo = readAgordo(next);
   if (legitaAgordo.agordo === undefined) {
     const unua = legitaAgordo.issues[0]?.path ?? "";
+    if (unua.includes("/neutral/farbe")) return rifuzo(NELEGEBLA_SATZ);
     if (unua.includes("/neutral")) return rifuzo(TOENUNG_SATZ);
     if (/\/(leitfarbe|zweitfarbe|zusatzfarben)/.test(unua)) return rifuzo(NELEGEBLA_SATZ);
     return rifuzo(NEVALIDA_SATZ);

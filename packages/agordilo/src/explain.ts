@@ -27,6 +27,7 @@ import {
   type DerivedStep,
   derivePalettes,
   type ModeOverride,
+  neutralToenung,
   type TargetFloors,
   ZWEITFARBE_PALETTE,
 } from "./palettes.js";
@@ -252,8 +253,12 @@ export class Explainer {
               apply: patchOf(agordo, palette, anchor.hex),
             };
     } else if (palette === "neutral") {
-      const tint = agordo.neutral?.toenung ?? 0;
-      const share = search((value) => ({ ...agordo, neutral: { toenung: tint * value } }));
+      // Spec 055 T3 (D-6): the search keeps an own Neutral colour; the patch stays the Tönung.
+      const tint = neutralToenung(agordo);
+      const share = search((value) => ({
+        ...agordo,
+        neutral: { ...agordo.neutral, toenung: tint * value },
+      }));
       const toenung = Math.floor(tint * share * 100) / 100;
       suggestion = {
         suggestion: `Set neutral.toenung to ${fixed(toenung, 2)} (now ${fixed(tint, 2)}): the neutral ramp then keeps ${rule}.`,
@@ -343,9 +348,10 @@ export class Explainer {
 
   #tintSuggestion(): Suggestion {
     const { agordo } = this.#context;
-    const tint = agordo.neutral?.toenung ?? 0;
+    // Spec 055 T3 (D-6): the search keeps an own Neutral colour; the patch stays the Tönung.
+    const tint = neutralToenung(agordo);
     const share = this.#largestShare(
-      (value) => ({ ...agordo, neutral: { toenung: tint * value } }),
+      (value) => ({ ...agordo, neutral: { ...agordo.neutral, toenung: tint * value } }),
       "neutral",
     );
     const toenung = Math.floor(tint * share * 100) / 100;
@@ -406,6 +412,8 @@ function originLabel(context: ExplainContext, palette: DerivedPaletteName): stri
       return "Zweitfarbe";
     case "toenung":
       return "tint (neutral.toenung)";
+    case "neutralfarbe":
+      return "own neutral colour (neutral.farbe)";
     case "zusatzfarbe":
       return `status colour (zusatzfarben.${palette})`;
     default:

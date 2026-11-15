@@ -1,8 +1,10 @@
 // Spec 054 (MP-1, T3): the canvas of the view Gestalten. It reads the Bildo from `/api/leinwand`,
-// lays the six phases as group nodes and every other node inside its phase (`parentId`, places
-// relative to it, from `poziciojKun` over ARANGXO_054), draws the session's edges (`ligojKun`) as
-// right-angled edges between square ports, and holds the state of the session – React state only,
-// never storage, never the address except `?scheme=` (E-9, AK-15):
+// lays every node at its place (Spec 055 T1: no phase frames – each node stands alone at an
+// absolute place from `poziciojKun` over ARANGXO_054's successor ARANGXO_055, and a drag moves only
+// that node), draws the session's edges (`ligojKun`) as right-angled edges with round corners on
+// their lanes (055 D-4, D-5) between square ports, and holds the state of the session – React state
+// (since Spec 055 mirrored into the brand's canvas state, see below), never browser storage, never
+// the address except `?scheme=` (E-9, AK-15):
 //   - moved places (`verschoben`, written at the end of a drag; no fetch on a drag),
 //   - the session's edges (`LigoSitzung`: detached ones and drawn ones, T7, E-11): an edge is drawn
 //     from an output to an input of the same kind (`validaLigo`; a refused one simply does not
@@ -11,10 +13,17 @@
 //     it. Nodes are never deleted (`onBeforeDelete`). When the effective view (`kablojDe`) changes,
 //     the Bildo is loaded again with `kabloj` and the previews get it; the Agordo never changes.
 //     While the edges differ from the Agordo's (plus those of session nodes), the header shows
-//     „Verbindungen geändert · gilt nur in dieser Sitzung“ with „zurücksetzen“,
-//   - session-only nodes (an empty Funktionsfarbe, further previews from „+ Knoten“),
+//     „Verbindungen geändert · gilt nur in dieser Sitzung“ with „zurücksetzen“. A fixed edge
+//     (055 D-18, `fest`) is neither selectable, deletable nor reconnectable, and leaves Primär at
+//     its bottom handle (`tenilojDe`),
+//   - session-only nodes (further previews from „+ Knoten“; the Funktionsfarben are in the Bildo),
 //   - the canvas's scheme (the switch „Leinwand hell | dunkel“ sets `data-fm-color-scheme` on the
 //     root and `scheme` in the address with `history.replaceState`, without a reload).
+// Spec 055 (T4): places, connections (as `kabloj`, D-13) and further previews persist per brand in
+// `leinwand.json`. The session starts from the state the first answer carries (`sesioDeStato`);
+// every change of the state (drag end, detach or plug, adding or removing a further preview) is
+// written whole, coalesced to the next animation frame with at most one request in flight and the
+// latest state pending – no timer. „Anordnung zurücksetzen“ is `statoForigi` + `rekomenci`.
 // The nodes read the shell's capabilities from `GestaltenKunteksto` (plan §2.3). The mount element
 // carries the marks the scripts and QA wait on: `data-nr-preta` after the first paint,
 // `data-nr-rev` with the rev of each Bildo once painted. A late answer older than the one shown is
@@ -22,29 +31,22 @@
 
 import {
   type Aldoneblo,
-  ARANGXO_054,
   aldonebloj,
   anschlussDe,
   type Bildo,
-  type BildoFarbo,
   type BildoLigo,
   type BildoNodo,
-  FARBO_ROLOJ,
-  type FarboRolo,
-  type FazoId,
   KATALOGO_054,
   type Kabloj,
-  kablojDe,
   kablojTeksto,
+  type LeinwandStato,
   type LeinwandSxangxo,
-  type LigoSitzung,
   largxoDe,
-  ligoId,
   ligojKun,
   type Pozicio,
   poziciojKun,
-  ROLO_PALETRO,
   type Schema,
+  tenilojDe,
   validaLigo,
   vorschauHref,
 } from "@fundamento/metiejo/gestalten";
@@ -67,9 +69,18 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { gespeichertTeksto, type Respondo, type SkriboRezulto, skribi, sxargi } from "./datumoj.js";
+import {
+  gespeichertTeksto,
+  type Respondo,
+  type SkriboRezulto,
+  type StatoRezulto,
+  skribi,
+  statoForigi,
+  statoSkribi,
+  sxargi,
+} from "./datumoj.js";
 import { Kanto, type KantoFlowLigo } from "./kanto.js";
-import { Kapo, LigoHinweis } from "./kapo.js";
+import { Kapo, type Konservo, LigoHinweis } from "./kapo.js";
 import {
   type GestaltenFlowNodo,
   GestaltenKunteksto,
@@ -79,11 +90,24 @@ import {
 import { Legendo, Zomo } from "./legendo.js";
 import { Menuo } from "./menuo.js";
 import { FarboNodo } from "./nodoj/farbo.js";
-import { FAZO_TENILO, FazoNodo } from "./nodoj/fazo.js";
 import { MarkoNodo } from "./nodoj/marko.js";
 import { PaletroNodo } from "./nodoj/paletro.js";
 import { VorschauNodo } from "./nodoj/vorschau.js";
 import { BAZA_STILO, GESTALTEN_STILO, useStilo } from "./roloj.js";
+import { Staende } from "./staende.js";
+import {
+  kablojDeSesio,
+  kunLoesen,
+  kunZiehen,
+  ligoSitzungDe,
+  type Sesio,
+  type SesioNodo,
+  sesioDeStato,
+  sesioId,
+  sesioLigoj,
+  statoDeSesio,
+  statoTeksto,
+} from "./stato.js";
 
 export interface GestaltenProps {
   /** The mount element `#nr-leinwand`; it carries the ready marks. */
@@ -96,7 +120,6 @@ export interface GestaltenProps {
 
 /** One node type per `speco`; the node tickets replace the component behind a name, not the map. */
 const NODO_TIPOJ = {
-  fazo: FazoNodo,
   marko: MarkoNodo,
   farbo: FarboNodo,
   paletro: PaletroNodo,
@@ -115,56 +138,6 @@ const ENPASO = {
   duration: 0,
 } as const;
 
-/** A node that lives only in the session: an empty Funktionsfarbe, or a further preview. */
-type SesioNodo =
-  | { speco: "farbo"; rolo: FarboRolo }
-  | { speco: "vorschau"; id: string; schema: Schema };
-
-interface Sesio {
-  nodoj: readonly SesioNodo[];
-  /** Edges drawn in the session, oldest first (`LigoSitzung.gezogen`). */
-  gezogen: readonly { de: string; al: string }[];
-  /** Edges the session detached (`LigoSitzung.geloest`), also the ones a drawn edge replaced. */
-  geloest: readonly string[];
-}
-
-const SESIO_KOMENCO: Sesio = { nodoj: [], gezogen: [], geloest: [] };
-
-const sesioId = (n: SesioNodo): string => (n.speco === "farbo" ? `farbo-${n.rolo}` : n.id);
-
-/** The edges a session node comes with, as if from the Agordo (Marke → node → own row; Palette → preview). */
-const sesioLigoj = (n: SesioNodo): { de: string; al: string }[] =>
-  n.speco === "farbo"
-    ? [
-        { de: "marko.el", al: `farbo-${n.rolo}.en` },
-        { de: `farbo-${n.rolo}.el`, al: `paletro.en.${n.rolo}` },
-      ]
-    : [{ de: "paletro.el", al: `${n.id}.en` }];
-
-/**
- * Draws `de → al` into the session. The edge `al` carried until now (from the Agordo or drawn)
- * goes into `geloest`, so the input stays as drawn even when the new edge is detached later.
- */
-function kunZiehen(nun: Sesio, ligoj: readonly BildoLigo[], de: string, al: string): Sesio {
-  const id = ligoId(de, al);
-  const anstatau = ligoj.filter((l) => l.al === al && l.id !== id).map((l) => l.id);
-  return {
-    ...nun,
-    geloest: [...nun.geloest.filter((g) => g !== id && !anstatau.includes(g)), ...anstatau],
-    gezogen: [...nun.gezogen.filter((g) => g.al !== al), { de, al }],
-  };
-}
-
-/** Detaches edges in the session: from the Agordo's (`geloest`) and from the drawn ones. */
-function kunLoesen(nun: Sesio, ids: readonly string[]): Sesio {
-  const weg = new Set(ids);
-  return {
-    ...nun,
-    geloest: [...nun.geloest.filter((g) => !weg.has(g)), ...weg],
-    gezogen: nun.gezogen.filter((g) => !weg.has(ligoId(g.de, g.al))),
-  };
-}
-
 /** Whether two edge lists hold the same edges (by id; an input carries at most one). */
 function samajLigoj(a: readonly BildoLigo[], b: readonly BildoLigo[]): boolean {
   if (a.length !== b.length) return false;
@@ -172,10 +145,13 @@ function samajLigoj(a: readonly BildoLigo[], b: readonly BildoLigo[]): boolean {
   return b.every((l) => ids.has(l.id));
 }
 
-/** Nodes are never deleted on this canvas; Entf and Rücktaste detach only selected edges. */
+/**
+ * Nodes are never deleted on this canvas; Entf and Rücktaste detach only selected edges, never a
+ * fixed one (055 D-18).
+ */
 const antauForigo: OnBeforeDelete<GestaltenFlowNodo, KantoFlowLigo> = async ({ edges }) => ({
   nodes: [],
-  edges: edges.filter((e) => e.selected === true),
+  edges: edges.filter((e) => e.selected === true && e.data?.ligo.fest !== true),
 });
 
 /** The line while an edge is drawn: dashed in the calm text role (mockup `.kabel`). */
@@ -190,8 +166,22 @@ const FORIGO_KLAVOJ = ["Delete", "Backspace"];
 /** The node a port belongs to (`farbo-primaer.el` → `farbo-primaer`). */
 const nodoDe = (port: string): string => anschlussDe(port)?.nodo ?? port.split(".")[0] ?? port;
 
-/** The step that stands for a Funktionsfarbe before it has a value (its Basis, 600). */
-const FUNKCIO_BASIS = "600";
+/** The token whose radius the edges' corners take (055 D-5; the mockup's `pfad(pts, 12)`). */
+const RADIUSO_TOKENO = "--fm-radius-role-surface";
+
+/**
+ * The corner radius of the edges in px: the resolved value of RADIUSO_TOKENO at the mount element
+ * (px, or rem against the root's font size); 0 when it cannot be read.
+ */
+function radiusoDe(ujo: HTMLElement): number {
+  const teksto = getComputedStyle(ujo).getPropertyValue(RADIUSO_TOKENO).trim();
+  const valoro = Number.parseFloat(teksto);
+  if (!Number.isFinite(valoro)) return 0;
+  if (teksto.endsWith("rem")) {
+    return valoro * Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+  }
+  return teksto.endsWith("px") ? valoro : 0;
+}
 
 /** Per Bildo, once: its nodes by id (an immutable input; the canvas asks this on every render). */
 const indeksoj = new WeakMap<Bildo, ReadonlyMap<string, BildoNodo>>();
@@ -228,26 +218,7 @@ function sxangxitaj(antaua: Bildo, nova: Bildo): Set<string> {
   return out;
 }
 
-/** The empty colour node a session Funktionsfarbe shows: its row's derived Basis as the swatch. */
-function sesioFarbo(bildo: Bildo, rolo: FarboRolo): BildoFarbo {
-  const paletro = indeksoDe(bildo).get("paletro");
-  const vico =
-    paletro?.speco === "paletro"
-      ? paletro.vicoj.find((v) => v.paletro === ROLO_PALETRO[rolo])
-      : undefined;
-  const hex = vico?.stufoj.find((s) => s.stufo === FUNKCIO_BASIS)?.hex ?? "";
-  return {
-    id: `farbo-${rolo}`,
-    speco: "farbo",
-    fazo: "fazo-4",
-    rolo,
-    hex,
-    stato: "leer",
-    elir: "farbo",
-  };
-}
-
-/** The `data.nodo` of every node on the canvas: the Bildo's first (phases first, R-13), then the session's. */
+/** The `data.nodo` of every node on the canvas: the Bildo's first, then the session's. */
 function cxiujNodoj(
   bildo: Bildo,
   sesio: readonly SesioNodo[],
@@ -257,46 +228,27 @@ function cxiujNodoj(
   return [
     ...bildo.nodoj.map((nodo) => ({ nodo, sitzung: false })),
     ...sesio.map((s) => ({
-      nodo:
-        s.speco === "farbo"
-          ? sesioFarbo(bildo, s.rolo)
-          : ({
-              id: s.id,
-              speco: "vorschau",
-              fazo: "fazo-5",
-              schema: s.schema,
-              href: vorschauHref(marko, s.schema, bildo.rev, kabloj),
-            } satisfies VorschauDatumo),
+      nodo: {
+        id: s.id,
+        speco: "vorschau",
+        fazo: "fazo-5",
+        schema: s.schema,
+        href: vorschauHref(marko, s.schema, bildo.rev, kabloj),
+      } satisfies VorschauDatumo,
       sitzung: true,
     })),
   ];
 }
 
-/** The React Flow node of one node of the canvas at its place. */
+/** The React Flow node of one node of the canvas at its absolute place (no parent, 055 T1). */
 function flowNodo(
   { nodo, sitzung }: { nodo: BildoNodo | VorschauDatumo; sitzung: boolean },
   pozicio: Pozicio,
   levita: boolean,
 ): GestaltenFlowNodo {
-  if (nodo.speco === "fazo") {
-    const platz = ARANGXO_054.fazoj[nodo.id];
-    return {
-      id: nodo.id,
-      type: "fazo",
-      position: pozicio,
-      data: { nodo, sitzung },
-      width: platz.largxo,
-      height: platz.alteco,
-      dragHandle: `.${FAZO_TENILO}`,
-      // The surface lets the pointer through to the pane (a drag there pans); the head takes it.
-      style: { pointerEvents: "none" },
-      zIndex: 0,
-    };
-  }
   const komuna = {
     id: nodo.id,
     position: pozicio,
-    parentId: nodo.fazo,
     width: largxoDe(nodo.id),
     ...(levita ? { zIndex: LEVITA_Z } : {}),
   };
@@ -312,12 +264,84 @@ function flowNodo(
   }
 }
 
-/** The shift of the vertical segment of an edge into a palette row (rows fan out by 5 px). */
-function sxovoDe(al: string): number {
-  const rolo = /^paletro\.en\.([a-z]+)$/.exec(al)?.[1];
-  const indekso = (FARBO_ROLOJ as readonly string[]).indexOf(rolo ?? "");
-  return indekso < 0 ? 0 : (indekso - 3) * 5;
+/** The writer of the canvas state (Spec 055 T4, plan §2.4); one per mounted canvas. */
+interface StatoSkribilo {
+  /** The state changed: one write in the next animation frame, at most one request in flight. */
+  plani(): void;
+  /** Stops writing (a scheduled write is dropped) and resolves once none is in flight. */
+  atendi(): Promise<void>;
+  /** Takes `teksto` as the state the server holds and writes again from now on. */
+  konati(teksto: string): void;
+  /** Writes again after `atendi` without a new state from the server (the load failed). */
+  dauxrigi(): void;
 }
+
+/**
+ * Coalesces the writes of the canvas state: a change asks for the next animation frame; a frame
+ * sends the latest state unless it is the one the server holds; while a request is in flight
+ * nothing more is sent, and once it is back the latest state goes if it differs from the one
+ * sent. A failed write leaves the state as the browser has it; the next change tries again. No
+ * timer, no new time limit.
+ */
+function statoSkribilo(o: {
+  legi: () => LeinwandStato;
+  sendi: (stato: LeinwandStato) => Promise<StatoRezulto>;
+  rezulto: (rezulto: StatoRezulto) => void;
+  konata: string;
+}): StatoSkribilo {
+  let konata = o.konata;
+  let kadro: number | null = null;
+  let flugo: Promise<void> | null = null;
+  let haltita = false;
+  const nuligi = (): void => {
+    if (kadro === null) return;
+    cancelAnimationFrame(kadro);
+    kadro = null;
+  };
+  const sendi = async (): Promise<void> => {
+    if (haltita || flugo !== null) return;
+    const stato = o.legi();
+    const teksto = statoTeksto(stato);
+    if (teksto === konata) return;
+    let fini = (): void => undefined;
+    flugo = new Promise<void>((done) => {
+      fini = done;
+    });
+    const rezulto = await o.sendi(stato);
+    if (rezulto.speco === "ok") konata = teksto;
+    flugo = null;
+    fini();
+    o.rezulto(rezulto);
+    if (statoTeksto(o.legi()) !== teksto) plani();
+  };
+  const plani = (): void => {
+    if (haltita || kadro !== null) return;
+    kadro = requestAnimationFrame(() => {
+      kadro = null;
+      void sendi();
+    });
+  };
+  return {
+    plani,
+    atendi: async () => {
+      haltita = true;
+      nuligi();
+      while (flugo !== null) await flugo;
+    },
+    konati: (teksto) => {
+      nuligi();
+      konata = teksto;
+      haltita = false;
+    },
+    dauxrigi: () => {
+      haltita = false;
+      plani();
+    },
+  };
+}
+
+/** The first answer: the Bildo and the stored canvas state. */
+type Komenco = Extract<Respondo, { speco: "bildo" }>;
 
 function Fluo({
   ujo,
@@ -328,15 +352,19 @@ function Fluo({
   ujo: HTMLElement;
   fonto: string;
   marko: string;
-  komenca: Bildo;
+  komenca: Komenco;
 }) {
   useStilo("baza", BAZA_STILO);
-  const [bildo, setBildo] = useState(komenca);
-  const [sesio, setSesio] = useState<Sesio>(SESIO_KOMENCO);
-  const [verschoben, setVerschoben] = useState<ReadonlyMap<string, Pozicio>>(new Map());
+  // Spec 055 (T4): the session starts from the stored state (none: the start layout).
+  const [unua] = useState(() => sesioDeStato(komenca.stato, komenca.bildo));
+  const [bildo, setBildo] = useState(komenca.bildo);
+  const [sesio, setSesio] = useState<Sesio>(unua.sesio);
+  const [verschoben, setVerschoben] = useState<ReadonlyMap<string, Pozicio>>(unua.verschoben);
   const [levitaj, setLevitaj] = useState<ReadonlySet<string>>(new Set());
+  const [elektitajLigoj, setElektitajLigoj] = useState<ReadonlySet<string>>(new Set());
   const [fokusPor, setFokusPor] = useState<string | null>(null);
-  const [gespeichert, setGespeichert] = useState<string | null>(null);
+  const [gespeichert, setGespeichert] = useState<Konservo | null>(null);
+  const [statoUnlesbar, setStatoUnlesbar] = useState(komenca.statoUnlesbar);
   const [menuo, setMenuo] = useState(false);
   const [lumoj, setLumoj] = useState<ReadonlyMap<string, number>>(new Map());
   const [skemo, setSkemo] = useState<Schema>(
@@ -349,23 +377,16 @@ function Fluo({
   const petoj = useRef({ sendita: 0, montrita: 0 });
   const bildoRef = useRef(bildo);
   bildoRef.current = bildo;
-  /** The number of the next further preview: `vorschau-3` follows the two fixed ones. */
-  const vorschauNombro = useRef(3);
+  /** The number of the next further preview: past the highest one stored (`vorschau-3` first). */
+  const vorschauNombro = useRef(unua.vorschauNombro);
   const { fitView } = useReactFlow();
   const preta = useNodesInitialized();
+  /** 055 D-5: the corner radius of the edges, read once per mount. */
+  const [radiuso] = useState(() => radiusoDe(ujo));
 
-  // Session nodes that the Bildo now carries itself (a Funktionsfarbe got its value) are hidden at
-  // once (the effect below drops them from the session); their drawn edges equal the Bildo's.
   const indekso = indeksoDe(bildo);
-  const sesioNodoj = useMemo(
-    () => sesio.nodoj.filter((s) => !indekso.has(sesioId(s))),
-    [sesio.nodoj, indekso],
-  );
-  const ligoSesio = useMemo<LigoSitzung>(
-    () => ({ geloest: sesio.geloest, gezogen: sesio.gezogen, nodoj: sesioNodoj.map(sesioId) }),
-    [sesio.geloest, sesio.gezogen, sesioNodoj],
-  );
-  const ligoj = useMemo(() => ligojKun(ligoSesio, bildo), [ligoSesio, bildo]);
+  const sesioNodoj = sesio.nodoj;
+  const ligoj = useMemo(() => ligojKun(ligoSitzungDe(sesio), bildo), [sesio, bildo]);
   const ligojRef = useRef(ligoj);
   ligojRef.current = ligoj;
   // The edges the session started from: the Agordo's plus those of the session nodes. The notice
@@ -384,31 +405,13 @@ function Fluo({
   );
   const ligojSxangxitaj = !samajLigoj(ligoj, grundLigoj);
 
-  // A session node the Bildo now carries (a Funktionsfarbe got its value) leaves the session for
-  // good: once its value is removed („↺“) it is gone, not back as an empty node.
-  useEffect(() => {
-    setSesio((nun) => {
-      const restas = nun.nodoj.filter((s) => !indekso.has(sesioId(s)));
-      return restas.length === nun.nodoj.length ? nun : { ...nun, nodoj: restas };
-    });
-  }, [indekso]);
-  const kabloj = useMemo(() => {
-    const nodojKunStato = [
-      ...bildo.nodoj.map((n) =>
-        n.speco === "farbo" ? { id: n.id, stato: n.stato } : { id: n.id },
-      ),
-      ...sesioNodoj.map((s) =>
-        s.speco === "farbo" ? { id: sesioId(s), stato: "leer" } : { id: s.id },
-      ),
-    ];
-    return kablojDe(ligoj, nodojKunStato);
-  }, [bildo, sesioNodoj, ligoj]);
+  const kabloj = useMemo(() => kablojDeSesio(bildo, sesio), [bildo, sesio]);
   const cxiuj = useMemo(
     () => cxiujNodoj(bildo, sesioNodoj, marko, kabloj),
     [bildo, sesioNodoj, marko, kabloj],
   );
 
-  // Load (again) and show only an answer newer than the one shown.
+  // Load (again) with the session's kabloj and show only an answer newer than the one shown.
   const sxargiDenove = useCallback(
     async (k: Kabloj): Promise<void> => {
       const numero = ++petoj.current.sendita;
@@ -429,7 +432,7 @@ function Fluo({
 
   // A change of the effective view reloads the Bildo with it (never on the first render).
   const kablojTekstoNun = kablojTeksto(kabloj);
-  const kablojPetita = useRef(kablojTeksto(komenca.kabloj));
+  const kablojPetita = useRef(kablojTeksto(komenca.bildo.kabloj));
   const kablojRef = useRef(kabloj);
   kablojRef.current = kabloj;
   useEffect(() => {
@@ -438,13 +441,78 @@ function Fluo({
     void sxargiDenove(kablojRef.current);
   }, [kablojTekstoNun, sxargiDenove]);
 
+  // Spec 055 (T4): the canvas state of the session, written whenever it changes. The state the
+  // first answer gave is the one the server holds, so nothing is written before a change (no
+  // leinwand.json before the first change of the layout).
+  const stato = useMemo(
+    () => statoDeSesio(bildo, sesio, verschoben, kabloj),
+    [bildo, sesio, verschoben, kabloj],
+  );
+  const statoRef = useRef(stato);
+  statoRef.current = stato;
+  const statoTekstoNun = statoTeksto(stato);
+  const skribiloRef = useRef<StatoSkribilo | null>(null);
+  skribiloRef.current ??= statoSkribilo({
+    legi: () => statoRef.current,
+    sendi: (s) => statoSkribi(marko, s),
+    rezulto: (r) => {
+      if (r.speco === "ok") {
+        setGespeichert({ speco: "ok", teksto: gespeichertTeksto(r.gespeichert) });
+        setStatoUnlesbar(false);
+      } else setGespeichert({ speco: "ne" });
+    },
+    konata: statoTekstoNun,
+  });
+  const skribilo = skribiloRef.current;
+  useEffect(() => {
+    if (statoTekstoNun !== "") skribilo.plani();
+  }, [statoTekstoNun, skribilo]);
+
+  // Spec 055 (T4): the session again from the stored state (plan §2.4, contract for LNS-3.1).
+  const rekomenci = useCallback(async (): Promise<void> => {
+    await skribilo.atendi();
+    const numero = ++petoj.current.sendita;
+    const respondo = await sxargi(fonto);
+    if (respondo.speco !== "bildo") {
+      skribilo.dauxrigi();
+      return;
+    }
+    petoj.current.montrita = Math.max(petoj.current.montrita, numero);
+    const nova = sesioDeStato(respondo.stato, respondo.bildo);
+    const novajKabloj = kablojDeSesio(respondo.bildo, nova.sesio);
+    kablojPetita.current = kablojTeksto(respondo.bildo.kabloj);
+    vorschauNombro.current = nova.vorschauNombro;
+    setBildo(respondo.bildo);
+    setSesio(nova.sesio);
+    setVerschoben(nova.verschoben);
+    setStatoUnlesbar(respondo.statoUnlesbar);
+    setElektitajLigoj(new Set());
+    setFokusPor(null);
+    skribilo.konati(
+      statoTeksto(statoDeSesio(respondo.bildo, nova.sesio, nova.verschoben, novajKabloj)),
+    );
+  }, [fonto, skribilo]);
+
+  // „Anordnung zurücksetzen“: start places, the Agordo's connections, added nodes stay at their
+  // start slots; the Agordo does not change. When the server could not reset, nothing else does.
+  const anordnungZuruecksetzen = useCallback(async (): Promise<void> => {
+    await skribilo.atendi();
+    const rezulto = await statoForigi(marko);
+    if (rezulto.speco !== "ok") {
+      setGespeichert({ speco: "ne" });
+      skribilo.dauxrigi();
+      return;
+    }
+    setGespeichert({ speco: "ok", teksto: gespeichertTeksto(rezulto.gespeichert) });
+    await rekomenci();
+    requestAnimationFrame(() => void fitView(ENPASO));
+  }, [marko, skribilo, rekomenci, fitView]);
+
   // The nodes at their places; React Flow's measurements and selection carry over.
   useEffect(() => {
     const pozicioj = poziciojKun(
       verschoben,
-      cxiuj.map(({ nodo }) =>
-        "fazo" in nodo ? { id: nodo.id, fazo: nodo.fazo as FazoId } : { id: nodo.id },
-      ),
+      cxiuj.map(({ nodo }) => ({ id: nodo.id })),
     );
     const elekti = elektota.current;
     elektota.current = null;
@@ -473,7 +541,8 @@ function Fluo({
     );
   }, []);
 
-  // The end of a drag keeps the place in the session; nothing is sent, nothing stored (AK-15).
+  // The end of a drag keeps the place in the session; nothing is sent during a drag (AK-15). Spec
+  // 055 (T4): the new place goes into the canvas state, written once the drag has ended.
   const onNodeDragStop = useCallback<OnNodeDrag<GestaltenFlowNodo>>((_evento, _nodo, movitaj) => {
     setVerschoben((nun) => {
       const nova = new Map(nun);
@@ -484,7 +553,6 @@ function Fluo({
 
   // T7 (E-11): the session's connections. Every change goes through `kunZiehen`/`kunLoesen`; the
   // edges on the canvas stay `ligojKun(session, bildo)`, the Agordo never changes (AK-18).
-  const [elektitajLigoj, setElektitajLigoj] = useState<ReadonlySet<string>>(new Set());
   const ziehen = useCallback((de: string, al: string) => {
     setSesio((nun) => kunZiehen(nun, ligojRef.current, de, al));
   }, []);
@@ -497,9 +565,7 @@ function Fluo({
     setSesio((nun) => ({
       ...nun,
       geloest: [],
-      gezogen: nun.nodoj
-        .filter((s) => !indeksoDe(bildoRef.current).has(sesioId(s)))
-        .flatMap(sesioLigoj),
+      gezogen: nun.nodoj.flatMap(sesioLigoj),
     }));
     setElektitajLigoj(new Set());
   }, []);
@@ -576,29 +642,33 @@ function Fluo({
       const malplena =
         sesiaj.has(de) || (fontaNodo?.speco === "farbo" && fontaNodo.stato === "leer");
       const farbo = de.startsWith("farbo-");
+      // 055 D-18: a fixed edge leaves Primär at its bottom handle and cannot be touched.
+      const teniloj = tenilojDe(ligo);
+      const fest = ligo.fest === true;
       return {
         id: ligo.id,
         type: "kanto",
         source: de,
-        sourceHandle: ligo.de,
+        sourceHandle: teniloj.de,
         target: nodoDe(ligo.al),
-        targetHandle: ligo.al,
-        selected: elektitajLigoj.has(ligo.id),
+        targetHandle: teniloj.al,
+        selected: !fest && elektitajLigoj.has(ligo.id),
+        ...(fest ? { selectable: false, deletable: false, reconnectable: false } : {}),
         data: {
           ligo,
           matt: farbo && (malplena || !surMarko.has(de)),
           lumo: lumoj.get(de) ?? 0,
-          sxovo: sxovoDe(ligo.al),
+          radiuso,
         },
       };
     });
-  }, [ligoj, sesioNodoj, indekso, lumoj, elektitajLigoj]);
+  }, [ligoj, sesioNodoj, indekso, lumoj, elektitajLigoj, radiuso]);
 
   const skribiKaj = useCallback(
     async (sxangxo: LeinwandSxangxo): Promise<SkriboRezulto> => {
       const rezulto = await skribi(marko, sxangxo);
       if (rezulto.speco === "ok") {
-        setGespeichert(gespeichertTeksto(rezulto.gespeichert));
+        setGespeichert({ speco: "ok", teksto: gespeichertTeksto(rezulto.gespeichert) });
         await sxargiDenove(kablojRef.current);
       }
       return rezulto;
@@ -660,13 +730,10 @@ function Fluo({
       if (a.zeichen !== "farbo" || a.nodo === undefined) return undefined;
       const nodo = cxiuj.find((c) => c.nodo.id === a.nodo)?.nodo;
       if (nodo?.speco === "farbo" && nodo.hex !== "") return nodo.hex;
-      const rolo = a.nodo.replace(/^farbo-/, "");
-      const r = FARBO_ROLOJ.find((x) => x === rolo);
-      if (r !== undefined) return sesioFarbo(bildo, r).hex || undefined;
       const primaer = indekso.get("farbo-primaer");
       return primaer?.speco === "farbo" ? primaer.hex : undefined;
     },
-    [cxiuj, bildo, indekso],
+    [cxiuj, indekso],
   );
   const elekti = useCallback(
     (a: Aldoneblo) => {
@@ -675,21 +742,6 @@ function Fluo({
         elektota.current = a.nodo;
         setNodoj((n) => n.map((x) => ({ ...x, selected: x.id === a.nodo })));
         setFokusPor(a.nodo);
-        return;
-      }
-      if (a.stato === "anlegen" && a.nodo !== undefined) {
-        const rolo = FARBO_ROLOJ.find((r) => `farbo-${r}` === a.nodo);
-        if (rolo === undefined) return;
-        const id = `farbo-${rolo}`;
-        elektota.current = id;
-        // Marke → node → its own row; an edge already at that row is replaced.
-        setSesio((nun) =>
-          sesioLigoj({ speco: "farbo", rolo }).reduce(
-            (s, { de, al }) => kunZiehen(s, ligojRef.current, de, al),
-            { ...nun, nodoj: [...nun.nodoj, { speco: "farbo", rolo } as const] } as Sesio,
-          ),
-        );
-        setFokusPor(id);
         return;
       }
       if (a.stato === "weitere") {
@@ -727,8 +779,22 @@ function Fluo({
       fokusFarita: () => setFokusPor(null),
       hervorheben,
       skemo,
+      rekomenci,
+      statoAtendi: () => skribilo.atendi(),
     }),
-    [marko, bildo, skribiKaj, kabloj, ligoj, forigi, fokusPor, hervorheben, skemo],
+    [
+      marko,
+      bildo,
+      skribiKaj,
+      kabloj,
+      ligoj,
+      forigi,
+      fokusPor,
+      hervorheben,
+      skemo,
+      rekomenci,
+      skribilo,
+    ],
   );
 
   // The first paint: fit, wait until painted, then the marks. Every later Bildo: its rev.
@@ -795,6 +861,9 @@ function Fluo({
           menuoMalfermita={menuo}
           menuo={() => setMenuo((m) => !m)}
           gespeichert={gespeichert}
+          statoUnlesbar={statoUnlesbar}
+          anordnungZuruecksetzen={() => void anordnungZuruecksetzen()}
+          staende={<Staende dauxrigi={skribilo.dauxrigi} />}
           skemo={skemo}
           elektiSkemon={elektiSkemon}
           ligoHinweis={ligojSxangxitaj ? <LigoHinweis zuruecksetzen={zuruecksetzen} /> : null}
@@ -841,7 +910,7 @@ export function Gestalten({ ujo, fonto, marko }: GestaltenProps) {
   if (respondo.speco !== "bildo") return <Ruhig respondo={respondo} />;
   return (
     <ReactFlowProvider>
-      <Fluo ujo={ujo} fonto={fonto} marko={marko} komenca={respondo.bildo} />
+      <Fluo ujo={ujo} fonto={fonto} marko={marko} komenca={respondo} />
     </ReactFlowProvider>
   );
 }
