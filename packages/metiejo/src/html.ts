@@ -939,6 +939,11 @@ export interface GrafeoScreen {
   studioHref?: string;
   /** Brands: the shared check of the current rev says `exportable: false`. */
   neEksportebla?: boolean;
+  /**
+   * Spec 054 (D-2): brands, the view Verstehen – the switch back to Gestalten. Opt-in: without it
+   * the screen is byte for byte as in Spec 047.
+   */
+  gestaltenHref?: string;
 }
 
 /**
@@ -965,6 +970,10 @@ export function grafeoScreen(doc: GrafeoScreen): string {
     doc.neEksportebla === true
       ? ` <fm-insigno intent="warning" id="nr-ne-eksportebla">nicht exportierbar</fm-insigno>`
       : "";
+  const ansicht =
+    doc.gestaltenHref === undefined
+      ? ""
+      : ` <span id="nr-ansicht"><fm-ligilo to="${escapeHtml(doc.gestaltenHref)}" placement="standalone">Gestalten</fm-ligilo> | Verstehen</span>`;
   return `<!doctype html>
 <html lang="de" data-fm-aspekto="${escapeHtml(doc.aspekto)}" data-fm-color-scheme="${doc.scheme}">
 <head>
@@ -977,7 +986,7 @@ ${GRAFEO_CSS}</style>
 <script type="module" src="/eroj/define.js"></script>
 </head>
 <body>
-<header class="nr-kapo"><fm-titolo level="1">Graph ${escapeHtml(doc.aspekto)}</fm-titolo>${zurueck}${insigno}</header>
+<header class="nr-kapo"><fm-titolo level="1">Graph ${escapeHtml(doc.aspekto)}</fm-titolo>${ansicht}${zurueck}${insigno}</header>
 <div id="nr-leinwand" data-nr-fonto="${escapeHtml(doc.fonto)}"></div>
 <script type="module" src="/nodredaktilo/leinwand.js"></script>
 </body>

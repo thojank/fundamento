@@ -21,6 +21,62 @@ declare module "react" {
         size?: "small" | "medium" | "large";
         emphasis?: Emphasis;
         intent?: "neutral" | "danger";
+        // Spec 054 (MP-1, T3): the controls of the view Gestalten.
+        type?: "button" | "submit" | "reset";
+        disabled?: boolean;
+        loading?: boolean;
+        "full-width"?: boolean;
+        /** Accessible name when the label slot holds only a sign („×“, „↺“). */
+        label?: string;
+      };
+      // Spec 054 (MP-1, T3, R-15): the field of a colour node. The Ero fires a native `input`
+      // (composed) while typing and a native `change` (bubbling) when it is left with a new text;
+      // read them with `addEventListener` on a ref, the reliable way for a custom element.
+      "fm-kampo": FmProps & {
+        kind?:
+          | "text"
+          | "email"
+          | "tel"
+          | "url"
+          | "search"
+          | "password"
+          | "number"
+          | "date"
+          | "time";
+        value?: string;
+        placeholder?: string;
+        label?: string;
+        size?: "small" | "medium" | "large";
+        disabled?: boolean;
+        readonly?: boolean;
+        invalid?: boolean;
+        required?: boolean;
+        name?: string;
+        autocomplete?: string;
+        unit?: string;
+        intent?: "neutral" | "success" | "warning" | "danger";
+        "message-position"?: "below" | "joined";
+      };
+      // Spec 054 (MP-1, T3): the slider „Tönung“; `change` when a thumb comes to rest.
+      "fm-glitilo": FmProps & {
+        min?: number;
+        max?: number;
+        step?: number;
+        value?: number;
+        label?: string;
+        disabled?: boolean;
+        readonly?: boolean;
+        name?: string;
+        readout?: "none" | "text" | "field";
+        ticks?: boolean;
+      };
+      // Spec 054 (MP-1, T3): links of the header (Verstehen, Studio).
+      "fm-ligilo": FmProps & {
+        to: string;
+        placement?: "inline" | "standalone";
+        size?: "small" | "medium" | "large";
+        external?: boolean;
+        label?: string;
       };
       "fm-teksto": FmProps & {
         kind?: "body" | "caption" | "kicker" | "code" | "label";

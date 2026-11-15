@@ -24,7 +24,11 @@ const STUB = "export {};\n";
 
 /** The screens of the block: path, the Aspekto on the root, the JSON URL of the mount point. */
 const EKRANOJ = [
-  { pfad: "/marko/provo/grafeo", aspekto: "provo", fonto: "/api/grafeo?marko=provo" },
+  {
+    pfad: "/marko/provo/grafeo?ansicht=verstehen",
+    aspekto: "provo",
+    fonto: "/api/grafeo?marko=provo",
+  },
   { pfad: "/aspekto/komuna/grafeo", aspekto: "komuna", fonto: "/api/grafeo?aspekto=komuna" },
   { pfad: "/aspekto/ekzemplo/grafeo", aspekto: "ekzemplo", fonto: "/api/grafeo?aspekto=ekzemplo" },
 ] as const;
@@ -130,7 +134,7 @@ describe("Spec 047 T4: the routes of the graph canvas", () => {
     expect(Object.keys(JSON.parse(text(antwort.body)) as object)).toEqual(["eraroj"]);
     // The screen is still shown: the canvas reads the 422 and shows the errors (`#nr-eraroj`), and
     // the shared check of this rev refuses the export, so the header says so.
-    const ekrano = await mit.anfrage("GET", "/marko/zyklo/grafeo");
+    const ekrano = await mit.anfrage("GET", "/marko/zyklo/grafeo?ansicht=verstehen");
     expect(ekrano.status).toBe(200);
     expect(count(text(ekrano.body), `data-nr-fonto="/api/grafeo?marko=zyklo"`)).toBe(1);
     expect(text(ekrano.body)).toContain(
@@ -147,7 +151,7 @@ describe("Spec 047 T4: the routes of the graph canvas", () => {
         ["?scheme=dark", "dark"],
         ["?scheme=sepia", "light"],
       ] as const) {
-        const pfad = `${ekrano.pfad}${query}`;
+        const pfad = `${ekrano.pfad}${ekrano.pfad.includes("?") ? query.replace("?", "&") : query}`;
         const antwort = await mit.anfrage("GET", pfad);
         const html = text(antwort.body);
         const pruefe = (bedingung: boolean, was: string): void => {
@@ -184,7 +188,7 @@ describe("Spec 047 T4: the routes of the graph canvas", () => {
 
   it("marks the screen of a brand the shared check does not export", async () => {
     const exportable = checkDraft(provoAgordo(), loadBases()).exportable;
-    const html = text((await mit.anfrage("GET", "/marko/provo/grafeo")).body);
+    const html = text((await mit.anfrage("GET", "/marko/provo/grafeo?ansicht=verstehen")).body);
     expect(count(html, `id="nr-ne-eksportebla"`)).toBe(exportable ? 0 : 1);
     if (!exportable) {
       expect(html).toContain(

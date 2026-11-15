@@ -95,6 +95,17 @@ import type { Settings } from "./env.js";
 import { esplori } from "./esploro/esploro.js";
 import { GrafeoEraro, grafeoDe, grafeoDePaket, serializeGrafeo } from "./grafeo.js";
 import { EKZEMPLO_DIR, paketoDosieroj } from "./grafeo-fontoj.js";
+import {
+  gestaltenDe,
+  type Kabloj,
+  kablojEl,
+  kablojTeksto,
+  paletrojDe,
+  serializeBildo,
+  wirksamerAgordo,
+} from "./grafeo-gestalten.js";
+import { gestaltenScreen, LEINWAND_CSS_HREF } from "./grafeo-gestalten-ekrano.js";
+import { leinwandSchreiben, paletroStufojDe } from "./grafeo-skribo.js";
 import { CLIENT_SCRIPT, escapeHtml, grafeoScreen, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
 import { type Klartext, klartextOf, satzOf, vorschlagOf } from "./klartext.js";
@@ -434,6 +445,20 @@ export function familyOfFilename(filename: string): string {
     .trim();
 }
 
+/**
+ * Spec 054 (T7, E-11): the `kabloj` of a request – the session's changed connections – or undefined
+ * for a malformed value (→ 400). Without the parameter, or with an empty one: {} (the Agordo's view).
+ */
+function kablojParametro(params: URLSearchParams): Kabloj | undefined {
+  return kablojEl(params.get("kabloj") ?? "");
+}
+
+/** Spec 054 (T7): a preview request without changed connections – the answer as before. */
+const KEINE_KABLOJ: { teksto: string; agordo: Agordo | undefined } = {
+  teksto: "",
+  agordo: undefined,
+};
+
 /** Spec 047 (NE-1): the dist dir of the built canvas, or null when it is not there. */
 function leinwandDist(): string | null {
   try {
@@ -445,6 +470,32 @@ function leinwandDist(): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Spec 054 (T2): the neutral Belegung of the canvas view Gestalten – an ordinary Agordo in the editor
+ * package, read and checked; null when the package does not resolve (outside the checkout). An
+ * Agordo that does not read throws: a broken Belegung fails loudly (R-7).
+ */
+function leinwandBelegung(): Agordo | null {
+  let file: string;
+  try {
+    file = join(
+      dirname(fileURLToPath(import.meta.resolve("@fundamento/nodredaktilo/package.json"))),
+      "belegung",
+      "leinwand.agordo.json",
+    );
+  } catch {
+    return null;
+  }
+  if (!existsSync(file)) return null;
+  const { agordo, issues } = readAgordo(JSON.parse(readFileSync(file, "utf8")));
+  if (agordo === undefined) {
+    throw new Error(
+      `${file}: the Belegung is no valid Agordo: ${issues.map((issue) => issue.message).join("; ")}`,
+    );
+  }
+  return agordo;
 }
 
 /** Spec 047 (NE-1): the answer of every canvas route while the bundle is missing. */
@@ -477,6 +528,15 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   const paketoGrafeoj = new Map<string, string>();
   const markoGrafeoj = new Map<string, { rev: number; korpo: string }>();
   const paketoStiloj = new Map<string, string>();
+  // Spec 054 (T2): the Bildo of a brand per rev (without kabloj), and the Belegung of the view
+  // Gestalten with its stylesheet, read and derived once per process on its first need.
+  const leinwandBildoj = new Map<string, { rev: number; korpo: string }>();
+  let belegung: Agordo | null | undefined;
+  const belegungOf = (): Agordo | null => {
+    belegung ??= leinwandBelegung();
+    return belegung;
+  };
+  let belegungCss: Promise<string> | undefined;
   const vitrinoDir = join(options.root, ".fundamento", "projekcioj", "vitrino");
   const nordsteloDir = join(options.root, ...NORDSTELO_DIR);
   const stand = options.stand ?? standOf(options.root);
@@ -1540,6 +1600,20 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       sendStatic(response, vitrinoDir, path.slice("/vitrino/".length));
       return;
     }
+    // Spec 054 (T2): the stylesheet of the neutral Belegung, derived as a brand's preview stylesheet
+    // (the same derivation and CSS_CELO), in memory once per process. Before the static route of the
+    // bundle, whose dir has no such file; missing like the bundle when the package is missing.
+    if (method === "GET" && path === LEINWAND_CSS_HREF) {
+      const agordo = leinwand === null ? null : belegungOf();
+      if (agordo === null) {
+        sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
+        return;
+      }
+      belegungCss ??= previewCssInTeilen(agordo, bases);
+      const stilo = await belegungCss;
+      response.writeHead(200, { "content-type": TYPES[".css"] ?? "" }).end(stilo);
+      return;
+    }
     // Spec 047 (NE-1): the graph canvas – its bundle and the graph as JSON. Before the generic
     // `/marko/:name/:key` route, which would answer its paths with 404.
     if (method === "GET" && path.startsWith("/nodredaktilo/")) {
@@ -1548,6 +1622,123 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       sendStatic(response, leinwand, path.slice("/nodredaktilo/".length));
+      return;
+    }
+    // Spec 054 (T2): the data of the view Gestalten – the Bildo of the draft, in memory per rev. It
+    // never writes (no setDraft, no Kroniko, the rev holds) and never asks the check. Like
+    // /api/grafeo: 404 without the brand, 422 with the errors of a draft that does not read.
+    if (method === "GET" && path === "/api/leinwand") {
+      const markoName = url.searchParams.get("marko");
+      if (markoName === null) {
+        sendHtml(response, "<!doctype html><title>400</title><p>Parameter marko fehlt.", 400);
+        return;
+      }
+      const draft = draftOf(markoName);
+      if (draft === undefined) {
+        notFound(response);
+        return;
+      }
+      // Spec 054 (T7, E-11): the session's changed connections. Computed per request, never held,
+      // never written; without the parameter (or with an empty one) the answer of the Agordo.
+      const kabloj = kablojParametro(url.searchParams);
+      if (kabloj === undefined) {
+        sendHtml(response, "<!doctype html><title>400</title><p>Parameter kabloj unlesbar.", 400);
+        return;
+      }
+      const cached = kablojTeksto(kabloj) === "" ? leinwandBildoj.get(markoName) : undefined;
+      if (cached?.rev === draft.rev) {
+        response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(cached.korpo);
+        return;
+      }
+      const { agordo, rev } = draft;
+      const read = readAgordo(agordo);
+      if (read.agordo === undefined) {
+        const eraroj = read.issues.map(({ path: where, rule, message }) => ({
+          path: where,
+          rule,
+          message,
+        }));
+        response
+          .writeHead(422, { "content-type": TYPES[".json"] ?? "" })
+          .end(serializeCanonicalJson({ eraroj }));
+        return;
+      }
+      const start = startAgordo(markoName, "leer", bases);
+      const wirksam = wirksamerAgordo(read.agordo, start, kabloj);
+      // Spec 054 (T7): a view whose effective Agordo does not read answers like a draft that does
+      // not read (the value of a source can be one the target field cannot carry).
+      const wirksamRead = kablojTeksto(kabloj) === "" ? read : readAgordo(wirksam);
+      if (wirksamRead.agordo === undefined) {
+        const eraroj = wirksamRead.issues.map(({ path: where, rule, message }) => ({
+          path: where,
+          rule,
+          message,
+        }));
+        response
+          .writeHead(422, { "content-type": TYPES[".json"] ?? "" })
+          .end(serializeCanonicalJson({ eraroj }));
+        return;
+      }
+      const palettes = paletrojDe(wirksam, bases);
+      const korpo = serializeBildo(gestaltenDe(read.agordo, { start, kabloj, palettes, rev }));
+      if (kablojTeksto(kabloj) === "") leinwandBildoj.set(markoName, { rev, korpo });
+      response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(korpo);
+      return;
+    }
+    // Spec 054 (T4/T5): the canvas's own write path – one change (a node's colour, the Tönung, a
+    // palette step for light or dark) into the stored draft. It reads the value and the Agordo, and
+    // nothing else: no check, no rule, no 409 (E-1, E-6). 404 and 400 as /api/marko/*; 422
+    // `{feld, satz}` only for an unreadable value or an invalid Agordo; 200 `{rev, gespeichert}`.
+    const leinwandSkribo = /^\/api\/marko\/([a-z0-9-]+)\/leinwand$/.exec(path);
+    if (leinwandSkribo !== null && method === "POST") {
+      const [, name = ""] = leinwandSkribo;
+      const problemo = (rule: string, message: string, suggestion: string, status: number) =>
+        sendJson(response, { issues: [{ rule, path: "body", message, suggestion }] }, status);
+      if (draftOf(name) === undefined) {
+        sendJson(
+          response,
+          {
+            issues: [
+              {
+                rule: "marko-missing",
+                path: name,
+                message: "no such brand",
+                suggestion: "create it first",
+              },
+            ],
+          },
+          404,
+        );
+        return;
+      }
+      let body: unknown;
+      try {
+        body = JSON.parse((await readBody(request)) || "{}");
+      } catch {
+        problemo("json-invalid", "the body is no JSON", "send a JSON object", 400);
+        return;
+      }
+      if (!isRecord(body)) {
+        problemo("json-invalid", "the body is no JSON object", "send a JSON object", 400);
+        return;
+      }
+      // The draft as it is now: another write may have moved it on while the body came in.
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        notFound(response);
+        return;
+      }
+      const rezulto = leinwandSchreiben(draft.agordo, body, paletroStufojDe(bases.calibration));
+      if (rezulto.speco === "malformita") {
+        problemo("sxangxo-invalid", rezulto.mesagxo, "send one change of the canvas", 400);
+        return;
+      }
+      if (rezulto.speco === "rifuzita") {
+        sendJson(response, { feld: rezulto.feld, satz: rezulto.satz }, 422);
+        return;
+      }
+      setDraft(name, draft, rezulto.agordo, "regilo");
+      sendJson(response, { rev: draft.rev, gespeichert: new Date().toISOString() });
       return;
     }
     if (method === "GET" && path === "/api/grafeo") {
@@ -1635,6 +1826,25 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
         return;
       }
+      // Spec 054 (T2): Gestalten unless Verstehen is asked – the canvas in the neutral Belegung,
+      // dark unless `scheme=light`, without the brand's stylesheet and without any check.
+      if (url.searchParams.get("ansicht") !== "verstehen") {
+        const neutral = belegungOf();
+        if (neutral === null) {
+          sendHtml(response, LEINWAND_NICHT_GEBAUT, 503);
+          return;
+        }
+        sendHtml(
+          response,
+          gestaltenScreen({
+            marko: name,
+            etikedo: draft.agordo.etikedoj?.marko ?? name,
+            aspekto: neutral.name,
+            scheme: url.searchParams.get("scheme") === "light" ? "light" : "dark",
+          }),
+        );
+        return;
+      }
       // The draft as the request found it, with the shared check of that rev (as the Studio).
       const { agordo, rev } = draft;
       const derivation = await pruefungOf(name, draft);
@@ -1649,6 +1859,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           fonto: `/api/grafeo?marko=${encodeURIComponent(name)}`,
           studioHref: `/studio/${encodeURIComponent(name)}/farbe${scheme === "light" ? "" : `?scheme=${scheme}`}`,
           neEksportebla: !derivation.exportable,
+          gestaltenHref: `/marko/${encodeURIComponent(name)}/grafeo`,
         }),
       );
       return;
@@ -1717,7 +1928,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     if (method === "POST" && path === "/marko") {
       const values = new URLSearchParams(await readBody(request));
       const basis = values.get("basis") ?? "leer";
-      if (basis === "oeffnen") {
+      // Spec 054 (T2): „Auf der Leinwand anlegen“ – always on the basis leer, then to the canvas.
+      // Together with „Vorhandene Marke öffnen“ it creates nothing and answers like a missing name.
+      const zuLeinwand = values.get("ziel") === "leinwand";
+      if (basis === "oeffnen" && !zuLeinwand) {
         const open = values.get("oeffnen") ?? "";
         if (readMarko(options.workdir, open) !== undefined) {
           redirect(response, `/marko/${encodeURIComponent(open)}/farbe`);
@@ -1732,11 +1946,14 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       // K-1 (Spec 024): the name as written, the identifier derived.
-      const written = (values.get("name") ?? "").trim();
+      const written = zuLeinwand && basis === "oeffnen" ? "" : (values.get("name") ?? "").trim();
       const name = identOf(written);
       const created = createMarko(
         options.workdir,
-        { name, basis: basis === "komuna" || basis === "komuna-0-2" ? basis : "leer" },
+        {
+          name,
+          basis: !zuLeinwand && (basis === "komuna" || basis === "komuna-0-2") ? basis : "leer",
+        },
         (ident, start) => {
           const agordo = startAgordo(ident, start);
           return written === ident ? agordo : { ...agordo, etikedoj: { marko: written } };
@@ -1758,8 +1975,12 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       drafts.set(name, { agordo: created.marko.agordo, rev: 1 });
-      kroniko(name, { ago: "kreo", fonto: "sistemo", detaloj: { basis } });
-      redirect(response, `/marko/${encodeURIComponent(name)}/farbe`);
+      kroniko(name, {
+        ago: "kreo",
+        fonto: "sistemo",
+        detaloj: zuLeinwand ? { basis: "leer", ziel: "leinwand" } : { basis },
+      });
+      redirect(response, `/marko/${encodeURIComponent(name)}/${zuLeinwand ? "grafeo" : "farbe"}`);
       return;
     }
 
@@ -2773,23 +2994,62 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           ? draft.agordo
           : (readAgordo(mergedAgordo(draft.agordo, open.agordo)).agordo ?? draft.agordo);
       };
+      // Spec 054 (T7, E-11): the preview with the session's changed connections – the effective
+      // Agordo of what is shown, for this one answer; nothing is written or held but the stylesheet
+      // in the store under its own key. Undefined: the answer (400/422) is already sent.
+      const vorschauKabloj = (): { teksto: string; agordo: Agordo | undefined } | undefined => {
+        const kabloj = kablojParametro(url.searchParams);
+        if (kabloj === undefined) {
+          sendHtml(response, "<!doctype html><title>400</title><p>Parameter kabloj unlesbar.", 400);
+          return undefined;
+        }
+        const teksto = kablojTeksto(kabloj);
+        if (teksto === "") return KEINE_KABLOJ;
+        const wirksam = readAgordo(
+          wirksamerAgordo(
+            messung.schritt("marke-laden", shown),
+            startAgordo(name, "leer", bases),
+            kabloj,
+          ),
+        );
+        if (wirksam.agordo === undefined) {
+          sendHtml(
+            response,
+            "<!doctype html><title>422</title><p>Diese Verbindungen ergeben keinen gültigen Agordo.",
+            422,
+          );
+          return undefined;
+        }
+        return { teksto, agordo: wirksam.agordo };
+      };
       if (method === "GET" && key === "vorschau" && css === ".css") {
+        // Spec 054 (T7): with the session's `kabloj` the stylesheet of the effective Agordo; a
+        // malformed value 400, an effective Agordo that does not read 422. Without it as before.
+        const kabloj = vorschauKabloj();
+        if (kabloj === undefined) return;
         // Spec 044 (A-02, B-4): the stylesheet of the rev and the proposal the request found, from
         // the shared store. The head goes out first as before: a failed derivation still ends the
         // response with 200 and an empty body (the server's catch), not with 500.
         response.writeHead(200, { "content-type": TYPES[".css"] ?? "" });
         const rev = draft.rev;
-        const agordo = messung.schritt("marke-laden", shown);
-        response.end(await cssSpeicher.css(name, rev, propono ?? "", agordo, messung));
+        const agordo = kabloj.agordo ?? messung.schritt("marke-laden", shown);
+        // The store's key: the proposal, plus the kabloj when there are any (else the old key).
+        const schluessel =
+          kabloj.teksto === "" ? (propono ?? "") : `${propono ?? ""}|kabloj=${kabloj.teksto}`;
+        response.end(await cssSpeicher.css(name, rev, schluessel, agordo, messung));
         return;
       }
       if (method === "GET" && key === "vorschau" && url.searchParams.has("sxtupo")) {
         const sxtupo = url.searchParams.get("sxtupo") ?? "vorschau";
         const breite = url.searchParams.get("breite") ?? "mittel";
+        // Spec 054 (T7): the stage's frames ignore `kabloj`; every other frame shows the effective
+        // Agordo of the session's connections and links the stylesheet of the same kabloj.
+        const kabloj = sxtupo.startsWith("buehne-") ? KEINE_KABLOJ : vorschauKabloj();
+        if (kabloj === undefined) return;
         // Spec 044 (A-04, V-5.4): of the draft as the request found it. Only the stage's frame
         // „Jetzt“ waits for the check of that rev; every other frame waits for nothing.
         const rev = draft.rev;
-        const agordo = messung.schritt("marke-laden", shown);
+        const agordo = kabloj.agordo ?? messung.schritt("marke-laden", shown);
         const teile = messung.schritt("css-js", () => ({
           fontFace: fontFaceOf(agordo),
           scheme:
@@ -2822,7 +3082,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           messung.schritt("css-js", () =>
             previewDocument({
               name,
-              cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${rev}${propono === null ? "" : `&propono=${encodeURIComponent(propono)}`}`,
+              cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${rev}${propono === null ? "" : `&propono=${encodeURIComponent(propono)}`}${kabloj.teksto === "" ? "" : `&kabloj=${kabloj.teksto}`}`,
               fontFace: teile.fontFace,
               scheme: teile.scheme,
               attributes: teile.attributes,
