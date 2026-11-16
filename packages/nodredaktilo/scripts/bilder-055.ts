@@ -401,7 +401,7 @@ async function lauf(browser: Browser, basis: string, ordner: string): Promise<vo
     console.log(
       `D-19: ${geo.knoten} Knoten, ${geo.kanten} Kanten, davon ${geo.geprueft} mit Knick geprüft, ${geo.gerade.length} gerade ausgenommen: ${geo.gerade.join("; ")}`,
     );
-    pruefe(geo.knoten === 11, "D-19", `11 Knoten gerendert (${geo.knoten})`);
+    pruefe(geo.knoten === 14, "D-19", `14 Knoten gerendert (${geo.knoten})`);
     pruefe(
       geo.ueberdeckungen.length === 0,
       "D-19",

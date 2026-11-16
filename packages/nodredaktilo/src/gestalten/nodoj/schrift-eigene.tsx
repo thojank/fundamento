@@ -82,8 +82,8 @@ const STILO = `
   align-items: center;
   gap: var(--fm-spacing-small);
   margin: 0;
-  font-size: var(--fm-typography-body-font-size);
-  font-weight: var(--fm-typography-label-font-weight);
+  font-size: var(--fm-typography-body-2-font-size);
+  font-weight: var(--fm-font-weight-medium);
   color: ${ROLOJ.teksto};
   overflow-wrap: anywhere;
 }

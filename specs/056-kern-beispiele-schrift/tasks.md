@@ -8,12 +8,12 @@ Acht Tickets, ein Strang (Spec: „höchstens 8 Tickets, ein PR“). Kein Ticket
 |---|---|---|---|---|
 | KBS-1.1 | T1 | Daten: Inhalte, gelöste Verbindungen, was bei der Marke ankommt, „Farbe folgt den Bildern“, Anordnung, Katalog, Schreibweg | – | erledigt |
 | KBS-2.1 | T2 | Hülle: Kurven, runde Anschlüsse, Marke-Knoten mit zwei Eingängen, Lösen/Stecken, Kopfleiste, Server-Verdrahtung, Platzhalter | 1.1 | erledigt |
-| KBS-3.1 | T3 | Die sieben Text-Knoten | 2.1 | fertig |
-| KBS-3.2 | T4 | Beispiele: Hochladen, Ziehen, Link, Vorschaubilder, Entfernen, nur Arbeitsordner | 2.1 | offen |
-| KBS-3.3 | T5 | Erkannt, „als Primär/Akzent übernehmen“, „Farbe folgt den Bildern“, Test Export/Paket | 2.1 | offen |
-| KBS-3.4 | T6 | Schrift: Katalog mit Suche und Filter, echte Schrift, Regler | 2.1 | offen |
-| KBS-3.5 | T7 | Eigene Schrift samt ZIP, erkannte Schnitte, setzen, privates Repo | 2.1 | offen |
-| KBS-4.1 | T8 | Tests gesamt, „kein Urteil“, eroj in Chromium, Bilder, Bericht-Entwurf | alle | offen |
+| KBS-3.1 | T3 | Die sieben Text-Knoten | 2.1 | erledigt |
+| KBS-3.2 | T4 | Beispiele: Hochladen, Ziehen, Link, Vorschaubilder, Entfernen, nur Arbeitsordner | 2.1 | erledigt |
+| KBS-3.3 | T5 | Erkannt, „als Primär/Akzent übernehmen“, „Farbe folgt den Bildern“, Test Export/Paket | 2.1 | erledigt |
+| KBS-3.4 | T6 | Schrift: Katalog mit Suche und Filter, echte Schrift, Regler | 2.1 | erledigt |
+| KBS-3.5 | T7 | Eigene Schrift samt ZIP, erkannte Schnitte, setzen, privates Repo | 2.1 | erledigt |
+| KBS-4.1 | T8 | Tests gesamt, „kein Urteil“, eroj in Chromium, Bilder, Bericht-Entwurf | alle | erledigt (ohne Push, PR, Dispatch) |
 
 ## Ausgangsmaß Bündel
 
@@ -29,11 +29,76 @@ Zusammengefasst aus den Ticket-Abschnitten (KBS-4.1). Zeilen beziehen sich auf `
 
 | Datei:Zeile | vorher → nachher | Grund | Ticket |
 |---|---|---|---|
-| `packages/metiejo/src/grafeo-anordnung-055.test.ts:124` | `marko: [24, 48, 190, 72, 120]` → `marko: [24, 48, 190, 360, 408]` (+1 Kommentarzeile davor) | `altecoDe` liest `ARANGXO_056`, das die Höchsthöhe der Marke anhebt (D-16); `ARANGXO_055` selbst bleibt byte-gleich | 1.1 |
+| `packages/metiejo/src/grafeo-anordnung-055.test.ts:124` (heute `:124–126`) | `marko: [24, 48, 190, 72, 120]` → `marko: [24, 48, 190, 480, 528]` (+2 Kommentarzeilen davor); über `360, 408` (KBS-1.1) zu `480, 528` (KBS-2.1) | `altecoDe` liest `ARANGXO_056` (D-16); die volle Marke maß in Chromium 452 px, darum Höchsthöhe 480 (anheben, nie senken). `ARANGXO_055` selbst bleibt byte-gleich | 1.1, 2.1 |
+| `packages/nodredaktilo/scripts/bilder-055.ts:305` | `/[QA]/` → `/[QAC]/` | M-1: jede Kante ist jetzt eine Bezier-Kurve und schreibt `C` | 2.1 |
+| `packages/nodredaktilo/scripts/bilder-055.ts:418` | „jede Kante mit Knick hat Q oder A“ → „… Q, A oder C“ | Meldetext zur Zeile 305 | 2.1 |
+| `packages/nodredaktilo/scripts/bilder-055.ts:404` | `geo.knoten === 11`, „11 Knoten gerendert“ → `geo.knoten === 14`, „14 Knoten gerendert“ | Jede Marke trägt jetzt die drei festen Text-Knoten Ausgangslage, Markenkern, Werte; das Skript brach dort ab | 4.1 |
+
+Nicht ältere Tests, aber im Lauf nachträglich geändert (056-eigene Dateien): `packages/metiejo/src/grafeo-anordnung-056.test.ts:78, 90` (`360` → `480`, gleiche Anhebung, KBS-2.1) und `packages/metiejo/src/leinwand-sxelo-056.test.ts:441–453` (Orchestrator nach KBS-3.2: die drei Routenmodule werden mit einem Pfad aufgerufen, der keinem gehört, `/api/marko/provo/entwurf`, statt mit dem Beispiele-Pfad, den es seit KBS-3.2 wirklich gibt). Kein Test aus 047/048 geändert; keine Datei unter `packages/eroj/**` geändert.
 
 ## Für den PR-Text
 
+Entwurf der PR-Beschreibung (KBS-4.1). Der Orchestrator ergänzt CI-Tabelle und Links.
+
+```markdown
+## Spec 056 – Markenprozess MP-2a: Ausgangslage, Kern, Werte, Beispiele, Schrift
+
+Die Leinwand „Gestalten“ bekommt die vordere Hälfte des Markenprozesses. Sieben Text-Knoten (Ausgangslage, Markenkern und Werte immer; Zielgruppe, Wettbewerb, Persönlichkeit, Tonalität über „+ Knoten“), ein Knoten „Beispiele“, der Bilder nur im Arbeitsordner der Marke ablegt und ihre Farben ohne KI ausliest, und ein Knoten „Schrift“ mit Fontsource-Katalog und eigener Schrift samt ZIP. Text-Knoten und Beispiele laufen in die Marke; der Marke-Knoten zeigt Kern, Werte und die erkannten Farben. Diese Verbindungen sind lösbar und bleiben gespeichert. Solange Primär den Beispielen folgt, wird die größte bunte erkannte Farbe Primär. Alle Kanten sind gestrichelte Kurven mit runden Anschlüssen (Vorbild `verbindungen.png`).
+
+### Was sich ändert und warum
+- **Inhalte in `marken/<name>/leinwand.json`, nie im Agordo.** Kein Schemafeld; Stände nehmen die Inhalte mit. `leinwand-stato.ts` (Leser aus Spec 055) wird im Ort erweitert; jede 055-Datei liest sich wie zuvor.
+- **Ein reines Modul für Server und Browser:** `packages/metiejo/src/leinwand-enhavo.ts` (Inhalte lesen, fünf Werte, „leer“, Kanten in die Marke, was bei der Marke ankommt, „Farbe folgt den Bildern“), im Bündel über den Alias `@fundamento/metiejo/enhavo`. `farb-arto.ts` teilt jede gemessene Farbe nach den vorhandenen Schwellen aus `kreilo.json` ein (hell, bunt, Leitfarbe); keine neue Schwelle.
+- **Teil V:** `getBezierPath` für jede Kante der Ansicht Gestalten, Strich `4 4` (vorhandener Wert) mit runden Enden, Farbkanten in ihrer Farbe, alle anderen in der Rolle `--fm-color-text-muted`; runde Anschlüsse. Verstehen unberührt.
+- **Server:** `GET /api/leinwand` liefert `marko.enhavo` und markiert fehlende Dateien mit `fehlt: true` (nur in der Antwort); ohne Zustandsdatei byte-gleich zu `6d34a75a`. `POST …/leinwand` nimmt Schrift, Schrift-Regler und die Herkunft eines Akzents. Neue Wege: `POST|DELETE …/beispiele`, `GET …/tiparoj?art=` (ohne `art` byte-gleich), `GET …/schriften`, `GET /api/tiparo/:id/css|:datei`, `POST …/schriftdateien`, `GET /marko/:name/fontoj/:datei`, `POST …/schrift-privat`. Jede antwortet einer unbekannten Marke mit 404 `{satz}` und einer unlesbaren Datei mit 422 `{satz}`; keine fragt die Prüfung.
+- **ZIP und Schriftdateien** werden mit `node:zlib` gelesen (`tiparo-legi.ts`, `zip-legi.ts`); keine neue Abhängigkeit. Testschrift Lato (OFL-1.1) unter `packages/metiejo/test/fixtures/valid/tiparo-056/` mit Herkunft und Hashes.
+- `ANFRAGE_GRENZE = 32 * 1024 * 1024` in `servilo.ts` benannt (Wert unverändert); „24 MB je Datei“ folgt daraus (drei Viertel, MiB).
+
+### Geänderte ältere Tests
+- `packages/metiejo/src/grafeo-anordnung-055.test.ts:124` – Marke `72, 120` → `480, 528`: `altecoDe` liest `ARANGXO_056`; die volle Marke misst 452 px.
+- `packages/nodredaktilo/scripts/bilder-055.ts:305, 418` – `/[QA]/` → `/[QAC]/` und Meldetext: Kurven schreiben `C`.
+- `packages/nodredaktilo/scripts/bilder-055.ts:404` – 11 → 14 Knoten beim Start: drei feste Text-Knoten.
+- Im Lauf an eigenen Tests geändert: `grafeo-anordnung-056.test.ts:78, 90` (dieselbe Anhebung), `leinwand-sxelo-056.test.ts:441–453` (Routenmodule mit einem fremden Pfad aufgerufen).
+
+### Abweichungen von der technischen Spec
+- D-3: die Inhaltsknoten sind keine Bildo-Knoten; der Bildo ändert sich nur um `marko.enhavo` und Primär „aus-material“. Alte Routen-Tests bleiben dadurch unverändert.
+- D-5: jede gespeicherte Farbe trägt ihre Merkmale `{hell, bunt, leit}`; der Browser rechnet keine Farben.
+- D-6: `primaer.seit` als Anker für „folgen lassen“.
+- D-21: eigener Weg `GET …/schriften`.
+- Akzent aus „Erkannt“ schreibt `herkunft {quelle, anteil}` ohne Dateinamen, sonst stünde ein Bildname in `agordo.json` und im Paket (AK 4).
+- `POST …/schrift-privat` nimmt ein wahlweises `bestaetigt`; vorher antwortet es mit `{satz, frage: true}` (Bestätigungsschritt).
+- Beispiele-Vorschaubilder in fünf Spalten (Mockup: vier), „Aa“ neben statt über den Probezeilen, Freitexte als `<textarea>`, Schrift-Regler laufen über Schrittnummern (`fm-glitilo` hält einen Bereich von mindestens 1).
+
+### Befunde (Auszug, alle im Bericht)
+- `packages/metiejo/src/enportilo/retejo.ts:21` – eine Zeile `export const RETEJO_TEMPOLIMO = 15_000;` (Wert unverändert; `:72` schreibt die Zahl weiter selbst).
+- Pinterest: ein öffentliches Board ohne Anmeldung nennt 156 Adressen `i.pinimg.com` (Gegensatz zu R-8); nichts darauf gebaut, ein Board-Link bleibt Verweis.
+- ZIP: keine Grenze für die Summe der Einträge; je Eintrag 24 MiB.
+- `#2f5bff` gilt nach den vorhandenen Schwellen als „hell“; Ablauf 2.3 der Produkt-Spec sagt „dunkel“.
+- Zwei Wege für Schriftdateien (Knoten über npm, Vorschau über CDN); JPG/WebP ohne den Browser des Enportilo ohne Farben.
+
+### Prüfungen
+- Neue Tests `abnahme-056` (9) und `grafeo-urteil-056` (5), rot gezeigt mit gepflanzten Fehlern; alle `*-056`-Tests und 047/048/054/055 grün.
+- Browser: `pnpm --filter @fundamento/nodredaktilo exec tsx scripts/bilder-056.ts --ziel <ordner>` – AK 7 beim Start und mit allen sechs Knoten, Abläufe 1–7, 107 Prüfungen, elf Bilder.
+- Korrektur: `schrift-eigene.tsx:85–86` las zwei `--fm-`-Namen, die es nicht gibt; jetzt `--fm-typography-body-2-font-size` und `--fm-font-weight-medium`.
+- `pnpm lint` grün, `pnpm check:privat` PASS; `test:betroffen` rot nur durch Hook-Zeitgrenzen, nacheinander und einzeln grün.
+- eroj in Chromium, je Datei einzeln: alle sieben grün.
+
+Created with [p0 by BePurple](https://bepurple.ai) in Spec mode
+```
+
 ## Befunde
+
+Zusammengefasst aus den Ticket-Abschnitten (KBS-4.1); Belege dort. Für Spec 057 im Bericht, Abschnitt 6.
+
+- **Read-and-call-Datei geändert:** `packages/metiejo/src/enportilo/retejo.ts:21` `export const RETEJO_TEMPOLIMO = 15_000;` (Wert unverändert, D-10); `:72` schreibt `15_000` weiter selbst, der Wert steht zweimal. Sonst nichts unter `enportilo/**`, `tiparoj*.ts`, `privata.ts`, `marko.ts`, `kontrolo.ts`.
+- **Benannt, Wert unverändert:** `ANFRAGE_GRENZE = 32 * 1024 * 1024` in `servilo.ts` (D-11); „24 MB“ heißt MiB.
+- **Abweichungen:** D-3 (Inhaltsknoten keine Bildo-Knoten), D-5 (Merkmale je Farbe), D-6 (`primaer.seit`), D-21 (eigener Weg `…/schriften`); Akzent-`herkunft` ohne `datei` (AK 4); `schrift-privat` mit `bestaetigt`; Beispiele in fünf Spalten, „Aa“ neben den Probezeilen, `<textarea>`, Schrittnummern für `fm-glitilo`.
+- **Pinterest** (KBS-3.2): ein öffentliches Board ohne Anmeldung nennt 156 `i.pinimg.com`-Adressen, entgegen R-8; nichts darauf gebaut.
+- **ZIP:** keine Grenze für die Summe der Einträge; verschlüsselt, ZIP64, mehrteilig, andere Verfahren, Eintrag über 24 MiB → unlesbar.
+- **Einteilung:** `#2f5bff` „hell“ nach den Schwellen, Ablauf 2.3 sagt „dunkel“; Pastellgrenze nimmt sehr helle Farben als Leitfarbe aus.
+- **Zwei Schriftwege** (Knoten npm, Vorschau CDN); JPG/WebP ohne Browser des Enportilo ohne Farben; `spuroX`/`ARANGXO_055.spuroj` ungenutzt.
+- **Wörter ohne gemeinsame Konstante:** Wettbewerb „Name“, „Adresse (wahlweise)“, „<Wert> entfernen“; „Dateien wählen“, „lizenziert, privat“, „Bestätigen“, „Abbrechen“; die lokalen Texte des Schrift-Knotens. Zwei Studio-Sätze kopiert, weil `servilo.ts` sie inline schreibt.
+- **Älter, nicht aus diesem Lauf:** `fm-kampo` lässt `change` nicht aus dem Shadow DOM; `fm-ikono: name is required`-Warnungen.
+- **Neu aus KBS-4.1:** siehe „KBS-4.1: Befunde“ unten (400-Form des Schreibwegs, Darstellung in den Bildern, Höhe mit Verweis).
 
 ## KBS-1.1 (T1): Daten – Inhalte, gelöste Verbindungen, Marke, Folgen, Anordnung, Katalog, Schreibweg
 
@@ -376,8 +441,82 @@ Keine. `leinwand-sxelo-056.test.ts:452` bleibt wahr, ohne Änderung.
 
 ### KBS-4.1 im Einzelnen
 
+**Neue Dateien:** `packages/metiejo/src/abnahme-056.test.ts` (9 Tests), `packages/metiejo/src/grafeo-urteil-056.test.ts` (5 Tests), `packages/nodredaktilo/scripts/bilder-056.ts`, `specs/056-kern-beispiele-schrift/bericht.md`. Geändert: `packages/nodredaktilo/scripts/bilder-055.ts:404`, diese Datei, und eine kleine Korrektur im Produktcode dieses Laufs:
+
+- **`packages/nodredaktilo/src/gestalten/nodoj/schrift-eigene.tsx:85–86`** (KBS-3.5): `var(--fm-typography-body-font-size)` → `var(--fm-typography-body-2-font-size)`, `var(--fm-typography-label-font-weight)` → `var(--fm-font-weight-medium)`. Die beiden alten Namen gibt es in der Belegung nicht; der Familienname einer eigenen Schrift erbte darum Größe und Gewicht still. Rot zuerst: der neue Schritt in `bilder-056.ts` („jede gelesene --fm-Rolle hat einen Wert“, alle `var(--fm-…)` unter `packages/nodredaktilo/src` gegen die berechneten Werte an `#nr-leinwand`) brach mit genau diesen zwei Namen ab; nach der Korrektur 70 Namen, 0 unbekannt. Die neuen Namen nutzen schon `roloj.ts:125` und `kapo.tsx:58`. Danach `vitest run 056 054 055 047 048`: 45 Dateien, 508 Tests grün; nodredaktilo lint grün.
+
+**`abnahme-056`** (über HTTP, ein Server, Marke `lumeto`, der Client `folgo.ts` per Adresse geladen wie in `erkannt-056`; Netz, Browser und npm sind Doubles): Ablauf 1/AK 15 (Kern und drei Werte über `wertAldoni`, `marko.enhavo` nach jeder Änderung), AK 5 (sechster Wert abgelehnt, `FUENF_WERTE_SATZ` im Knoten, Server speichert fünf), Ablauf 2/AK 1, 17 (drei Bilder über den echten Weg, Primär folgt, wechselt nach Entfernen, „als Primär übernehmen“, neues Bild ändert nichts, „folgen lassen“, Farbe von Hand), Ablauf 3/AK 9, Ablauf 4/AK 1 (zwei Fontsource-Schriften über Suche und Art, `/api/tiparo/…`, Vorschau-Rahmen nennt beide Familien), Ablauf 5/AK 3 (Fixture-ZIP), Ablauf 6/AK 2 (Neuladen, Stand → ändern → öffnen), Ablauf 7/AK 16, 17 (gelöst über Neuladen und Stand, gelöst folgt nicht, „zurücksetzen“ steckt alles), AK 4 (Akzent übernommen, Speichern und alle Exportziele: kein Bildname, kein Byte-Fenster; Gegenprobe findet beides). Vor dem Export setzt der Test Primär von Hand auf `#1f5fbf`: mit der gefolgten Orange-Farbe verweigert die vorhandene Paletten-Prüfung den Export (Befund unten).
+
+**`grafeo-urteil-056`**: eine Sitzung durch alle neuen Wege (52 Antworten, alle 2xx, `pruefTor` und `checkDraft` je 0); 404 `{satz: "Diese Marke gibt es nicht."}` auf 13 Anfragen an neue Wege; 422 `{feld?, satz}` auf 17 Schreibwege und unlesbare Dateien, danach rev, Zustand, `materialo/` und `fontoj/` unverändert; falsch gebaute neue Änderungen in derselben 400-Form wie eine ältere; Wortsuche (62 Regeln mit Name, Id, Aussage, Kialo + Berichtsmarken) über alle Antworten, alle Satz-Konstanten der neuen Knoten (+ 5 Satzfunktionen) und die acht Quellen `nodoj/teksto*.tsx`, `beispiele.tsx`, `erkannt.tsx`, `schrift*.tsx` ohne Kommentare; Gegenprobe: ein Regelname als Wettbewerber geschrieben wird gefunden.
+
+Erster Lauf: beide Dateien nach Korrektur eigener Testfehler grün (veraltete Antwort, lokaler Zustand nach „Öffnen“ nicht übernommen, Export ohne Akzent). Darum je Prüfgruppe ein gepflanzter Fehler, rot gesehen, zurückgesetzt, `cmp` gleich (Skript `/tmp/kbs41/plant.py`):
+
+| Nr. | Datei | Fehler | rot |
+|---|---|---|---|
+| A1 | `leinwand-enhavo.ts` | `markoEnhavoDe` gibt nie `werte` | Ablauf 1, Ablauf 7 |
+| A2 | `grafeo-gestalten-sicht.ts` | `WERTE_GRENZE = 6` | AK 5 |
+| A3 | `leinwand-enhavo.ts` | `folgeFarboDe` ohne `!primaer.folgt` | Ablauf 2 |
+| A4 | `beispiele-vojoj.ts` | Pinterest-Satz und anderer Satz vertauscht | Ablauf 3 |
+| A5 | `tiparo-vojoj.ts` | `art` ignoriert (alle Arten) | Ablauf 4 |
+| A6 | `tiparo-legi.ts` | „Italic“ fehlt nie | Ablauf 5 |
+| A7 | `leinwand-stato.ts` | Inhalt des Schrift-Knotens beim Lesen verworfen | Ablauf 6, 7 |
+| A8 | `leinwand-stato.ts` | `geloest` nie geschrieben | Ablauf 7 |
+| A9 | `nodredaktilo/src/gestalten/folgo.ts` | Akzent-`herkunft` mit `merkmal` = Dateiname | AK 4 |
+| U1 | `tiparo-vojoj.ts` | `…/schriften` ruft `pruefTor` | Sitzung, 422-Test |
+| U1b | `tiparo-vojoj.ts` | `…/schriften` antwortet 500 | Sitzung |
+| U2 | `schriftdosieroj-vojoj.ts` | 404-Satz mit „!“ | 404-Test |
+| U3 | `tiparo-vojoj.ts` | unbekannte Art 400 statt 422 | 422-Test |
+| U3b | `beispiele-vojoj.ts` | Datei vor dem Lesen nach `materialo/` geschrieben | 422-Test |
+| U4 | `tiparo-vojoj.ts` | `probleme: 0` in `…/schriften` | Wortsuche |
+| U4b | `grafeo-gestalten-sicht.ts` | `DATEI_FEHLT` mit „(Problem)“ | Wortsuche |
+| U4c | `nodredaktilo/src/gestalten/nodoj/schrift.tsx` | „Schrift wählen (Prüfung)“ | Wortsuche |
+
+Zwei erste Versuche blieben grün und sind keine Fehler des Produkts: A2 als entfernte Kürzung in `werteDe` (die Werte-Ids `w1`–`w5` begrenzen zusätzlich) und als `>= WERTE_GRENZE + 1` in `wertAldoni` (die Id-Vergabe lehnt zusätzlich ab); A5 zuerst unentdeckt, Test um „ohne Suchwort: Anzahl je Art aus dem Katalog“ ergänzt. A9 zuerst als Kopie in `eksporto/` – der Export räumt den Ordner, darum der Pfad über `folgo.ts`.
+
+**Browser und Bilder** (`bilder-056.ts`, 107 Prüfungen, Exit 0; Ausgabe in `bericht.md`, Abschnitt 2): AK 7 beim Start (14 Knoten, 19 Kanten), mit allen sechs Knoten und mit vollen Inhalten (20 Knoten, 29 Kanten) – Boxen ohne Schnitt, keine Kante durch eine fremde Box, jedes `d` mit `C`, Anschlüsse rund, 7 Farbkanten in ihrer Farbe, sonst die graue Rolle. Abläufe 1–7 einschließlich AK 1, 15, 16, 17 im Browser, eine unlesbare GIF-Datei ruhig am Knoten, Stand speichern/öffnen, Neuladen. Netz: `/api/tiparo/fraunces/…`, `/api/tiparo/inter/…` 200; 46 CDN-Anfragen der Vorschau abgebrochen; sonst 0 Anfragen nach außen. `bilder-055.ts` läuft mit der Änderung an `:404` durch (41 Prüfungen, Exit 0).
+
+**Höhen** (gemessen/Maximum): Werte fünf 269/270, Zielgruppe 259/264, Wettbewerb 209/220, Tonalität 255/300, Beispiele zwölf Bilder + acht Felder 601/640 (mit einem Verweis 663), Schrift alle Regler am Ende 346/360, Marke 412/480.
+
+**eroj** (Chromium, je Datei einzeln, `PLAYWRIGHT_ENGINES=chromium FM_AUSGABE=knapp pnpm exec playwright test test/<datei>`): `metiejo.spec.ts` 6/0, `metiejo-036.spec.ts` 2/0, `metiejo-036-uebernahme.spec.ts` 2/0, `form-036.spec.ts` 1/0, `zweitfarbe-036.spec.ts` 5/0, `buehne-036.spec.ts` 20/0, `buehne-navigation-042.spec.ts` 2/0; kein Wackeln, keine Wiederholung.
+
+**Gesamtläufe**
+- `FM_AUSGABE=knapp pnpm test:betroffen` (cli, ekranoj, metiejo, modelo, nodredaktilo, nordstelo): rot nur nordstelo `ac8.test.ts:156`, `neubewertung-053.test.ts:206`, `ablauf/integra.test.ts:131`, jeweils „Hook timed out in 10000ms“ (Lastfenster).
+- Nacheinander `pnpm exec turbo run test --continue --concurrency=1 …` mit denselben sechs Paketen: 14/15 Aufgaben grün; metiejo 1127/0 (mit `esploro/start-ohne-playwright` nach gebautem `cli`/`mcp`), cli 120/0, ekranoj 301/0, nordstelo 379/0; rot nur modelo `ci/turbo-inputs.test.ts:679` (Hook-Zeitgrenze). Einzeln wiederholt: `pnpm --filter @fundamento/modelo test turbo-inputs` 8/0. Nichts angehoben.
+- `pnpm lint`: 22/22. `pnpm check:privat`: PASS (4608 Dateien, 0 Treffer). `grep -rn "\.only(\|\.skip(" packages/*/src`: nur das alte `context.skip` in `packages/mcp/src/http.test.ts:97` (schon in `6d34a75a`).
+- 047/048: keine Datei mit `047`/`048` im Diff; im metiejo-Lauf grün (AK 11).
+
+**Diff-Suche gegen `6d34a75a`** (Arbeitsbaum samt der drei neuen, noch nicht eingecheckten Dateien):
+
+```
+git diff --name-only 6d34a75a -- packages/modelo packages/agordilo packages/mcp packages/eroj/src packages/vortaro .github pnpm-lock.yaml | wc -l   → 0
+git diff --name-only 6d34a75a | grep -v /                                      → (leer, keine Root-Datei)
+git diff 6d34a75a -- '**/package.json' package.json | wc -l                      → 0
+git diff --stat 6d34a75a -- packages/metiejo/src/enportilo packages/metiejo/src/tiparoj.ts packages/metiejo/src/tiparoj-npm.ts packages/metiejo/src/privata.ts packages/metiejo/src/marko.ts packages/metiejo/src/kontrolo.ts
+                                                                                → enportilo/retejo.ts | 1 + (nur :21)
+git diff --stat 6d34a75a -- packages/metiejo/src/grafeo-sicht.ts packages/metiejo/src/grafeo.ts packages/metiejo/src/html.ts → (leer)
+--fm-Namen in neuen Zeilen, die es in 6d34a75a unter packages/ nicht gibt (comm -23) → --fm-font-family-display (nach der Korrektur oben; davor auch die zwei unbekannten Namen)
+```
+
+`--fm-font-family-display` ist kein neuer Token: `schrift.tsx:255` liest die vorhandene Rolle der Belegung (Wert im Browser `Geist, system-ui, sans-serif`), die vorher kein Quelltext unter `packages/` las; kein `--fm-…:`-Eintrag ist neu, nichts unter `packages/modelo/**` oder `packages/vortaro/**` geändert.
+
+Zeit, Grenze, Toleranz in neuen Zeilen (`grep -inE 'timeout|retries|tempolimo|threshold|toleran|setTimeout|_000\b|GRENZE *=|limit'` über die Produktzeilen): `RETEJO_TEMPOLIMO = 15_000` (benannt, Wert unverändert, `retejo.ts:21`), `ANFRAGE_GRENZE = 32 * 1024 * 1024` (benannt, Wert aus `readBody` unverändert), `WERTE_GRENZE = 5` (Produkt-Spec „höchstens fünf“), `ERKANNT_GRENZE = 8` (`leinwand-enhavo.ts:348`, die Zahl, die `farbojOfPixels` liefert), `TREFFER_GRENZE = 12` (`tiparo-vojoj.ts:40`, die Länge der Trefferliste des Studios); kein `retries`, keine neue Schwelle. Die Zeitangaben in `bilder-056.ts` (`waitForFunction` 120 s für das erste Laden der Schriften aus npm, 30 s für die eigene Schrift) gelten nur dem lokalen Skript, nicht CI. Wort aus R-12 und Name des privaten Schriften-Repos (`node /tmp/kbs41/wort.mjs <repo>`, Wörter zur Laufzeit zusammengesetzt bzw. aus `scripts/neutrale-namen/rules.mjs`): 0 / 0 in 17 473 neuen Zeilen (einschließlich `bericht.md` und dieser Datei).
+
+**Bündel** `packages/nodredaktilo/dist/leinwand.js`: 746 121 → **843 439** Byte roh, 195 930 → **218 254** Byte `gzip -6` (+97 318 / +22 324); keine Schwelle.
+
 ### KBS-4.1: geänderte ältere Tests
+
+| Datei:Zeile | vorher → nachher | Grund |
+|---|---|---|
+| `packages/nodredaktilo/scripts/bilder-055.ts:404` | `geo.knoten === 11`, „11 Knoten gerendert“ → `geo.knoten === 14`, „14 Knoten gerendert“ | drei feste Text-Knoten bei jeder Marke; das Skript brach dort ab, läuft jetzt mit 41 Prüfungen durch |
 
 ### KBS-4.1: für den PR-Text
 
+Der PR-Text-Entwurf steht oben im Abschnitt „Für den PR-Text“.
+
 ### KBS-4.1: Befunde
+
+- **400 statt 422 für falsch gebaute neue Änderungen:** `POST …/leinwand` mit unbekannter Schrift-Rolle, unbekanntem Regler-Pfad oder `herkunft` an Primär antwortet wie jede falsch gebaute Änderung seit Spec 054 mit 400 `{issues:[{rule:"sxangxo-invalid", path, message, …}]}` (`servilo.ts`, `problemo(…, 400)`), nicht 422 `{satz}`. Der Knoten schickt so etwas nie; der Test hält die Form gleich der älteren.
+- **Export mit gefolgter Farbe:** Folgt Primär einem kräftigen Orange (`#d2552c`), verweigert die vorhandene Paletten-Prüfung des Exports („palette-aligned“, Stufen 500/600). Das gilt für jede solche Leitfarbe, nicht nur aus Beispielen; ein Hinweis an der Leinwand fehlt (kein Urteil gewollt).
+- **Beispiele mit Verweis:** zwölf Bilder, acht Felder und ein Verweis 663 px (> 640); der Knoten wächst nach unten, überdeckt an den Startplätzen nichts.
+- **Bilder:** Wettbewerb-Adressen abgeschnitten (`lampenhaus.exa…`); Probezeilen der Schrift mit Auslassungspunkten; mit Größe und Skala am Ende bricht „Standards“ in der Vorschau mitten im Wort; „dazwischen“ der Tonalität sitzt knapp über der nächsten Reglerzeile; die Regler „Größe“ und „Gewicht“ zeigen „0,00“, solange der Agordo keinen Wert setzt (Bild 06), und „Gewicht“ auch am Ende seines Bereichs (Bild 08); „als Primär übernehmen“ nahm im Lauf `#c6f135`, eine bunte Pastellfarbe, die nie von selbst Primär würde (zulässig, kein Urteil). Detailbilder sind Ausschnitte bei eingepasster Zoomstufe und darum klein.
+- **Mockup-Vergleich:** Abweichungen wie gemeldet (fünf Spalten, „Aa“ daneben); sonst entspricht die Leinwand Option A und dem Vorbild `verbindungen.png` (gestrichelte Kurven, runde Punkte, Farbkanten farbig).
