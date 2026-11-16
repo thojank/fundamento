@@ -75,6 +75,8 @@ Die Leinwand „Gestalten“ bekommt die vordere Hälfte des Markenprozesses. Si
 - ZIP: keine Grenze für die Summe der Einträge; je Eintrag 24 MiB.
 - `#2f5bff` gilt nach den vorhandenen Schwellen als „hell“; Ablauf 2.3 der Produkt-Spec sagt „dunkel“.
 - Zwei Wege für Schriftdateien (Knoten über npm, Vorschau über CDN); JPG/WebP ohne den Browser des Enportilo ohne Farben.
+- `merkmal` der Akzent-Herkunft ist freier Text: ein anderer Aufrufer als der Knoten kann dort einen Dateinamen eintragen (der Knoten schickt `Farbe #hex`). Ob der Server `merkmal` selbst bildet, ist ein Entscheid.
+- `turbo run build` spielt nach einer Änderung nur in `packages/metiejo/src` ein altes `leinwand.js` ein (Alias, nicht in den `inputs`; so seit Spec 054). `turbo.json` ist in diesem Lauf nicht frei.
 
 ### Prüfungen
 - Neue Tests `abnahme-056` (9) und `grafeo-urteil-056` (5), rot gezeigt mit gepflanzten Fehlern; alle `*-056`-Tests und 047/048/054/055 grün.
@@ -83,6 +85,7 @@ Die Leinwand „Gestalten“ bekommt die vordere Hälfte des Markenprozesses. Si
 - Korrekturen aus QA-Lauf 1 (je rot zuerst): `herkunft.datei` abgelehnt (Test über HTTP bis ins Paket); Kachel „Datei fehlt“ ohne geteiltes Wort; Wettbewerb liest Namen und Platzhalter ganz; „ד an „Datei fehlt“ ohne `DELETE` (keine 404 in der Konsole).
 - `pnpm lint` grün, `pnpm check:privat` PASS; `test:betroffen` rot nur durch Hook-Zeitgrenzen, nacheinander und einzeln grün.
 - eroj in Chromium, je Datei einzeln: alle sieben grün.
+- QA im Browser und am API in zwei Läufen: Lauf 1 mit vier Befunden (behoben), Lauf 2 beide PASS; ganze metiejo-Suite danach 1129 bestanden, 0 rot.
 
 Created with [p0 by BePurple](https://bepurple.ai) in Spec mode
 ```
