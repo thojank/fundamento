@@ -260,19 +260,17 @@ type Legita = { speco: "ok"; sxangxo: LeinwandSxangxo } | { speco: "malformita";
 const plena = (x: unknown): x is string => typeof x === "string" && x.trim() !== "";
 
 /**
- * Spec 056 (D-23): the origin of an Akzent: `quelle` bild or pdf, optionally `datei` and `merkmal`
- * (texts) and `anteil` (a finite number), nothing else; undefined for any other shape.
+ * Spec 056 (D-23): the origin of an Akzent: `quelle` bild or pdf, optionally `merkmal` (a text)
+ * and `anteil` (a finite number), nothing else; undefined for any other shape. A `datei` makes it
+ * malformed: no file name from a request reaches the Agordo or an export (AK-4, QA run 1).
  */
 function herkunftEl(roh: unknown): LeinwandHerkunft | undefined {
   if (!isObjekto(roh) || (roh.quelle !== "bild" && roh.quelle !== "pdf")) return undefined;
-  if (Object.keys(roh).some((k) => !["quelle", "datei", "merkmal", "anteil"].includes(k)))
-    return undefined;
+  if (Object.keys(roh).some((k) => !["quelle", "merkmal", "anteil"].includes(k))) return undefined;
   const herkunft: LeinwandHerkunft = { quelle: roh.quelle };
-  for (const kampo of ["datei", "merkmal"] as const) {
-    if (!(kampo in roh)) continue;
-    const wert = roh[kampo];
-    if (!plena(wert)) return undefined;
-    herkunft[kampo] = wert;
+  if ("merkmal" in roh) {
+    if (!plena(roh.merkmal)) return undefined;
+    herkunft.merkmal = roh.merkmal;
   }
   if ("anteil" in roh) {
     if (typeof roh.anteil !== "number" || !Number.isFinite(roh.anteil)) return undefined;
@@ -353,7 +351,7 @@ export function sxangxoEl(korpo: unknown, kun056 = false): Legita {
       const wert = korpo.farbe.wert;
       if (rolle !== "akzent" || typeof wert !== "string" || herkunft === undefined)
         return malformita(
-          "herkunft only for akzent with a colour: quelle (bild, pdf), datei, merkmal, anteil",
+          "herkunft only for akzent with a colour: quelle (bild, pdf), merkmal, anteil",
         );
       return { speco: "ok", sxangxo: { farbe: { rolle: "akzent", wert, herkunft } } };
     }

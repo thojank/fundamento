@@ -130,13 +130,18 @@ const STILO = `
   background: ${ROLOJ.pinto};
 }
 
+/* A Wettbewerb row: name above address, each the node's full width, the „×“ beside the name. */
 .nr-g-teksto-zeile {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--fm-size-icon-large);
+  grid-template-columns: minmax(0, 1fr) var(--fm-size-icon-large);
+  grid-template-areas: "name x" "adresse adresse";
   gap: var(--fm-spacing-xsmall);
   align-items: center;
   padding: var(--fm-spacing-small) var(--fm-spacing-large) 0;
 }
+.nr-g-teksto-zeile > [data-nr-teksto-linio="name"] { grid-area: name; }
+.nr-g-teksto-zeile > [data-nr-teksto-linio="adresse"] { grid-area: adresse; }
+.nr-g-teksto-zeile > :last-child { grid-area: x; }
 
 .nr-g-teksto-ton-listo { padding-block-start: var(--fm-spacing-xsmall); }
 .nr-g-teksto-ton {

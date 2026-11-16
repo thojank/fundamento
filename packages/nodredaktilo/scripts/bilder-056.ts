@@ -32,6 +32,7 @@ import { deflateSync } from "node:zlib";
 import {
   altecoDe,
   BEISPIELE_HILFE,
+  DATEI_FEHLT,
   EIGENE_SCHRIFT_SAETZE,
   FOLGO_SAETZE,
   FUENF_WERTE_SATZ,
@@ -869,7 +870,7 @@ async function lauf(
       await schreibe(seite, zielgruppe.locator(`textarea[data-nr-teksto-kampo="${feld}"]`), wort);
     const wettbewerb = nodo(seite, "teksto-wettbewerb");
     for (const [i, [name, adresse]] of [
-      ["Lampenhaus", "lampenhaus.example"],
+      ["Leuchtwerk Berlin GmbH", "https://www.leuchtwerk-berlin.example/ueber-uns"],
       ["Strahl", ""],
       ["Werklicht", "werklicht.example"],
     ].entries()) {
@@ -890,6 +891,36 @@ async function lauf(
         );
     }
     await leereStelle(seite);
+    // QA run 1: a name of 22 characters stands whole in its field, the address placeholder is not
+    // cut (the Wettbewerb shows its own content, AK 6).
+    const zeileFeld = (i: number, linio: "name" | "adresse") =>
+      wettbewerb.locator(
+        `[data-nr-wettbewerb="${i}"] fm-kampo[data-nr-teksto-linio="${linio}"] input`,
+      );
+    const nameFeld = await zeileFeld(0, "name").evaluate((e) => ({
+      wert: (e as HTMLInputElement).value,
+      scroll: e.scrollWidth,
+      breite: e.clientWidth,
+    }));
+    pruefe(
+      nameFeld.wert.length === 22 && nameFeld.scroll <= nameFeld.breite,
+      "AK 6",
+      `Wettbewerb: „${nameFeld.wert}“ ganz sichtbar (${nameFeld.scroll}/${nameFeld.breite} px)`,
+    );
+    const platzhalter = await zeileFeld(1, "adresse").evaluate((e) => {
+      // The placeholder measured as a value (setting `value` fires no event, nothing is stored).
+      const feld = e as HTMLInputElement;
+      const vorher = feld.value;
+      feld.value = feld.placeholder;
+      const masse = { text: feld.placeholder, scroll: feld.scrollWidth, breite: feld.clientWidth };
+      feld.value = vorher;
+      return masse;
+    });
+    pruefe(
+      platzhalter.text !== "" && platzhalter.scroll <= platzhalter.breite,
+      "AK 6",
+      `Wettbewerb: Platzhalter „${platzhalter.text}“ nicht abgeschnitten (${platzhalter.scroll}/${platzhalter.breite} px)`,
+    );
     const persoenlichkeit = nodo(seite, "teksto-persoenlichkeit").locator(
       'fm-kampo[data-nr-teksto-linio="eigenschaft"] input',
     );
@@ -1550,6 +1581,78 @@ async function lauf(
       ...ALDONEBLAJ.map(([, id]) => id),
     ]);
     await pruefeHoehen(seite, "volle Inhalte");
+
+    // ── QA run 1, Randfall: an image removed, an older Stand still names it ─────────────────
+    // The tile reads „Datei fehlt“ without a word broken; its „×“ removes it without a request
+    // for the file that is already gone (no console error).
+    await seite.locator("[data-nr-stand-speichern]").click();
+    await standName.waitFor();
+    await standName.fill("Muster");
+    await seite.locator("[data-nr-stand-konservi]").click();
+    await seite
+      .locator("[data-nr-stand-mesagxo]")
+      .filter({ hasText: "Stand „Muster“ gespeichert" })
+      .waitFor();
+    const fehlend = "muster-0.png";
+    await seite.locator(`[data-nr-beispiel="${fehlend}"]`).hover();
+    await seite.locator(`[data-nr-beispiel-forigi="${fehlend}"]`).click();
+    await seite.locator(`[data-nr-beispiel="${fehlend}"]`).waitFor({ state: "detached" });
+    await seite.locator("[data-nr-staende]").click();
+    await seite.locator('[data-nr-staende-listo][data-nr-preta="true"]').waitFor();
+    await seite
+      .locator("[data-nr-stand]")
+      .filter({ hasText: "Muster" })
+      .locator("[data-nr-stand-oeffnen]")
+      .click();
+    await seite.locator("[data-nr-staende-listo]").waitFor({ state: "detached" });
+    const kachel = seite.locator(`[data-nr-beispiel="${fehlend}"][data-nr-fehlt]`);
+    await kachel.waitFor();
+    const etikedo = await kachel.evaluate((k) => {
+      const teksto = [...k.childNodes].find((n) => n.nodeType === Node.TEXT_NODE);
+      const inhalt = teksto?.textContent ?? "";
+      // A word split over two lines has two rectangles.
+      const geteilt = [...inhalt.matchAll(/\S+/g)].filter((m) => {
+        const r = document.createRange();
+        r.setStart(teksto as Node, m.index);
+        r.setEnd(teksto as Node, m.index + m[0].length);
+        return r.getClientRects().length !== 1;
+      });
+      const ganz = document.createRange();
+      if (teksto !== undefined) ganz.selectNodeContents(teksto);
+      return {
+        inhalt,
+        zeilen: ganz.getClientRects().length,
+        geteilt: geteilt.map((m) => m[0]),
+        abgeschnitten: k.scrollWidth > k.clientWidth || k.scrollHeight > k.clientHeight,
+      };
+    });
+    pruefe(
+      etikedo.inhalt === DATEI_FEHLT && etikedo.geteilt.length === 0 && !etikedo.abgeschnitten,
+      "Randfall",
+      `Kachel „${etikedo.inhalt}“ ohne geteiltes Wort, nicht abgeschnitten (${etikedo.zeilen} Zeile(n); geteilt: ${etikedo.geteilt.join(", ")})`,
+    );
+    const anfragen: string[] = [];
+    const notieren = (r: { method(): string; url(): string }) => {
+      if (r.url().includes(`/beispiele/${fehlend}`)) anfragen.push(`${r.method()} ${r.url()}`);
+    };
+    seite.on("request", notieren);
+    await kachel.hover();
+    await seite.locator(`[data-nr-beispiel-forigi="${fehlend}"]`).click();
+    await kachel.waitFor({ state: "detached" });
+    await warteBis(
+      seite,
+      "Randfall",
+      "Kachel aus dem Inhalt entfernt",
+      async () =>
+        !JSON.stringify(inhaltDe(await stand(), "beispiele") ?? {}).includes(`"${fehlend}"`),
+    );
+    seite.off("request", notieren);
+    pruefe(
+      anfragen.length === 0,
+      "Randfall",
+      `„×“ an „Datei fehlt“ ohne Anfrage nach der Datei (${anfragen.join(" | ")})`,
+    );
+    pruefeSeite("Randfall");
     pruefeSeite("Ende");
     console.log(`Schrift-Route: ${[...new Set(tiparoRoute)].join(", ")}`);
     console.log(

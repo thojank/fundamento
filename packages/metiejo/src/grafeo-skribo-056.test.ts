@@ -165,7 +165,7 @@ describe("Spec 056 T1: {regler} – the three Schrift sliders with their ranges 
 });
 
 describe("Spec 056 T1: {farbe: akzent, herkunft} – Akzent „aus Material“ (D-23)", () => {
-  const herkunft = { quelle: "bild", datei: "plakat.png", merkmal: "Farbe #c6f135", anteil: 12 };
+  const herkunft = { quelle: "bild", merkmal: "Farbe #c6f135", anteil: 12 };
 
   it("stores the origin with the Zweitfarbe; the Bildo shows Akzent „aus Material“", () => {
     const a = agordoDe(
@@ -206,6 +206,19 @@ describe("Spec 056 T1: {farbe: akzent, herkunft} – Akzent „aus Material“ (
     ];
     const ist = faelle.map((korpo) => leinwandSchreiben(LUMO, korpo, stufoj, katalogo).speco);
     expect(ist).toEqual(faelle.map(() => "malformita"));
+  });
+
+  it("refuses an origin with a file name as malformed; the message does not offer datei (AK-4)", () => {
+    const ist = leinwandSchreiben(
+      LUMO,
+      {
+        farbe: { rolle: "akzent", wert: "#c6f135", herkunft: { ...herkunft, datei: "plakat.png" } },
+      },
+      stufoj,
+      katalogo,
+    );
+    expect(ist.speco).toBe("malformita");
+    expect(ist.speco === "malformita" && ist.mesagxo.includes("datei")).toBe(false);
   });
 });
 

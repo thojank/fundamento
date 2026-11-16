@@ -844,7 +844,7 @@ export type AltecoSpeco056 = AltecoSpeco | TekstoId | "beispiele" | "schrift";
 export const ARANGXO_056 = {
   nodoj: {
     ...ARANGXO_055.nodoj,
-    "teksto-wettbewerb": { x: -350, y: -496, largxo: 280 },
+    "teksto-wettbewerb": { x: -350, y: -656, largxo: 280 },
     "teksto-zielgruppe": { x: -350, y: -258, largxo: 280 },
     "teksto-ausgangslage": { x: -350, y: 24, largxo: 280 },
     "teksto-markenkern": { x: -350, y: 214, largxo: 280 },
@@ -857,7 +857,7 @@ export const ARANGXO_056 = {
   alteco: {
     ...ARANGXO_055.alteco,
     marko: 480,
-    "teksto-wettbewerb": 220,
+    "teksto-wettbewerb": 380,
     "teksto-zielgruppe": 264,
     "teksto-ausgangslage": 172,
     "teksto-markenkern": 220,

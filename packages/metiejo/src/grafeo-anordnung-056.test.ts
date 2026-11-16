@@ -79,7 +79,7 @@ describe("Spec 056 T1: ARANGXO_056 (plan §2.3, D-16)", () => {
           return [id, [p.x, p.y, p.largxo, alteco, p.y + alteco]];
         }),
       ),
-      "teksto-wettbewerb": [-350, -496, 280, 220, -276],
+      "teksto-wettbewerb": [-350, -656, 280, 380, -276],
       "teksto-zielgruppe": [-350, -258, 280, 264, 6],
       "teksto-ausgangslage": [-350, 24, 280, 172, 196],
       "teksto-markenkern": [-350, 214, 280, 220, 434],

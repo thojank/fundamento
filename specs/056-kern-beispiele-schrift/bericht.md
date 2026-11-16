@@ -19,12 +19,12 @@ Stand 2026-11-16, Entwurf aus KBS-4.1 (T8); der Orchestrator füllt die Platzhal
 
 ## 2. Bilder (Chromium 153, 2100×1250)
 
-`pnpm exec turbo run build --filter=@fundamento/cli --filter=@fundamento/metiejo --filter=@fundamento/nodredaktilo`, dann `pnpm --filter @fundamento/nodredaktilo exec tsx scripts/bilder-056.ts --ziel /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder` (Marke `lumeto`, Temp-Arbeitsordner, Temp-Schriftzwischenspeicher, freier Port; 107 Prüfungen, Abbruch beim ersten Fehler; 0 Seiten- und Konsolenfehler). Der Browser erreicht nur die Metiejo: Fontsource-Dateien kommen nur über `/api/tiparo/…` (der Server holt sie aus npm), die 46 CDN-Anfragen der Vorschau bricht das Skript ab, andere Anfragen nach außen: 0. Übersichtsbilder sind eingepasst, Detailbilder Ausschnitte bei dieser Zoomstufe.
+`pnpm exec turbo run build --filter=@fundamento/cli --filter=@fundamento/metiejo --filter=@fundamento/nodredaktilo`, dann `pnpm --filter @fundamento/nodredaktilo exec tsx scripts/bilder-056.ts --ziel /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder` (Marke `lumeto`, Temp-Arbeitsordner, Temp-Schriftzwischenspeicher, freier Port; 112 Prüfungen, Abbruch beim ersten Fehler; 0 Seiten- und Konsolenfehler; nach QA-Lauf 1 neu gelaufen). Der Browser erreicht nur die Metiejo: Fontsource-Dateien kommen nur über `/api/tiparo/…` (der Server holt sie aus npm), die 50 CDN-Anfragen der Vorschau bricht das Skript ab, andere Anfragen nach außen: 0. Übersichtsbilder sind eingepasst, Detailbilder Ausschnitte bei dieser Zoomstufe.
 
 1. [01-neue-marke.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/01-neue-marke.png) – drei leere Text-Knoten links, gestrichelt, blasse Kurven in die Marke, runde Punkte.
 2. [02-kern-und-werte.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/02-kern-und-werte.png) – Ausgangslage, Markenkern, drei Werte mit eigenen Kanten; Marke mit Kern, Werten, „Dazu“.
 3. [03-fuenf-werte.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/03-fuenf-werte.png) – fünf Werte, Feld weg, der ruhige Satz.
-4. [04-text-knoten-alle.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/04-text-knoten-alle.png) – Zielgruppe, Wettbewerb, Persönlichkeit, Tonalität gefüllt; Beispiele und Schrift leer.
+4. [04-text-knoten-alle.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/04-text-knoten-alle.png) – Zielgruppe, Wettbewerb (Name über Adresse, „Leuchtwerk Berlin GmbH“ ganz lesbar), Persönlichkeit, Tonalität gefüllt; Beispiele und Schrift leer.
 5. [05-beispiele-erkannt.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/05-beispiele-erkannt.png) – drei Bilder, sechs Felder mit Anteil, Kante von oben in die Marke, „Primär folgt den Beispielen.“, Primär `#2f5bff` „aus Material“.
 6. [06-farbe-uebernommen.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/06-farbe-uebernommen.png) – anderes Feld als Primär, „Primär folgt nicht.“ mit „folgen lassen“, Palette und Vorschau auf neuem rev.
 7. [07-pinterest-verweis.png](file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/spec056/bilder/07-pinterest-verweis.png) – Board-Link als Verweis mit dem Satz, dazu das Bild einer direkten Adresse.
@@ -35,7 +35,7 @@ Stand 2026-11-16, Entwurf aus KBS-4.1 (T8); der Orchestrator füllt die Platzhal
 
 **AK 7 im Browser (bindend, nicht in CI):** Start 14 Knoten, 19 Kanten; mit allen sechs Knoten 20 Knoten, 29 Kanten; mit vollen Inhalten ebenso. Jedes Mal: Boxen paarweise ohne Schnitt, jede Kante alle 2 px abgetastet ohne Punkt in einer fremden Box, jedes `d` mit `C`, alle Anschlüsse rund, 7 Farbkanten in ihrer Farbe, alle anderen in der grauen Rolle.
 
-**Höhen (gemessen/Maximum §2.3):** Start: Marke 66/480, Ausgangslage 101/172, Markenkern 147/220, Werte 129/270. Knappe Fälle: Werte mit fünf Werten **269/270**; Zielgruppe drei Felder **259/264**; Wettbewerb drei Zeilen 209/220; Persönlichkeit 127/172; Tonalität sechs Regler 255/300; Beispiele mit zwölf Bildern und acht Feldern **601/640** (mit zusätzlich einem Verweis 663, der Knoten wächst nach unten); Schrift Skala am Ende 324/360, alle drei Regler am Ende **346/360**; Marke am vollsten in diesem Lauf 412/480 (KBS-2.1: 452). Kein Maximum geändert.
+**Höhen (gemessen/Maximum §2.3):** Start: Marke 66/480, Ausgangslage 101/172, Markenkern 147/220, Werte 129/270. Knappe Fälle: Werte mit fünf Werten **269/270**; Zielgruppe drei Felder **259/264**; Wettbewerb drei Zeilen und die leere Zeile **361/380**; Persönlichkeit 127/172; Tonalität sechs Regler 255/300; Beispiele mit zwölf Bildern und acht Feldern **601/640** (mit zusätzlich einem Verweis 663, der Knoten wächst nach unten); Schrift Skala am Ende 324/360, alle drei Regler am Ende **346/360**; Marke am vollsten in diesem Lauf 412/480 (KBS-2.1: 452). Nach QA-Lauf 1 ein Maximum angehoben: Wettbewerb 220 → 380 (Name über Adresse), Platz `y` −496 → −656, Unterkante −276 und Abstand zur Zielgruppe gleich; AK 7 mit vollen Inhalten grün. Kein Maximum gesenkt.
 
 ## 3. Ergebnis Pinterest-Link
 
@@ -53,7 +53,7 @@ Gelesen mit `node:zlib`, keine Abhängigkeit (`packages/metiejo/src/zip-legi.ts`
 | `packages/nodredaktilo/scripts/bilder-055.ts:305, 418` | `/[QA]/` → `/[QAC]/`, Meldetext | Kurven schreiben `C` (M-1) |
 | `packages/nodredaktilo/scripts/bilder-055.ts:404` | 11 → 14 Knoten beim Start | drei feste Text-Knoten |
 
-Dazu an Tests dieses Laufs: `grafeo-anordnung-056.test.ts:78, 90` (dieselbe Anhebung) und `leinwand-sxelo-056.test.ts:441–453` (Routenmodule mit einem fremden Pfad aufgerufen, nachdem der Beispiele-Weg echt wurde). Kein Test aus 047/048, keine Datei unter `packages/eroj/**`.
+Dazu an Tests dieses Laufs: `grafeo-anordnung-056.test.ts:78, 90` (dieselbe Anhebung), `grafeo-anordnung-056.test.ts:82` (QA-Lauf 1: Wettbewerb `[-350, -496, 280, 220, -276]` → `[-350, -656, 280, 380, -276]`), `grafeo-skribo-056.test.ts:168` (QA-Lauf 1: Herkunft der Gutfälle ohne `datei`) und `leinwand-sxelo-056.test.ts:441–453` (Routenmodule mit einem fremden Pfad aufgerufen, nachdem der Beispiele-Weg echt wurde). Kein Test aus 047/048, keine Datei unter `packages/eroj/**`.
 
 ## 6. Befunde für Spec 057 (was die Auswertung ohne KI nicht leistet)
 
@@ -64,9 +64,9 @@ Dazu an Tests dieses Laufs: `grafeo-anordnung-056.test.ts:78, 90` (dieselbe Anhe
 - **ZIP ohne Summengrenze** (Abschnitt 4); „24 MB“ bedeutet MiB (25 165 824 Byte).
 - **Aufräumen:** `spuroX` und `ARANGXO_055.spuroj` sind ungenutzt.
 - **Abweichungen D-3/D-6:** Inhaltsknoten sind keine Bildo-Knoten; `primaer.seit` als Anker. Die Inhalte stehen nicht im Agordo, Export, Studio und Agenten sehen Kern und Werte nicht.
-- Akzent aus „Erkannt“ ohne Dateinamen in `herkunft` (sonst Bildname im Paket). `schrift-privat` mit `bestaetigt`.
+- Akzent aus „Erkannt“ ohne Dateinamen in `herkunft` (sonst Bildname im Paket); seit QA-Lauf 1 lehnt der Schreibweg eine `herkunft` mit `datei` als falsch gebaut ab (400), von jedem Aufrufer. `schrift-privat` mit `bestaetigt`.
 - Der Schreibweg der Leinwand beantwortet eine falsch gebaute neue Änderung (unbekannte Rolle, unbekannter Regler, Herkunft an Primär) wie jede falsch gebaute Änderung seit 054 mit 400 `{issues:[{rule:"sxangxo-invalid", …}]}`, nicht mit 422 `{satz}`; nur im API sichtbar.
-- Sichtbar in den Bildern: Wettbewerb-Adressen abgeschnitten (`lampenhaus.exa…`, Bild 11); Probezeilen der Schrift mit Auslassungspunkten; mit Größe und Skala am Ende bricht „Standards“ in der Vorschau mitten im Wort (Bild 11); „dazwischen“ der Tonalität sitzt knapp über der nächsten Reglerzeile; die Schrift-Regler „Größe“ und „Gewicht“ zeigen „0,00“, solange kein Wert gesetzt ist (Bild 06).
+- Sichtbar in den Bildern: eine sehr lange Wettbewerb-Adresse endet am Feldrand (Bild 04, gewollt; Namen und Platzhalter stehen seit QA-Lauf 1 ganz); Probezeilen der Schrift mit Auslassungspunkten; mit Größe und Skala am Ende bricht „Standards“ in der Vorschau mitten im Wort (Bild 11); „dazwischen“ der Tonalität sitzt knapp über der nächsten Reglerzeile; die Schrift-Regler „Größe“ und „Gewicht“ zeigen „0,00“, solange kein Wert gesetzt ist (Bild 06).
 - Weitere aus den Tickets (Belege in `tasks.md`): Wörter ohne gemeinsame Konstante; zwei Studio-Sätze kopiert; `fm-kampo` lässt `change` nicht aus dem Shadow DOM (älter); `fm-ikono: name is required`-Warnungen (älter); `retejo.ts:21` benennt `15_000` und `:72` schreibt die Zahl weiter selbst.
 
 ## 7. Prüfungen (lokal)
@@ -77,7 +77,8 @@ Dazu an Tests dieses Laufs: `grafeo-anordnung-056.test.ts:78, 90` (dieselbe Anhe
 - `FM_AUSGABE=knapp pnpm test:betroffen`: rot nur drei Hook-Zeitgrenzen in nordstelo (`ac8.test.ts:156`, `neubewertung-053.test.ts:206`, `ablauf/integra.test.ts:131`). Nacheinander: metiejo 1127/0, cli 120/0, ekranoj 301/0, nordstelo 379/0; rot nur modelo `ci/turbo-inputs.test.ts:679` (Hook-Zeitgrenze), einzeln 8/0. Nichts angehoben.
 - `pnpm lint` 22/22; `pnpm check:privat` PASS; `.only(`/`.skip(` nur das alte `context.skip` in `packages/mcp/src/http.test.ts:97`; 047/048 unverändert und grün.
 - Diff-Suche gegen `6d34a75a` (Befehle in `tasks.md`): nichts unter den Tabu-Pfaden, keine Root-Datei, kein Lockfile, keine Abhängigkeit, kein neuer `--fm-`-Token, keine neue Zeit, Grenze oder Toleranz (benannt, Wert unverändert: `RETEJO_TEMPOLIMO`, `ANFRAGE_GRENZE`); Wort aus R-12 und Name des privaten Schriften-Repos 0 / 0.
-- Bündel `dist/leinwand.js`: 746 121 → **843 439** Byte roh, 195 930 → **218 254** gzip -6; keine Schwelle.
+- Bündel `dist/leinwand.js`: 746 121 → **843 924** Byte roh, 195 930 → **218 425** gzip -6 (nach QA-Lauf 1); keine Schwelle.
+- **QA-Lauf 1, vier Korrekturen** (je rot zuerst, Einzelheiten in `tasks.md`, „QA-Lauf 1: Korrekturen“): `herkunft.datei` abgelehnt (`grafeo-skribo-056.test.ts:211–222`, `beispiele-eksporto-056.test.ts:303–328` bis ins Paket); Kachel „Datei fehlt“ ohne geteiltes Wort; Wettbewerb Name über Adresse; „ד an „Datei fehlt“ ohne `DELETE`, keine 404 in der Konsole. Danach `vitest run 054 055 056 047 048` 510/0, Lint beider Pakete grün, Build grün, `bilder-056.ts` Exit 0.
 - `bilder-055.ts` läuft mit der geänderten Zeile 404 durch (41 Prüfungen).
 
 ## 8. Was der Maintainer jetzt tut

@@ -57,14 +57,15 @@ Die Leinwand „Gestalten“ bekommt die vordere Hälfte des Markenprozesses. Si
 - `packages/metiejo/src/grafeo-anordnung-055.test.ts:124` – Marke `72, 120` → `480, 528`: `altecoDe` liest `ARANGXO_056`; die volle Marke misst 452 px.
 - `packages/nodredaktilo/scripts/bilder-055.ts:305, 418` – `/[QA]/` → `/[QAC]/` und Meldetext: Kurven schreiben `C`.
 - `packages/nodredaktilo/scripts/bilder-055.ts:404` – 11 → 14 Knoten beim Start: drei feste Text-Knoten.
-- Im Lauf an eigenen Tests geändert: `grafeo-anordnung-056.test.ts:78, 90` (dieselbe Anhebung), `leinwand-sxelo-056.test.ts:441–453` (Routenmodule mit einem fremden Pfad aufgerufen).
+- Im Lauf an eigenen Tests geändert: `grafeo-anordnung-056.test.ts:78, 90` (dieselbe Anhebung), `leinwand-sxelo-056.test.ts:441–453` (Routenmodule mit einem fremden Pfad aufgerufen); nach QA-Lauf 1 `grafeo-anordnung-056.test.ts:82` (Wettbewerb `-496, 220` → `-656, 380`) und `grafeo-skribo-056.test.ts:168` (Herkunft der Gutfälle ohne `datei`).
 
 ### Abweichungen von der technischen Spec
 - D-3: die Inhaltsknoten sind keine Bildo-Knoten; der Bildo ändert sich nur um `marko.enhavo` und Primär „aus-material“. Alte Routen-Tests bleiben dadurch unverändert.
 - D-5: jede gespeicherte Farbe trägt ihre Merkmale `{hell, bunt, leit}`; der Browser rechnet keine Farben.
 - D-6: `primaer.seit` als Anker für „folgen lassen“.
 - D-21: eigener Weg `GET …/schriften`.
-- Akzent aus „Erkannt“ schreibt `herkunft {quelle, anteil}` ohne Dateinamen, sonst stünde ein Bildname in `agordo.json` und im Paket (AK 4).
+- Akzent aus „Erkannt“ schreibt `herkunft {quelle, anteil}` ohne Dateinamen, sonst stünde ein Bildname in `agordo.json` und im Paket (AK 4). Der Schreibweg lehnt eine `herkunft` mit `datei` als falsch gebaut ab (400), damit auch kein anderer Aufrufer einen Dateinamen hineinschreibt (QA-Lauf 1).
+- Wettbewerb-Knoten: Name über Adresse in voller Breite; Höchsthöhe 220 → 380, Platz `y` −496 → −656 (Unterkante −276 und Abstand zur Zielgruppe unverändert).
 - `POST …/schrift-privat` nimmt ein wahlweises `bestaetigt`; vorher antwortet es mit `{satz, frage: true}` (Bestätigungsschritt).
 - Beispiele-Vorschaubilder in fünf Spalten (Mockup: vier), „Aa“ neben statt über den Probezeilen, Freitexte als `<textarea>`, Schrift-Regler laufen über Schrittnummern (`fm-glitilo` hält einen Bereich von mindestens 1).
 
@@ -77,8 +78,9 @@ Die Leinwand „Gestalten“ bekommt die vordere Hälfte des Markenprozesses. Si
 
 ### Prüfungen
 - Neue Tests `abnahme-056` (9) und `grafeo-urteil-056` (5), rot gezeigt mit gepflanzten Fehlern; alle `*-056`-Tests und 047/048/054/055 grün.
-- Browser: `pnpm --filter @fundamento/nodredaktilo exec tsx scripts/bilder-056.ts --ziel <ordner>` – AK 7 beim Start und mit allen sechs Knoten, Abläufe 1–7, 107 Prüfungen, elf Bilder.
+- Browser: `pnpm --filter @fundamento/nodredaktilo exec tsx scripts/bilder-056.ts --ziel <ordner>` – AK 7 beim Start, mit allen sechs Knoten und mit vollen Inhalten, Abläufe 1–7 und der Randfall „Datei fehlt“, 112 Prüfungen, elf Bilder.
 - Korrektur: `schrift-eigene.tsx:85–86` las zwei `--fm-`-Namen, die es nicht gibt; jetzt `--fm-typography-body-2-font-size` und `--fm-font-weight-medium`.
+- Korrekturen aus QA-Lauf 1 (je rot zuerst): `herkunft.datei` abgelehnt (Test über HTTP bis ins Paket); Kachel „Datei fehlt“ ohne geteiltes Wort; Wettbewerb liest Namen und Platzhalter ganz; „ד an „Datei fehlt“ ohne `DELETE` (keine 404 in der Konsole).
 - `pnpm lint` grün, `pnpm check:privat` PASS; `test:betroffen` rot nur durch Hook-Zeitgrenzen, nacheinander und einzeln grün.
 - eroj in Chromium, je Datei einzeln: alle sieben grün.
 
@@ -99,6 +101,23 @@ Zusammengefasst aus den Ticket-Abschnitten (KBS-4.1); Belege dort. Für Spec 057
 - **Wörter ohne gemeinsame Konstante:** Wettbewerb „Name“, „Adresse (wahlweise)“, „<Wert> entfernen“; „Dateien wählen“, „lizenziert, privat“, „Bestätigen“, „Abbrechen“; die lokalen Texte des Schrift-Knotens. Zwei Studio-Sätze kopiert, weil `servilo.ts` sie inline schreibt.
 - **Älter, nicht aus diesem Lauf:** `fm-kampo` lässt `change` nicht aus dem Shadow DOM; `fm-ikono: name is required`-Warnungen.
 - **Neu aus KBS-4.1:** siehe „KBS-4.1: Befunde“ unten (400-Form des Schreibwegs, Darstellung in den Bildern, Höhe mit Verweis).
+
+## QA-Lauf 1: Korrekturen
+
+Vier Befunde aus QA-Lauf 1, je rot zuerst, dann die Korrektur. Sonst nichts geändert.
+
+| # | Datei:Zeile | Was | Warum | Rot zuerst |
+|---|---|---|---|---|
+| API 1 | `packages/metiejo/src/grafeo-skribo.ts:263–282, 354` | `herkunftEl` nimmt nur noch `quelle`, `merkmal`, `anteil`; eine `herkunft` mit `datei` ist falsch gebaut (400, wie `quelle: "link"`); die Meldung nennt `datei` nicht mehr. Der ältere Weg des Enportilo unberührt | Ein Aufrufer konnte einen Dateinamen über `farbe.herkunft.datei` in `agordo.json` und `aspekto.json` des Pakets schreiben (AK 4, US-9) | `grafeo-skribo-056.test.ts:211–222` (neu): `expected 'ok' to be 'malformita'`; `beispiele-eksporto-056.test.ts:303–328` (neu, über HTTP, danach „Speichern“ und Suche nach dem Namen in `eksporto/**` und `agordo.json`): `expected 200 to be 400` |
+| Web 1 | `packages/nodredaktilo/src/gestalten/nodoj/beispiele.tsx:83–84` | Die Kachel „Datei fehlt“ bricht nur zwischen Wörtern (`word-break: normal`); eine PDF-Kachel mit Dateinamen bricht weiter überall | „Datei f / ehlt“ brach mitten im Wort. In einer Kachel von rund 40 px passt „Datei fehlt“ nicht in eine Zeile; es steht jetzt „Datei“ über „fehlt“ | `bilder-056.ts:1585–1655` (neu, Randfall: Stand speichern, Bild entfernen, Stand öffnen): „Kachel „Datei fehlt“ ohne geteiltes Wort … (2 Zeile(n); geteilt: fehlt)“ |
+| Web 2 | `packages/nodredaktilo/src/gestalten/nodoj/teksto.tsx:133–144`; `packages/metiejo/src/grafeo-gestalten-sicht.ts:847, 860` | Wettbewerb-Zeile: Name über Adresse, beide in voller Breite des Knotens, „ד neben dem Namen. Drei Zeilen und die leere Zeile messen 361 px → Maximum **220 → 380**, `y` **−496 → −656** (unten bleibt −276, Abstand 18 zur Zielgruppe bleibt) | Zwei Felder von rund 100 px schnitten Namen und Platzhalter ab („Leuchtwerk Ber“, „Adresse (wahlw“) | `bilder-056.ts:894–923` (neu, Zeile 0 jetzt „Leuchtwerk Berlin GmbH“ mit langer Adresse): „„Leuchtwerk Berlin GmbH“ ganz sichtbar (168/107 px)“; nach der Korrektur 218/218 und Platzhalter 244/244. Die erste Fassung (nur Zeile) maß 361/220 und brach an „keine Höhe über ihrem Maximum“ ab, darum die Anhebung |
+| Web 3 | `packages/nodredaktilo/src/gestalten/nodoj/beispiele.tsx:245–255, 341` | „ד an einer Kachel „Datei fehlt“ nimmt die Datei nur aus dem Inhalt, ohne `DELETE`. Die 404 des Wegs bleibt | `DELETE …/beispiele/<fehlende Datei>` → 404 in der Konsole | `bilder-056.ts` Randfall: „„ד an „Datei fehlt“ ohne Anfrage nach der Datei (DELETE …/beispiele/muster-0.png)“; danach „keine Seiten- oder Konsolenfehler“ |
+
+Geänderte Testzeilen (056-eigene Dateien): `grafeo-skribo-056.test.ts:168` `herkunft = { quelle, datei: "plakat.png", merkmal, anteil }` → ohne `datei` (die Herkunft der Gutfälle trägt keinen Dateinamen mehr); `grafeo-anordnung-056.test.ts:82` `"teksto-wettbewerb": [-350, -496, 280, 220, -276]` → `[-350, -656, 280, 380, -276]`; `bilder-056.ts:872` Zeile 0 `["Lampenhaus", "lampenhaus.example"]` → `["Leuchtwerk Berlin GmbH", "https://www.leuchtwerk-berlin.example/ueber-uns"]`. Neu: die beiden Tests oben, die Schritte in `bilder-056.ts:894–923` und `:1585–1655`, `DATEI_FEHLT` im Import. `marko-enhavo-056.test.ts:203` baut ein Agordo mit `datei` direkt (Lesen, nicht der Schreibweg) und bleibt.
+
+Läufe: `FM_AUSGABE=knapp pnpm exec vitest run 054 055 056 047 048` in `packages/metiejo` → 510 bestanden, 0 rot. `pnpm --filter @fundamento/metiejo lint` und `pnpm --filter @fundamento/nodredaktilo lint` grün (eine ältere Warnung in `komponentoj.ts:42`). Build der drei Pakete grün. `bilder-056.ts --ziel …/spec056/bilder` Exit 0, 112 Prüfungen, elf Bilder neu. AK 7 beim Start, mit allen sechs und mit vollen Inhalten grün (Wettbewerb an −656, Beispiele unverändert x 24, y −656, Breite 300). Höhen: Wettbewerb leer 184/380, drei Zeilen + leere Zeile **361/380**; Beispiele mit zwölf Bildern und acht Feldern 601/640.
+
+Hinweis für den nächsten Lauf: `turbo run build` spielte nach einer Änderung nur in `metiejo/src` ein altes `nodredaktilo/dist/leinwand.js` aus dem Zwischenspeicher ein (Wettbewerb stand im Browser noch bei −496); `pnpm --filter @fundamento/nodredaktilo build` baut es neu.
 
 ## KBS-1.1 (T1): Daten – Inhalte, gelöste Verbindungen, Marke, Folgen, Anordnung, Katalog, Schreibweg
 

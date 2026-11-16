@@ -2,7 +2,8 @@
 // „Hochladen“ or by dropping them on the node – several at once, one request per file in their
 // order; the files that read are kept, each one that does not stands calmly named at the node and
 // is not stored. The node shows square thumbnails (a PDF as a tile with its name, a file that is
-// gone as „Datei fehlt“), each with „×“, which removes the file from the brand's work folder. The
+// gone as „Datei fehlt“), each with „×“, which removes the file from the brand's work folder (a
+// „Datei fehlt“ tile only from the content, without a request – QA run 1). The
 // field „Pinterest-Link oder Bildadresse“ loads an image address like an upload; a page or a
 // Pinterest board stays as a reference with its sentence and its own „×“. After every image in or
 // out the content is written (`inhaltMeti(…, true)`) and the follow rule runs once
@@ -79,7 +80,8 @@ const STILO = `
   color: ${ROLOJ.mallauta};
   word-break: break-all;
 }
-.nr-g-beispiele-bild[data-nr-fehlt] { border-style: var(--fm-stroke-dashed); }
+/* „Datei fehlt“ breaks between its words only (a file name of a PDF tile may break anywhere). */
+.nr-g-beispiele-bild[data-nr-fehlt] { border-style: var(--fm-stroke-dashed); word-break: normal; }
 .nr-g-beispiele-bild > fm-butono {
   position: absolute;
   inset-block-start: 0;
@@ -241,10 +243,12 @@ export function BeispieleNodo({ data }: NodeProps<BeispieleFlowNodo>) {
   }, [enviciigi, preni, marko]);
 
   const bildoForigi = useCallback(
-    (nomo: string) => {
+    (nomo: string, fehlt: boolean) => {
       enviciigi(async () => {
         setMeldoj([]);
-        if (await beispielForigi(marko, nomo)) meti(senDosiero(aktuala.current, nomo), true);
+        // A file already gone („Datei fehlt“) only leaves the content; there is nothing to delete.
+        if (fehlt || (await beispielForigi(marko, nomo)))
+          meti(senDosiero(aktuala.current, nomo), true);
         else setMeldoj([meldoDe(nomo, NE_KONSERVITA_SATZ)]);
       });
     },
@@ -334,7 +338,7 @@ export function BeispieleNodo({ data }: NodeProps<BeispieleFlowNodo>) {
                       label={`${d.name} entfernen`}
                       title={`${d.name} entfernen`}
                       data-nr-beispiel-forigi={d.name}
-                      onClick={() => bildoForigi(d.name)}
+                      onClick={() => bildoForigi(d.name, d.fehlt === true)}
                     >
                       ×
                     </fm-butono>

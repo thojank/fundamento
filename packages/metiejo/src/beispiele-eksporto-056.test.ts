@@ -299,4 +299,31 @@ describe("Spec 056 T5 (AK-4): Beispiele appear in no export and no package", () 
       ).toBe(true);
     }
   });
+
+  it("a caller that sends Akzent with a file name in herkunft is refused; agordo.json and the export stay without it", async () => {
+    const name = BILDOJ[1]?.name ?? "";
+    const antwort = await senden(
+      "POST",
+      `/api/marko/${NOMO}/leinwand`,
+      teksto({
+        farbe: {
+          rolle: "akzent",
+          wert: "#e76f51",
+          herkunft: { quelle: "bild", datei: name, merkmal: "Farbe #e76f51", anteil: 64.9 },
+        },
+      }),
+    );
+    expect(antwort.status).toBe(400);
+    const gespeichert = await senden(
+      "POST",
+      `/studio/${NOMO}/speichern`,
+      "",
+      "application/x-www-form-urlencoded",
+    );
+    expect(gespeichert.status).toBe(303);
+    const dir = markoDir(server.workdir, NOMO);
+    const rezultoj = [...dosierojSub(join(dir, "eksporto")), join(dir, "agordo.json")];
+    const funde = rezultoj.filter((d) => readFileSync(d, "utf8").includes(name));
+    expect(funde.map((d) => relative(dir, d))).toEqual([]);
+  });
 });
