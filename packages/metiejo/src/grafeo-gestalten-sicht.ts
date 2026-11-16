@@ -856,7 +856,7 @@ export const ARANGXO_056 = {
   } satisfies Record<string, Platz>,
   alteco: {
     ...ARANGXO_055.alteco,
-    marko: 360,
+    marko: 480,
     "teksto-wettbewerb": 220,
     "teksto-zielgruppe": 264,
     "teksto-ausgangslage": 172,

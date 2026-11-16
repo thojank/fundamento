@@ -7,7 +7,7 @@ Acht Tickets, ein Strang (Spec: „höchstens 8 Tickets, ein PR“). Kein Ticket
 | Ticket | Spec | Inhalt | Hängt ab von | Stand |
 |---|---|---|---|---|
 | KBS-1.1 | T1 | Daten: Inhalte, gelöste Verbindungen, was bei der Marke ankommt, „Farbe folgt den Bildern“, Anordnung, Katalog, Schreibweg | – | erledigt |
-| KBS-2.1 | T2 | Hülle: Kurven, runde Anschlüsse, Marke-Knoten mit zwei Eingängen, Lösen/Stecken, Kopfleiste, Server-Verdrahtung, Platzhalter | 1.1 | offen |
+| KBS-2.1 | T2 | Hülle: Kurven, runde Anschlüsse, Marke-Knoten mit zwei Eingängen, Lösen/Stecken, Kopfleiste, Server-Verdrahtung, Platzhalter | 1.1 | erledigt |
 | KBS-3.1 | T3 | Die sieben Text-Knoten | 2.1 | offen |
 | KBS-3.2 | T4 | Beispiele: Hochladen, Ziehen, Link, Vorschaubilder, Entfernen, nur Arbeitsordner | 2.1 | offen |
 | KBS-3.3 | T5 | Erkannt, „als Primär/Akzent übernehmen“, „Farbe folgt den Bildern“, Test Export/Paket | 2.1 | offen |
@@ -107,11 +107,49 @@ Kein anderer Test aus 047/048/054/055 geändert.
 
 ### KBS-2.1 im Einzelnen
 
+- [x] **Tests zuerst:** `packages/metiejo/src/leinwand-sxelo-056.test.ts` (14 Tests). Erster Lauf: 10 rot aus dem richtigen Grund (Sitzung kennt `markoGeloest`/`aldonitaj`/`inhaltoj` nicht, kein `enhavo`/`fehlt` in der Antwort, `{schrift}` 400, Quellen ohne Bezier/Alias), 4 grün (Bytes ohne Zustandsdatei, eine Import-Anweisung in `stato.ts`, Stubs, D-11) – je ein Fehler gepflanzt, rot gesehen, zurückgenommen, `cmp` gleich: **F1** GET antwortet ohne Datei `stato: {knoten:[],kabloj:{}}` statt `null` → „bytes of 6d34a75a“ rot; **F2** zweite Import-Zeile (`import type { Node } from "@xyflow/react"`) in `stato.ts` → D-20-Test rot; **F3** `tiparoVojoj` gibt `true` → Stub-Test rot (nur dieser Test, `-t`, weil ein Stub mit `true` jede Anfrage unbeantwortet lässt); **F4** `dateiGrenzeDe` = `grenze·2/3` → D-11-Test rot.
+- [x] **Prüfsummen vor der Änderung** (`servilo.ts` = `6d34a75a`, `git diff --quiet` geprüft): `GET /api/leinwand?marko=provo` `b5fcedbd…50c0`, `…&kabloj=akzent:-` `d2464ebb…052f`, `?marko=komuna` (Basis komuna) `77bff7cc…a187`; im Test fest eingetragen, nach der Änderung gleich.
+- [x] **Teil V (D-17):** `kanto.tsx` `getBezierPath` (kein `spuroX`, kein `radiuso`); `roloj.ts` `.nr-g-kanto` `stroke-dasharray: 4 4; stroke-linecap: round`, `[data-nr-matt]` nur noch `stroke-opacity`; neue Rolle `ROLOJ.kanto` = `var(--fm-color-text-muted)` (dieselbe wie `--xy-edge-stroke`) für jede Nicht-Farbkante; Anschlüsse und Zeichen `--fm-radius-full`; `connectionLineType={ConnectionLineType.Bezier}`, Ziehlinie `4 4`, runde Enden. `spuroX`/`ARANGXO_055.spuroj` bleiben unbenutzt (D-15).
+- [x] **Marke-Knoten:** `marko.en.teksto` links, `marko.en.bildo` oben (`rando="supro"`), `marko.el` wie bisher; darunter „Kern“ (je 3 Zeilen), „Werte“ (Pillen), „Beispiele“ (Punkte), „Dazu“ – je nur wenn etwas ankommt (`markoEnhavoDe` der Sitzung). Breite 190, wächst nach unten.
+- [x] **Lösen/Stecken:** Kanten in die Marke = `markoLigojDe(Sitzungsknoten, markoGeloest)` neben den Farbkanten; „×“, Entf und Ende-ins-Leere lösen (`kunLoesen` erkennt `…>marko.en.*` und legt den Ausgang in `markoGeloest`, nie in `geloest`, D-19); Ziehen vom Ausgang zum Marke-Eingang steckt (`kunZiehen` nimmt nur diesen Ausgang heraus, D-18); `beispiele.el` wieder gesteckt → `folgi("gesteckt")`. Kopfleiste D-29: `geloestHinweisDe(n) + " ·"` + „zurücksetzen“, n = Zeilen von `kabloj` + gelöste Marke-Kanten (mindestens 1, solange Farbkanten abweichen); „zurücksetzen“ steckt alles.
+- [x] **„+ Knoten“** zeigt `KATALOGO_056`; „anlegen“ ist wählbar für die sechs hinzufügbaren Knoten (`menuo.tsx` `elektebla`), sie stehen an ihrem Platz aus `ARANGXO_056`, höchstens einmal. „×“ im Kopf nur bei hinzugefügtem **leerem** Knoten (Rahmen), feste drei nie. Schrift auf der Leinwand → feste Kante `schrift.el` → `<vorschau>.en.tiparo` zu jeder Vorschau (auch weiteren), ohne „×“.
+- [x] **Sitzung/Zustand** (`stato.ts`, eine Import-Anweisung): `Sesio` + `aldonitaj?`, `inhaltoj?`, `markoGeloest?` (nur gesetzt, wenn nicht leer); `statoDeSesio` schreibt die Knoten dieses Laufs in fester Reihenfolge (TEKSTO_IDS, beispiele, schrift), leere Inhalte weg, `geloest` nur bestehende Ausgänge, sortiert, nur wenn nicht leer – genau das, was `parseLeinwandStato` daraus macht (Test). Neue reine Helfer `enhavoNodojDe`, `enhavoKnotenDe`, `markoGeloestDe`, `markoElirDe`, `kunAldono`, `kunForigo`. Getippter Inhalt (`konservi: false`) bleibt im Speicher; geschrieben wird der zuletzt mit `konservi: true` gesetzte.
+- [x] **Server** (`servilo.ts`): `ANFRAGE_GRENZE`/`dateiGrenzeDe` (Wert unverändert, D-11), `korpoDe` (über der Grenze wird der Rest gelesen und verworfen → 422 möglich), `VojoKunteksto`, Aufruf der drei Routenmodule vor `…/leinwand-stato` und allen generischen `/api/marko/*`, `/marko/:name/*`-Wegen, `fontFaceOf(agordo, name)` hängt `eigeneFontFace` an (bei `""` byte-gleich); GET `/api/leinwand` gibt den Zustand an `gestaltenDe` und markiert fehlende Dateien `fehlt: true` (nur Antwort; solche Antworten werden nicht zwischengespeichert); POST `/leinwand` reicht `{tiparoj, regler}` weiter.
+- [x] **Platzhalter:** `nodoj/teksto.tsx` (Titel, Hilfe, Anschluss; Werte je Wert eine Pille mit Anschluss), `nodoj/beispiele.tsx` (Titel, Hilfe, `<Erkannt />`, Anschluss unten), `nodoj/erkannt.tsx` (null), `nodoj/schrift.tsx` („Aa“, `<SchriftEigene />`, Anschluss), `nodoj/schrift-eigene.tsx` (null), `gestalten/folgo.ts` (`folgi` tut nichts). Server-Stubs `beispiele-vojoj.ts`, `tiparo-vojoj.ts`, `schriftdosieroj-vojoj.ts` (`false`, `eigeneFontFace` → `""`, `FONTOJ_DIR = "fontoj"`).
+- [x] **Alias D-4:** `@fundamento/metiejo/enhavo` → `metiejo/src/leinwand-enhavo.ts` in `vite.config.ts` und `tsconfig.json`.
+- [x] **M-1:** `scripts/bilder-055.ts:305` `/[QA]/` → `/[QAC]/`, `:418` Text „Q, A oder C“.
+- [x] **Höhen in Chromium** (2100×1250, gebaute CLI, leere Marke „lumeto“): Start Marke 66/480, Ausgangslage 93/172, Markenkern 75/220, Werte 93/270; alle sechs angelegt: Zielgruppe 110/264, Wettbewerb 110/220, Persönlichkeit 92/172, Tonalität 66/300, Beispiele 110/640, Schrift 110/360 (Platzhalter). **Marke mit vollstem Inhalt** (Kern 2×3 Zeilen, fünf Werte, acht Farben, „Dazu“ mit fünf Namen): **452 > 360** → Höchsthöhe auf **480** angehoben (`ARANGXO_056.alteco.marko`, unten 528; unter der Marke steht in ihrer Spalte nichts). Werte mit fünf Werten (Platzhalter) 248/270. Boxen paarweise disjunkt und keine Kante durch eine fremde Box – beim Start, mit allen Knoten und mit voller Marke; jede Kante `d` mit `C`; Anschlüsse `border-radius: 9999px`; Strich `4px, 4px | round`.
+- [x] **Chromium-Rauchtest** (eigenes Skript außerhalb des Repos, siehe „für den PR-Text“): neue Marke, drei Textknoten links, Kurven, Lösen per „×“ und Entf, Kopfleiste „1 Verbindung gelöst ·“, Wert blass, nach Neuladen weiter gelöst, Stecken per Ziehen, „zurücksetzen“, „×“ auf leerem hinzugefügtem Knoten, kein Konsolenfehler: **SMOKE OK**.
+- [x] **Läufe:** `leinwand-sxelo-056` 14/14; `vitest run 054 055 056 047 048` 398 bestanden, 0 rot; `pnpm --filter @fundamento/metiejo lint` grün (1 ältere Warnung), `pnpm --filter @fundamento/nodredaktilo lint` grün (vorher rot wegen `ART_NOMOJ`), Build grün. Wortsuche (R-12-Wort, Repo-Name, aus `oldNames()` zur Laufzeit) über 1 862 neue Zeilen: 0.
+- [x] **Bündel:** `dist/leinwand.js` 772 688 Byte roh, 202 475 Byte `gzip -6` (Ausgang 746 121 / 195 930).
+
 ### KBS-2.1: geänderte ältere Tests
+
+| Datei:Zeile | vorher → nachher | Grund |
+|---|---|---|
+| `packages/metiejo/src/grafeo-anordnung-055.test.ts:124–125` | `marko: [24, 48, 190, 360, 408]` (Stand KBS-1.1) → `marko: [24, 48, 190, 480, 528]`, Kommentar um eine Zeile verlängert | Gemessene Höhe der vollen Marke 452 px > 360 (D-16: anheben, nie senken) |
+| `packages/metiejo/src/grafeo-anordnung-056.test.ts:78, 90` | `360`/`[24, 48, 190, 360, 408]` → `480`/`[24, 48, 190, 480, 528]` | dieselbe Anhebung (Test von KBS-1.1, selbe Konstante) |
+| `packages/nodredaktilo/scripts/bilder-055.ts:305, 418` | `/[QA]/`, „Q oder A“ → `/[QAC]/`, „Q, A oder C“ | M-1: Kurven schreiben `C` |
 
 ### KBS-2.1: für den PR-Text
 
+- Teil V: alle Kanten der Ansicht Gestalten als gestrichelte Bezier-Kurven mit runden Enden, hellgrau außer Farbkanten; runde Anschlüsse; Ziehlinie als Kurve. Verstehen unberührt.
+- Marke-Knoten mit zwei Eingängen (Text links, Bild oben) und dem, was ankommt; Kanten in die Marke lösbar/steckbar, als `geloest` gespeichert, Kopfleiste „n Verbindungen gelöst · zurücksetzen“ (statt „gilt nur in dieser Sitzung“).
+- „+ Knoten“ mit `KATALOGO_056`; drei feste Textknoten, sechs hinzufügbare Knoten (bis KBS-3.x Platzhalter); feste Kante Schrift → jede Vorschau.
+- Server: `/api/leinwand` mit `marko.enhavo`, `fehlt: true` für fehlende Dateien (nur Antwort); `POST …/leinwand` nimmt Schrift und Schrift-Regler; Grenzwert `ANFRAGE_GRENZE` benannt (Wert unverändert, 32 MiB → Datei 24 MiB); drei Routenmodule als Einhängepunkte.
+- Ältere Tests: `grafeo-anordnung-055.test.ts:124–125` Marke 480/528 (gemessen 452), `bilder-055.ts:305,418` akzeptiert `C`.
+- Rauchtest (wiederverwendbar): `node smoke.mjs <repo> <bilder-ordner>` – eigenes Skript im Temp-Ordner, `createRequire(<repo>/packages/nodredaktilo/package.json)("playwright")`, startet `packages/cli/dist/index.js metiejo --port <frei> --workdir <tmp>`, Chromium 2100×1250; vorher `pnpm exec turbo run build --filter=@fundamento/cli` und `pnpm --filter @fundamento/nodredaktilo build`.
+
 ### KBS-2.1: Befunde
+
+- **Höhe Marke angehoben:** 360 → 480 (gemessen 452 mit Kern 2×3 Zeilen, fünf Werte, acht Farben, „Dazu“ fünf Namen; Abschnittsabstand schon auf `--fm-spacing-small` verdichtet).
+- **`bilder-055.ts:404` erwartet „11 Knoten gerendert“**; seit Spec 056 stehen beim Start 14 (drei feste Textknoten) und 19 Kanten. Das Skript von 055 bricht dort ab; außerhalb meiner Zeilen (M-1 nennt nur 305/418), daher nicht geändert. KBS-4.1 (`bilder-056.ts`) ersetzt die Messung.
+- **Konsolen-Warnungen `fm-ikono: name is required`** erscheinen schon beim ersten Laden einer neuen Marke (4 je Laden), bevor ein neuer Knoten oder ein neues „×“ da ist – nicht von dieser Änderung; keine Konsolenfehler.
+- **Kopfleisten-Zahl:** D-29 zählt Zeilen von `kabloj` + gelöste Marke-Kanten. Weicht nur eine Vorschaukante ab (keine `kabloj`-Zeile), zeigt der Hinweis „1 Verbindung gelöst“ (Mindestwert 1).
+- **Vorschau-Schrifteingang** `…en.tiparo` wird immer gezeichnet (Ring ohne Schrift-Knoten): ein später hinzukommender Anschluss würde von React Flow nicht vermessen. Für Werte ruft die Hülle `updateNodeInternals("teksto-werte")`, wenn sich die Wert-Anschlüsse ändern.
+- **Marke-Eingang mit vielen Kanten:** Greifen am Anschluss nimmt die gewählte Kante dort, sonst die letzte. Beim Klicken auf dicht beieinanderliegende Wert-Kanten trifft man die zuletzt gezeichnete.
+- **Client kennt `ANFRAGE_GRENZE` nicht** (liegt in `servilo.ts`, das Bündel darf es nicht laden); KBS-3.2/3.5 prüfen im Browser über die Zahl 24 MiB der Sätze oder verlassen sich auf die 422 des Servers (`korpoDe` → `{troGranda}`).
+- **Leer bei Schrift:** `estasMalplena("schrift", …)` zählt nur eigene Schriften; der Rahmen nimmt das, solange `schrift.tsx` kein eigenes `leer` übergibt (KBS-3.4).
 
 ## KBS-3.1 (T3): Die sieben Text-Knoten
 

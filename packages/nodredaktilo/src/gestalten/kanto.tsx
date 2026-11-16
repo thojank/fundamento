@@ -11,14 +11,21 @@
 // T7 (E-11): a selected edge carries „×“ in its middle (an Ero, `nodrag nopan`); it detaches the
 // edge through React Flow's own deletion (`deleteElements`, the same way as Entf on the canvas).
 // A fixed edge (055 D-18, `fest`: Primär → Neutral) is never selected and never shows „×“.
+// Spec 056 (T2, Teil V, plan D-15, D-17): every edge is a curve (`getBezierPath`): it leaves its
+// output and enters its input along the port's side (Primär → Neutral top → bottom), so no lane
+// and no corner radius any more (`spuroX` and `ARANGXO_055.spuroj` stay unused in the shared
+// module). The „×“ and the light use the curve's middle and path. Dashed with round ends (roloj.ts);
+// a colour edge keeps the colour of its source, every other edge takes `ROLOJ.kanto`. An edge from
+// an empty or detached source is only fainter. The edges into the Marke and the fixed Schrift →
+// Vorschau edges are drawn the same way; a fixed one has no „×“.
 
-import { type Anschlussart, type BildoLigo, spuroX } from "@fundamento/metiejo/gestalten";
+import type { Anschlussart, BildoLigo } from "@fundamento/metiejo/gestalten";
 import {
   BaseEdge,
   type Edge,
   EdgeLabelRenderer,
   type EdgeProps,
-  getSmoothStepPath,
+  getBezierPath,
   useReactFlow,
 } from "@xyflow/react";
 import type { CSSProperties } from "react";
@@ -26,17 +33,15 @@ import { ART_ROLOJ, NODRAG, NOPAN, ROLOJ, useStilo } from "./roloj.js";
 
 export type KantoDatumoj = {
   ligo: BildoLigo;
-  /** From an empty or detached colour node: dashed and muted. */
+  /** From an empty or detached source: fainter (the stroke stays the same). */
   matt: boolean;
-  /** Changes when the edge should light up once (a new rev touched its source); 0 = never. */
+  /** Changes when the edge should light up once (a new rev or a saved content); 0 = never. */
   lumo: number;
-  /** The corner radius in px (`--fm-radius-role-surface`, read once by the canvas). */
-  radiuso: number;
 };
 
 export type KantoFlowLigo = Edge<KantoDatumoj, "kanto">;
 
-/** The „×“ of a selected edge: a small round button in the middle of its vertical piece. */
+/** The „×“ of a selected edge: a small round button in the middle of its curve. */
 const STILO = `
 .nr-g-kanto-x {
   position: absolute;
@@ -51,12 +56,10 @@ const STILO = `
 }
 `;
 
-/** The stroke of an edge of `art`: the source's colour for Farbe, the kind's role otherwise. */
+/** The stroke of an edge of `art`: the source's colour for Farbe, the light grey otherwise. */
 function strekoDe(art: Anschlussart, hex: string | undefined): CSSProperties {
   if (art === "farbo") return { stroke: hex ?? ART_ROLOJ.farbo };
-  if (art === "marko")
-    return { stroke: ART_ROLOJ.marko, strokeOpacity: "var(--fm-opacity-overlay)" };
-  return { stroke: ART_ROLOJ[art] };
+  return { stroke: ROLOJ.kanto };
 }
 
 export function Kanto({
@@ -73,17 +76,13 @@ export function Kanto({
   useStilo("kanto", STILO);
   const { deleteElements } = useReactFlow();
   const ligo = data?.ligo;
-  // D-4: the lane of the vertical piece; without one (the fixed top → bottom edge) React Flow's own.
-  const centerX = ligo === undefined ? undefined : spuroX(ligo.de, ligo.al, sourceX, targetX);
-  const [vojo, mezoX, mezoY] = getSmoothStepPath({
+  const [vojo, mezoX, mezoY] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
     targetX,
     targetY,
     targetPosition,
-    borderRadius: data?.radiuso ?? 0,
-    ...(centerX === undefined ? {} : { centerX }),
   });
   const art = ligo?.art ?? "marko";
   const fest = ligo?.fest === true;

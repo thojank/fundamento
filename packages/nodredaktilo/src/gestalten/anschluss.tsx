@@ -14,8 +14,11 @@
 // a handle id of its own (`tenilo`): the fixed Primär → Neutral edge leaves Primär at the bottom
 // (`FESTA_TENILO`) and ends at the top of Neutral (`farbo-neutral.en.farbo`). Nobody draws from
 // such an output, and a fixed edge is never picked up at its end.
+// Spec 056 (T2, Teil V): ports are round – filled when connected, a ring otherwise – in their kind's
+// colour (Text, Bild, Schrift, Maß, Marke; a colour port in its colour). The two inputs of the
+// Marke take many edges (D-18): grabbing one picks up the selected edge there, else the last one.
 
-import { anschlussDe, validaLigo } from "@fundamento/metiejo/gestalten";
+import { anschlussDe, estasMarkoEnir, validaLigo } from "@fundamento/metiejo/gestalten";
 import { Handle, Position, useConnection } from "@xyflow/react";
 import type { CSSProperties, MouseEvent } from "react";
 import { useGestalten } from "./kunteksto.js";
@@ -63,6 +66,18 @@ const elConnection = (c: { inProgress: boolean; fromHandle: { id?: string | null
  * Picks up the edge that ends at an input: a press on the port is handed to the reconnect anchor at
  * the edge's end (`.react-flow__edgeupdater-target`), which then moves that end with the pointer.
  */
+/**
+ * Spec 056 (D-18): of several edges at one input (the Marke's), the selected one, else the last.
+ * The selection lives in React Flow; its edge element carries `selected`.
+ */
+function elektitaLigo(ids: readonly string[]): string | undefined {
+  const elektita = ids.find(
+    (id) =>
+      document.querySelector(`.react-flow__edge.selected[data-id="${CSS.escape(id)}"]`) !== null,
+  );
+  return elektita ?? ids[ids.length - 1];
+}
+
 function prenuLigon(ligo: string, evento: MouseEvent<HTMLDivElement>): void {
   const ankro = document.querySelector(
     `.react-flow__edge[data-id="${CSS.escape(ligo)}"] .react-flow__edgeupdater-target`,
@@ -104,7 +119,8 @@ export function Anschluss({ port, supro, hex, rando, tenilo }: AnschlussProps) {
     else stato = "zurueck";
   }
   // A fixed edge (D-18) stays where it is: its end is never picked up.
-  const ena = el ? undefined : ligoj.find((l) => l.al === port && l.fest !== true);
+  const enaj = el ? [] : ligoj.filter((l) => l.al === port && l.fest !== true).map((l) => l.id);
+  const ena = estasMarkoEnir(port) ? undefined : enaj[0];
   const stilo = {
     ...(rando === undefined ? { top: supro } : {}),
     "--nr-g-art": artKoloro(anschluss.art, hex),
@@ -119,7 +135,14 @@ export function Anschluss({ port, supro, hex, rando, tenilo }: AnschlussProps) {
       isConnectableEnd={!el}
       className="nr-g-anschluss"
       style={stilo}
-      onMouseDown={ena === undefined ? undefined : (evento) => prenuLigon(ena.id, evento)}
+      onMouseDown={
+        enaj.length === 0
+          ? undefined
+          : (evento) => {
+              const id = ena ?? elektitaLigo(enaj);
+              if (id !== undefined) prenuLigon(id, evento);
+            }
+      }
       data-nr-anschluss={tenilo ?? port}
       data-nr-art={anschluss.art}
       data-nr-plena={plena ? "" : undefined}

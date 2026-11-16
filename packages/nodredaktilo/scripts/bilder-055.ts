@@ -302,7 +302,7 @@ async function geometrie(seite: Page): Promise<Geometrie> {
         continue;
       }
       geprueft++;
-      if (!/[QA]/.test(pfad.getAttribute("d") ?? "")) ohneRundung.push(id);
+      if (!/[QAC]/.test(pfad.getAttribute("d") ?? "")) ohneRundung.push(id);
     }
     return {
       knoten: boxen.length,
@@ -415,7 +415,7 @@ async function lauf(browser: Browser, basis: string, ordner: string): Promise<vo
     pruefe(
       geo.ohneRundung.length === 0,
       "D-19",
-      `jede Kante mit Knick hat Q oder A (${geo.ohneRundung.join(", ")})`,
+      `jede Kante mit Knick hat Q, A oder C (${geo.ohneRundung.join(", ")})`,
     );
     pruefe(
       geo.geprueft + geo.gerade.length === geo.kanten,

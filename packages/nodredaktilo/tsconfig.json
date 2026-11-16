@@ -9,7 +9,8 @@
     "noEmit": true,
     "paths": {
       "@fundamento/metiejo/grafeo": ["../metiejo/src/grafeo-sicht.ts"],
-      "@fundamento/metiejo/gestalten": ["../metiejo/src/grafeo-gestalten-sicht.ts"]
+      "@fundamento/metiejo/gestalten": ["../metiejo/src/grafeo-gestalten-sicht.ts"],
+      "@fundamento/metiejo/enhavo": ["../metiejo/src/leinwand-enhavo.ts"]
     }
   },
   "include": ["src", "scripts", "vite.config.ts"]

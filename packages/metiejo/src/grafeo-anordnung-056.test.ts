@@ -75,7 +75,7 @@ describe("Spec 056 T1: ARANGXO_056 (plan §2.3, D-16)", () => {
     expect(tabelo).toEqual({
       ...Object.fromEntries(
         Object.entries(ARANGXO_055.nodoj).map(([id, p]) => {
-          const alteco = id === "marko" ? 360 : altecoDe(id);
+          const alteco = id === "marko" ? 480 : altecoDe(id);
           return [id, [p.x, p.y, p.largxo, alteco, p.y + alteco]];
         }),
       ),
@@ -87,7 +87,7 @@ describe("Spec 056 T1: ARANGXO_056 (plan §2.3, D-16)", () => {
       "teksto-persoenlichkeit": [-350, 740, 280, 172, 912],
       "teksto-tonalitaet": [-350, 930, 280, 300, 1230],
       beispiele: [24, -656, 300, 640, -16],
-      marko: [24, 48, 190, 360, 408],
+      marko: [24, 48, 190, 480, 528],
       schrift: [700, 562, 316, 360, 922],
     });
     expect(ARANGXO_056.weitereVorschauen).toEqual(ARANGXO_055.weitereVorschauen);

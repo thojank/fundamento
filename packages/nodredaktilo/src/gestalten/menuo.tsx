@@ -5,9 +5,13 @@
 // the canvas, so they read „auf der Leinwand“ and nothing creates them here any more. A selection
 // closes the list (the canvas does the rest); Esc or a press outside the list and its trigger closes
 // it too.
+// Spec 056 (T2, plan D-24): the list is `aldonebloj(KATALOGO_056, …)`. Under „Eingabe“ the text
+// nodes and Beispiele, under „Gestalt“ Schrift: a node not on the canvas reads „anlegen“ and can be
+// selected (the canvas adds it at its slot), one on the canvas reads „auf der Leinwand“; the three
+// fixed text nodes always read „auf der Leinwand“.
 
 import type { Aldoneblo, KatalogoGrupo } from "@fundamento/metiejo/gestalten";
-import { ALDON_ETIKEDOJ } from "@fundamento/metiejo/gestalten";
+import { ALDON_ETIKEDOJ, estasEnhavoId } from "@fundamento/metiejo/gestalten";
 import { useEffect, useRef } from "react";
 import { ROLOJ, useStilo } from "./roloj.js";
 import { ArtSigno } from "./sxelo.js";
@@ -54,8 +58,11 @@ export interface MenuoProps {
   fermi: () => void;
 }
 
-/** Whether an entry can be selected. */
-export const elektebla = (a: Aldoneblo): boolean => a.stato === "setzen" || a.stato === "weitere";
+/** Whether an entry can be selected (Spec 056: also „anlegen“ of a node of this run). */
+export const elektebla = (a: Aldoneblo): boolean =>
+  a.stato === "setzen" ||
+  a.stato === "weitere" ||
+  (a.stato === "anlegen" && a.nodo !== undefined && estasEnhavoId(a.nodo));
 
 export function Menuo({ aldonebloj, hexDe, elekti, fermi }: MenuoProps) {
   useStilo("menuo", STILO);
