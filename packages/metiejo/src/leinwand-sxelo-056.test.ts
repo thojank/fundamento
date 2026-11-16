@@ -438,11 +438,12 @@ describe("Spec 056 T2: the routes of the canvas with the new nodes", () => {
 // The route stubs and the size limit
 
 describe("Spec 056 T2: the route modules of the node tickets and the size limit (D-11, D-13)", () => {
-  it("the three stubs handle nothing and the own font adds no @font-face yet", async () => {
+  it("the three route modules leave a path of another route alone, and a brand without an own font adds no @font-face", async () => {
     const kunteksto = {} as VojoKunteksto;
     const peto = {} as Parameters<typeof beispieleVojoj>[1];
     const respondo = {} as Parameters<typeof beispieleVojoj>[2];
-    const url = new URL("http://127.0.0.1/api/marko/provo/beispiele");
+    // A path none of the three modules owns: each must answer `false` without touching the context.
+    const url = new URL("http://127.0.0.1/api/marko/provo/entwurf");
     const rezultoj = await Promise.all(
       [beispieleVojoj, tiparoVojoj, schriftdosierojVojoj].map((vojo) =>
         vojo(kunteksto, peto, respondo, "POST", url.pathname, url),

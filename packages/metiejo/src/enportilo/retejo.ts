@@ -18,6 +18,7 @@ import { coloursIn, type Herkunft, lineOf, type Trovo } from "./trovo.js";
 export type RetejoFetch = (url: string, init?: RequestInit) => Promise<Response>;
 
 const LIMIT = 2 * 1024 * 1024;
+export const RETEJO_TEMPOLIMO = 15_000; // Spec 056 D-10: the time limit of `text` (unchanged)
 const MAX_SHEETS = 10;
 const GENERIC = new Set([
   "serif",

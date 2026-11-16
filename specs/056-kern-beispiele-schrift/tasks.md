@@ -8,7 +8,7 @@ Acht Tickets, ein Strang (Spec: „höchstens 8 Tickets, ein PR“). Kein Ticket
 |---|---|---|---|---|
 | KBS-1.1 | T1 | Daten: Inhalte, gelöste Verbindungen, was bei der Marke ankommt, „Farbe folgt den Bildern“, Anordnung, Katalog, Schreibweg | – | erledigt |
 | KBS-2.1 | T2 | Hülle: Kurven, runde Anschlüsse, Marke-Knoten mit zwei Eingängen, Lösen/Stecken, Kopfleiste, Server-Verdrahtung, Platzhalter | 1.1 | erledigt |
-| KBS-3.1 | T3 | Die sieben Text-Knoten | 2.1 | offen |
+| KBS-3.1 | T3 | Die sieben Text-Knoten | 2.1 | fertig |
 | KBS-3.2 | T4 | Beispiele: Hochladen, Ziehen, Link, Vorschaubilder, Entfernen, nur Arbeitsordner | 2.1 | offen |
 | KBS-3.3 | T5 | Erkannt, „als Primär/Akzent übernehmen“, „Farbe folgt den Bildern“, Test Export/Paket | 2.1 | offen |
 | KBS-3.4 | T6 | Schrift: Katalog mit Suche und Filter, echte Schrift, Regler | 2.1 | offen |
@@ -155,51 +155,222 @@ Kein anderer Test aus 047/048/054/055 geändert.
 
 ### KBS-3.1 im Einzelnen
 
+Stand: fertig.
+
+- Platzhalter `nodredaktilo/src/gestalten/nodoj/teksto.tsx` ersetzt; aufgeteilt in `teksto.tsx` (`TekstoNodo`, Stile, Auswahl des Körpers, ein Ausgang `${id}.el` bei `supro={42}` außer Werte), `teksto-kampoj.tsx` (Freitext, einzeiliges Feld `fm-kampo`, „ד `fm-butono`, ruhige Zeile), `teksto-listoj.tsx` (Werte, Persönlichkeit, Wettbewerb), `teksto-tonalitaet.tsx` (sechs `fm-glitilo`).
+- Ausgangslage: ein Freitext, Hilfe als Platzhalter. Zielgruppe: drei beschriftete Freitexte (`ZIELGRUPPE_ETIKEDOJ`), Hilfe im Feld „Wer“. Markenkern: Zweck (Hilfe als Platzhalter) und Versprechen (`MARKENKERN_HINWEIS` als Platzhalter, keine Prüfung). Freitexte wachsen mit dem Text nach unten (Knoten wächst mit, kein Scrollen).
+- Werte: Enter im Feld `WERT_HINZUFUEGEN` → `wertAldoni`; jede Pille mit „ד und eigenem Anschluss `wertElirDe(w.id)` am rechten Knotenrand auf Höhe der Pille; bei fünf verschwindet das Feld, `FUENF_WERTE_SATZ` steht da; doppelt (Groß/klein egal) still abgelehnt; gelöste Pille blass und gestrichelt; leer: `TEKSTO_HILFOJ` als ruhige Zeile.
+- Persönlichkeit: wie Werte mit `eigenschaftAldoni`, ein Ausgang; Hilfe als Platzhalter des Felds; unter drei steht `EIGENSCHAFTEN_HINWEIS`, bei fünf `FUENF_EIGENSCHAFTEN_SATZ` und das Feld ist weg.
+- Wettbewerb: Zeilen Name + Adresse (wahlweise), nie geladen, nie geprüft; am Ende wartet immer eine leere Zeile; leere Zeilen werden nicht gespeichert (`enhavoDe`); „ד je gefüllter Zeile; Hilfe als ruhige Zeile solange leer (`estasMalplena`).
+- Tonalität: sechs Regler −2…2 mit Strichen, Mitte `TONALITAET_MITTE` als Zeile unter dem Regler; unberührt blass und ungesetzt; der Knoten bleibt leer, bis ein Regler gesetzt ist; ein Druck ohne Bewegung auf einen unberührten Regler setzt die Mitte; die Seite, zu der der Regler neigt, steht in Textfarbe.
+- Speichern: Tippen setzt den Inhalt nur im Speicher (`inhaltMeti(…, false)`, Marke folgt sofort); Verlassen eines Felds mit geändertem Text, Hinzufügen/Entfernen einer Pille oder Zeile und Loslassen eines Reglers schreiben (`konservi: true` → „gespeichert HH:MM“, Licht in die Marke).
+- **Tests zuerst** `packages/metiejo/src/teksto-knoten-056.test.ts` (9 Tests): Quellen nur mit Kontext (`inhaltDe`, `inhaltMeti`, `verbunden`, `markoGeloest`, `forigi`) und geteilten Regeln (`wertAldoni`, `eigenschaftAldoni`, `estasMalplena`, kein eigenes Kleinschreiben, keine 5), erlaubte Importe, kein `fetch`; jede Hilfe, Überschrift, Feldbeschriftung und jeder ruhige Satz aus den geteilten Konstanten (kein Literal); ein `Anschluss` je Wert `teksto-werte.el.<id>`; keine Farbliterale; kein Regelwort, kein R-12-Wort; HTTP: Zustand mit allen sieben Inhalten (inkl. 5 800 Zeichen Ausgangslage) übersteht PUT/GET unverändert, Marke trägt `markoEnhavoDe`.
+  - Erster Lauf vor der Umsetzung: 3 rot aus dem richtigen Grund (Kontext ohne `inhaltMeti`, keine geteilten Regeln aufgerufen, Konstanten nicht benutzt), 1 rot wegen eines Testfehlers (`kabloj` fehlte im PUT-Körper, korrigiert), 6 grün.
+  - **Eingepflanzte Fehler** für die zuerst grünen Gruppen (je rot gesehen, zurückgesetzt, `cmp` gleich): P1 `TekstoNodo` als `const`-Funktion → „exporting TekstoNodo“ rot; P2a `import type {} from "../datumoj.js"` → Import-Test rot; P2b `fetch("/api")` → derselbe Test rot; P4 Wert-Port als Literal `` `teksto-werte.el.${w.id}` `` → Port-Test rot; P5 Hex-Farbe in einem Kommentar → Farbliteral-Test rot; P6 Wort „Pflicht“ in einem Kommentar → Wort-Test rot; P7a Regler `"warm-kuehl": "kühl"` im PUT → HTTP-Test rot; P7b `geloest: ["teksto-werte.el.w2"]` im PUT → HTTP-Test rot (Marke-Inhalt).
+- **Läufe:** `FM_AUSGABE=knapp pnpm --filter @fundamento/metiejo test teksto-knoten-056 grafeo-literale-054 grafeo-urteil-054 grafeo-urteil-055 leinwand-enhavo-056 marko-enhavo-056` → 53 bestanden, 0 rot. `pnpm --filter @fundamento/nodredaktilo lint` und `build` grün; biome auf der neuen Testdatei grün. `leinwand-sxelo-056` hatte zwischendurch 1 rot in `beispiele-vojoj.ts` (KBS-3.2 in Arbeit, nicht diese Zone).
+- **Wortsuche** (R-12-Wort, Name des privaten Schriften-Repos, Erweiterungsschlüssel, zur Laufzeit aus `oldNames()`): 5 neue/ersetzte Dateien, 1 191 Zeilen: 0 / 0 / 0.
+- **Chromium** (eigenes Skript `/tmp/kbs31-smoke/smoke.mjs`, headless, 2100×1250, gebaute CLI, temporärer Arbeitsordner, freier Port): Ablauf 1 Schritte 1–4 und Ablauf 7 Schritte 1–3 bestanden, dazu fünf Werte/Satz/Feld weg, Entfernen mit stabilen Ids, Duplikat, alle vier angelegten Knoten, Wettbewerb-Zeilen, Persönlichkeit (Hinweis < 3, Satz bei 5), Tonalität (blass, sechs gesetzt, Mitte durch Druck, „dazwischen“), Neuladen behält alles, langer Text lässt den Knoten wachsen (122 → 311 px), Kästen disjunkt, keine Konsolenfehler. Ergebnis: alles ok.
+- **Gemessene Höhen** (übliche Inhalte, px bei Zoom 1, Maximum §2.3): Ausgangslage 122/172 (drei Sätze), Zielgruppe 259/264 (drei Felder mit je einem Satz), Wettbewerb 209/220 (drei Zeilen + leere Zeile), Markenkern 189/220 (je ein Satz), Werte 269/270 (fünf Werte + Satz), Persönlichkeit 145/172 (fünf), Tonalität 255/300 (sechs gesetzt), Marke 327/480. Im Laufe korrigiert im Knoten: Pillenabstand von `small` auf `xsmall` (Werte war 279), Platz unter jedem Regler für „dazwischen“ (überlappte die nächste Zeile).
+
 ### KBS-3.1: geänderte ältere Tests
+
+Keine.
 
 ### KBS-3.1: für den PR-Text
 
+- Die sieben Text-Knoten schreiben im Knoten selbst (Option A): Hilfe als Platzhalter oder ruhige Zeile, Werte mit eigenem Anschluss je Wert, Persönlichkeit als Marken, Wettbewerb als Zeilen, Tonalität mit sechs Reglern. Gespeichert wird beim Verlassen eines Felds, beim Setzen/Entfernen einer Marke und beim Loslassen eines Reglers.
+- Freitexte sind native `<textarea>` (Rollen der Belegung, `nodrag`/`nopan`): die Ero `fm-tekstareo` wächst nicht mit dem Text und steht nicht in `fm-elementoj.d.ts`.
+- Neuer Test `teksto-knoten-056` (Quellen + HTTP-Roundtrip aller sieben Inhalte).
+
 ### KBS-3.1: Befunde
+
+- Drei Wörter stehen ohne geteilte Konstante im Knoten: Wettbewerb „Name“ und „Adresse (wahlweise)“ (Wortlaut der Produktspezifikation, `teksto-listoj.tsx` `WETTBEWERB_ETIKEDOJ`) und das Zugangslabel „<Wert> entfernen“ des „ד. Vorschlag: in `grafeo-gestalten-sicht.ts` aufnehmen (eingefrorene Datei, nicht angefasst).
+- `fm-kampo` gibt das native `change` seines inneren Felds nicht nach außen (Shadow-DOM, nicht `composed`); „Feld verlassen“ wird darum aus `focusin`/`focusout` gelesen. Der Kommentar in `fm-elementoj.d.ts` (Ero feuert `change`) stimmt für das Verlassen nicht; der Farbknoten schreibt nur über Enter zuverlässig. Kein Eingriff (eingefroren).
+- Werte mit fünf Werten misst 269 von 270 px: knapp. Ein Font mit größerer Zeilenhöhe könnte das Maximum überschreiten; dann im Knoten den Satz kürzer setzen oder die Höhe in `ARANGXO_056` anheben (KBS-4.1).
+- Ein unberührter Regler lässt sich nur über Ziehen, Tastatur oder einen Druck auf die Mitte setzen (`fm-glitilo` meldet keinen Wert, der sich nicht ändert); der Druck wird über `pointerup` gelesen.
 
 ## KBS-3.2 (T4): Beispiele
 
 ### KBS-3.2 im Einzelnen
 
+Stand: fertig.
+
+- Server `packages/metiejo/src/beispiele-vojoj.ts` (Stub ersetzt):
+  - `POST /api/marko/:name/beispiele` mit `{filename, base64}` → 200 `{datei: {name, art, farben, satz?}}`; mit `{url}` → 200 `{datei}` oder 200 `{verweis: {adresse, satz}}`; 422 `{satz: "Diese Datei kann Fundamento nicht lesen"}` für eine unlesbare Datei (nichts gespeichert); 422 `{satz: "Diese Datei kann Fundamento nicht lesen. Sie ist größer als 24 MB."}` bei Überlauf von `korpoDe` (D-11); 422 `{satz: KEIN_BILD_SATZ}` für einen Text, der keine http(s)-Adresse ist (nichts abgerufen); 404 `{satz: "Diese Marke gibt es nicht."}`.
+  - `DELETE /api/marko/:name/beispiele/:datei` → 200 `{}`; 404 `{satz}` für unbekannte Marke, unbekannte Datei, einen Namen, den `safeFilename` ändert (Pfad, `..`, Leerzeichen), oder eine Endung, die Beispiele nicht nimmt (`.gitignore`, `.txt`).
+  - D-9: nur `.png .jpg .jpeg .webp .svg .pdf`, und die ersten Bytes müssen zur Endung passen (`artDeBajtoj`; SVG muss mit dem Wurzelelement beginnen). `legiMaterialon` läuft in `mkdtemp(tmpdir()/fm-beispiele-)` unter demselben Markennamen, ohne `tiparojRepo`/`deps`; nur bei Erfolg wird die Datei nach `marken/<name>/materialo/` kopiert (`.gitignore` `*`), das Temp-Verzeichnis wird immer entfernt.
+  - D-5: jede Farbe trägt `{hex, anteil, hell, bunt, leit}` aus `farbArtDe(hex, KREILO.unbunt)`. PNG/JPG/WebP: `anteil` = Flächenanteil des Enportilo; SVG/PDF: Häufigkeit der Füllung, umgerechnet in Prozent (0,1) aller Füllungen der Datei.
+  - D-10: eine Adresse wird einmal über `options.esploro.fetch` (sonst globales `fetch`) geholt: `redirect: "follow"`, `credentials: "omit"`, keine Kopfzeilen, `AbortSignal.timeout(RETEJO_TEMPOLIMO)`; Körper höchstens `dateiGrenzeDe(ANFRAGE_GRENZE)` (vorhandener Wert). Bild = `content-type: image/*` oder Bytes von PNG/JPG/WebP/SVG/PDF → weiter wie ein Upload (Name aus dem letzten Pfadteil, Endung nach den Bytes). Sonst, bei Fehlerstatus oder ohne Antwort → Verweis; `pin.it` und `*.pinterest.<tld>` → PINTEREST_SATZ, alles andere → KEIN_BILD_SATZ.
+- Browser `packages/nodredaktilo/src/gestalten/nodoj/beispiele.tsx` (Platzhalter ersetzt, `<Erkannt />` unverändert als Slot) und neu `gestalten/beispiele-datumoj.ts` (`beispielHochladen`, `beispielLigi`, `beispielForigi`, `materialoFonto`, reine Schritte `kunDosiero`, `senDosiero`, `kunVerweis`, `senVerweis`).
+  - Hilfe BEISPIELE_HILFE in der gestrichelten Ablagefläche; mehrere Dateien über „Hochladen“ (verstecktes `input type=file multiple`) oder durch Ziehen auf den Knoten, eine Anfrage je Datei nacheinander (eine Warteschlange auch über mehrere Aktionen); lesbare werden übernommen, jede unlesbare steht als „„name“: Satz.“ ruhig am Knoten.
+  - Quadratische Vorschaubilder in fünf Spalten (siehe Befund Höhe), PDF als Kachel mit Namen, fehlende Datei als „Datei fehlt“, je „×“ (`fm-butono`). Ein ersetztes Bild bekommt `?v=n`, damit der Browser nicht das alte zeigt. Der vorhandene Satz eines JPG/WebP ohne Browser steht unter der Fläche und im `title` des Bildes.
+  - Feld „Pinterest-Link oder Bildadresse“ (`fm-kampo kind=url`, Enter oder „+“), Verweise mit Adresse, Satz und „×“.
+  - Nach jedem Bild rein/raus und jeder geladenen Adresse: `inhaltMeti("beispiele", …, true)` und – nach dem Rendern des neuen Inhalts, über einen Effekt – `folgi("dateien", valoro)`. Ein Verweis rein/raus schreibt nur den Inhalt.
+  - Ausgang `beispiele.el` an der Unterkante (unverändert aus KBS-2.1).
+- Tests `packages/metiejo/src/beispiele-056.test.ts` (18): PNG/SVG/PDF mit Farben und Flags, `.gitignore`; JPG/JPEG/WebP ohne Browser (gespeichert, vorhandener Satz, `farben: []`); JPG mit Browser-Double; GIF, DOCX, WOFF2, kaputtes PNG, „kein PNG“, PNG-Bytes als `.svg/.pdf/.jpg/.webp`, ohne Endung, leerer Name → 422, nichts gespeichert, gleichnamige gute Datei unberührt, keine Schrift in `fontoj/`; kaputter Körper → 422; gleicher Name ersetzt; Pfad im Namen bleibt in `materialo/`; Überlauf → 422 mit TRO_GRANDA_SATZ; unbekannte Marke → 404; Bildadresse (mit und ohne Bildtyp), GIF-Adresse → 422; Pinterest (`www.pinterest.de`, `pin.it`) → Verweis mit PINTEREST_SATZ; andere Seite, 404, unerreichbar → KEIN_BILD_SATZ; kein Cookie, kein `authorization`, `credentials: "omit"`, `redirect: "follow"`, Signal; keine Web-Adresse → 422 ohne Abruf; DELETE, zweites DELETE, unbekannte Datei/Marke → 404; Traversal (`..%2F`, kodierte Punkte), `.gitignore`, `.txt`, `a b.png` → 404, nichts gelöscht.
+- Erster Lauf: 18 von 18 rot (Stub antwortet `false`, Anfragen fielen auf 404-HTML; der Überlauf-Test mit ECONNRESET, der Traversal-Test schon beim Anlegen von `notiz.txt`, weil `materialo/` fehlte). Für die drei Tests, deren erstes Rot nicht an ihrer Aussage hing, und für D-10 je ein gepflanzter Fehler, rot gesehen, zurückgesetzt, `cmp` gegen die Kopie gleich:
+  - F1 DELETE ohne `safeFilename`-/Endungsprüfung → Traversal-Test rot.
+  - F2 `legiMaterialon` direkt im Arbeitsordner (ohne Temp-Verzeichnis, D-9) → „unreadable file … good file untouched“ rot.
+  - F3 `headers: { cookie: "sesio=1" }` im Abruf → Adress-Test rot.
+  - F4 Überlauf antwortet nur NELEGEBLA_DOSIERO_SATZ → Überlauf-Test rot.
+- Läufe: `beispiele-056` 18/18; mit `leinwand-sxelo-056`, `src/enportilo/`, `grafeo-literale-054`, `grafeo-urteil-054/055`: alles grün bis auf den einen Stub-Test von KBS-2.1 (siehe Befunde). `pnpm --filter @fundamento/nodredaktilo lint` grün; metiejo: `tsc`/`biome` ohne Meldung in meinen Dateien (rot nur in `erkannt-056.test.ts`, `beispiele-eksporto-056.test.ts`, `teksto-knoten-056.test.ts` der Nachbarn und der alten Warnung `komponentoj.ts:42`). nodredaktilo-Build grün, `dist/leinwand.js` 803 020 B (gzip 210 720 B) mit dem Stand aller laufenden Tickets.
+- Chromium (eigenes Skript `/tmp/kbs32-smoke/smoke.mjs <repo> <aus>`, gebaute CLI, Temp-Arbeitsordner, freier Port, 2100×1250, keine Verbindung nach außen: Bildadresse von einem lokalen Server, Pinterest als `www.pinterest.invalid`): SMOKE OK – Ablauf 2 Schritte 1–2 (Knoten über „+ Knoten“, Kante von oben in die Marke, Ausgang an der Unterkante, drei Bilder gezogen → drei quadratische Vorschaubilder, drei POST nacheinander), mehrere mit einer unlesbaren (GIF benannt, nicht gespeichert; PDF als Kachel), „Hochladen“ mit gleichem Namen ersetzt, Schritt 5 (× entfernt Bild und Datei), Bildadresse geladen, Ablauf 3 (Pinterest-Verweis mit Satz), andere Seite als Verweis, Verweis-×, Neuladen behält alles, gelöschte Datei → „Datei fehlt“, keine Konsolenfehler (außer dem erwarteten 422 der GIF-Antwort), keine Warnung außer `fm-ikono`. Bilder in `/tmp/kbs32-smoke/bilder/`.
+- Höhe (gemessen, Flusseinheiten): zwölf Vorschaubilder + „Erkannt“ von KBS-3.3 mit acht Zeilen (258) + Zeile „Primär folgt …“: **601 / 640** (Kopf 31, Fläche 202, Hochladen 40, Link 44, Erkannt 258). Mit vier Spalten wie im Mockup waren es 640 / 640.
+- **Pinterest-Prüfung** (einmal, `curl` ohne Cookie, ohne Konto, ohne Anmeldung, am 16.11.2026): `https://www.pinterest.com/pinterest/official-news/` → 200 `text/html`, 1,68 MB. Die Seite nennt **ohne Anmeldung Bildadressen**: 156 verschiedene Adressen auf `i.pinimg.com` (Größen `236x`, `474x`, `736x`, `170x`, `originals` …), davon 155 im JSON des Skripts `<script id="__PWS_INITIAL_PROPS__">`, 23 als `<img src>` im ausgelieferten HTML, eine als `og:image`. Erwartung R-8 („liefert nichts“) trifft damit nicht zu. Gebaut wurde darauf nichts: eine Board-Adresse bleibt nach Spec ein Verweis mit dem Pinterest-Satz; eine einzelne `i.pinimg.com`-Bildadresse lädt wie jede Bildadresse.
+
 ### KBS-3.2: geänderte ältere Tests
+
+- Keine geändert. **Nötig, aber außerhalb meiner Zone (nicht angewandt):** `packages/metiejo/src/leinwand-sxelo-056.test.ts:441–453` (KBS-2.1) erwartet, dass `beispieleVojoj` einen `POST /api/marko/provo/beispiele` nicht behandelt (`[false, false, false]`). Mit der echten Route ist das falsch (sie wirft auf dem leeren Kontext-Double). Vorschlag: `beispieleVojoj` aus der Liste nehmen (`[tiparoVojoj, schriftdosierojVojoj]` → `[false, false]`) oder eine Adresse prüfen, die keine Route behandelt; KBS-3.4/3.5 trifft dasselbe.
 
 ### KBS-3.2: für den PR-Text
 
+- Neue Wege `POST /api/marko/:name/beispiele` und `DELETE /api/marko/:name/beispiele/:datei` in `beispiele-vojoj.ts`; Bilder nur in `marken/<name>/materialo/`, erst gelesen, dann abgelegt (Temp-Ordner, D-9).
+- Befund `packages/metiejo/src/enportilo/retejo.ts:21`: eine Zeile, `export const RETEJO_TEMPOLIMO = 15_000;` – benennt den vorhandenen Wert, den `text()` bei `retejo.ts:72` (`AbortSignal.timeout(15_000)`) schreibt; Wert unverändert, keine weitere Änderung in `enportilo/**`.
+- Keine neue Grenze, keine neue Zeit, keine neue Abhängigkeit: Größe über `dateiGrenzeDe(ANFRAGE_GRENZE)`, Zeit über `RETEJO_TEMPOLIMO`.
+- Ergebnis Pinterest-Link mit Fundstelle: siehe „im Einzelnen“.
+
 ### KBS-3.2: Befunde
+
+- **Pinterest liefert ohne Anmeldung Bildadressen** (R-8 widerlegt), Fundstelle `__PWS_INITIAL_PROPS__` und `<img src>`; nicht genutzt (kein Umgehen, Spec lässt Board = Verweis).
+- `retejo.ts:21` und `:72` tragen den Wert jetzt zweimal (eine Zeile war vorgegeben); wer ihn ändert, muss beide ändern. Aufräumvorschlag: `:72` auf `RETEJO_TEMPOLIMO` umstellen.
+- Höhe: vier Spalten wie im Mockup hätten mit „Erkannt“ genau 640 erreicht; fünf Spalten geben 601. Jeder Verweis kostet etwa 60 (Adresse und Satz in zwei Zeilen); mit zwölf Bildern, acht Farben und einem Verweis wächst der Knoten auf etwa 663 nach unten (nach Spec erlaubt, „wächst nach unten“; übliche Inhalte nennen keine Verweise).
+- Die Größe wird im Browser nicht vorab geprüft (das Bündel kennt `ANFRAGE_GRENZE` nicht); eine zu große Datei wird ganz als base64 gelesen und gesendet, der Server antwortet 422 mit dem Satz.
+- Ein Text, der keine http(s)-Adresse ist, wird nicht als Verweis gespeichert, sondern mit KEIN_BILD_SATZ am Knoten genannt (422).
+- Ein PDF mit passendem Kopf, aus dem der Enportilo nichts liest, wird gespeichert, ohne Farben und ohne Satz (der Enportilo meldet nichts).
+- Für KBS-3.3: `folgi("dateien")` wird nach dem Rendern des neuen Inhalts gerufen; mehrere Dateien in Folge können mehrere `folgi`-Läufe auslösen, React fasst gleichzeitige zusammen. `folgi` sollte `inhaltDe("beispiele")` zum Zeitpunkt des Schreibens lesen, sonst überschreibt ein später Lauf eine inzwischen hinzugekommene Datei.
+- Kein Kroniko-Eintrag für Upload/Entfernen (nicht verlangt).
 
 ## KBS-3.3 (T5): Erkannt, Übernehmen, Folgen, Export-Test
 
 ### KBS-3.3 im Einzelnen
 
+- [x] **Tests rot zuerst:** `erkannt-056.test.ts` (15 Tests) und `beispiele-eksporto-056.test.ts` (2 Tests) liefen gegen den Platzhalter rot: `primaerUebernehmen`/`akzentUebernehmen`/`folgoDe` fehlen, `folgi` schrieb nichts (Log leer), Quellen ohne Konstanten und Knöpfe. Grün beim ersten Lauf waren nur die Prüfung „keine Farbliterale“ (der Platzhalter hatte keine), die Einteilung der Testfarben und die Positivkontrolle des Exporttests → gepflanzte Fehler F1–F5 unten.
+- [x] **`gestalten/folgo.ts`** (ersetzt den Stub, Signatur von `folgi` unverändert). Alles, was eine Farbe aus den Beispielen schreibt, läuft hier durch, ein Lauf nach dem anderen (Warteschlange im Modul):
+  - `folgi(okazo, valoro)`: wartet einen Frame, liest den neuesten gerenderten Kontext und rechnet `folgeFarboDe` (Beispiele-Inhalt, Primär des Bildo `wert ?? hex`, `estasStartwert` = `stato === "startwert"`, `verbunden(beispiele.el)`, bei `"verlangt"` mit `verlangt: true`). Ohne gespeichertes `primaer` gilt D-8: `{folgt: true}` beim Startwert, sonst `{folgt: false}`. Reihenfolge nach tech R-12: erst die Farbe (`skribi({farbe:{rolle:"primaer",wert}})`), dann der Inhalt mit dem neuen `primaer` (`inhaltMeti("beispiele", …, true)`). Scheitert die Farbe, wird kein Zustand geschrieben. Den Zustand schreibt `folgi` nur, wenn sich `primaer` geändert hat. Gelesen wird der Inhalt im Augenblick des Schreibens, damit ein inzwischen hinzugekommenes Bild bleibt. Akzent folgt nie. Bei allen drei Anlässen (`dateien`, `gesteckt`, `verlangt`) läuft derselbe Weg; „folgen lassen“ = `verlangt` (D-6: `{folgt: true, seit: Leitfarbe}`, dann einmal die Regel).
+  - `primaerUebernehmen(hex, valoro)`: Farbe, dann `{folgt: false, zuletzt: hex}` (D-6).
+  - `akzentUebernehmen(farbo, valoro)`: `{farbe:{rolle:"akzent", wert, herkunft:{quelle, anteil}}}` (D-23). `quelle` = `pdf`, wenn die Datei mit dem größten Anteil dieser Farbe ein PDF ist, sonst `bild`. **Ohne `datei`** (siehe Befunde). Der Schreibweg ergänzt `merkmal` „Farbe <wert>“.
+  - `folgoDe(valoro)`: die Regel ohne Schreiben, für die Zeile unter „Erkannt“. `folgoValoroMeti(v)`: „Erkannt“ übergibt jeden gerenderten Kontext.
+- [x] **`nodoj/erkannt.tsx`** (Option A): Kopf „Erkannt“, bis acht Zeilen aus `erkanntDe` (größte zuerst). Jede Zeile ist ein echter `<button>` mit Farbfeld (Bildfarbe als `--nr-g-erkannt-farbo` aus den Daten), Hex-Wert, „hell/dunkel · bunt/unbunt“ aus den gespeicherten Flags, der Marke „Primär“ am Feld gleich Primär und dem Anteil in ganzen Prozent. Ein Klick klappt „als Primär übernehmen“ / „als Akzent übernehmen“ auf (`fm-butono`, `nodrag nopan`, immer nur eine Zeile offen). Darunter die Zeile aus `FOLGO_SAETZE[folgoDe(…).linio]`; „folgen lassen“ (`<button>`) erscheint bei „folgt-nicht“, solange `beispiele.el` verbunden ist (wie im Mockup: gelöst steht nur „Primär folgt nicht.“). Ohne gemessene Farbe steht nichts da, auch kein Kopf. Eine gescheiterte Übernahme zeigt `nelegebla.satz` oder `NE_KONSERVITA_SATZ`. Alle Sätze kommen aus den gemeinsamen Konstanten, kein Farbliteral, Stile nur `var(--fm-*)`/`ROLOJ`.
+- [x] **Maße:** Zeile 26 px, „Erkannt“ mit sieben Zeilen 232 px (acht ≈ 258 px), also kleiner als im Mockup (≈ 32 px je Zeile).
+- [x] **Läufe:** `erkannt-056` 15/15, `beispiele-eksporto-056` 2/2; `vitest run 056 grafeo-literale-054 055 054`: 375 bestanden, 0 rot. `pnpm --filter @fundamento/nodredaktilo lint` grün. In `metiejo` sind `tsc` und biome für meine Dateien grün; `biome check .` meldet nur die ältere Warnung `komponentoj.ts:42` und die Formatierung von `teksto-knoten-056.test.ts` (KBS-3.1, nicht meine Datei). Nodredaktilo-Build grün.
+- [x] **Gepflanzte Fehler** (jeweils rot gesehen, zurückgesetzt, `cmp` gleich mit der Sicherung in `/tmp/kbs33-backup`):
+  - F1: Kommentar `// #2f5bff` in `erkannt.tsx` → „carry no colour literal“ rot.
+  - F2: `datei: dateien[0]?.name` in der Akzent-`herkunft` von `folgo.ts` → Akzent-Test und Exporttest rot.
+  - F3: Dateiname in `merkmal` (`"aus " + name`) → Exporttest rot über die Namenssuche (`funde` mit 2 Dateien: `agordo.json`, `aspekto.json`).
+  - F4: Bytesuche im Test auf einen leeren Puffer → Positivkontrolle rot.
+  - F5: `GRAU` als bunte Farbe → Einteilungstest rot.
+- [x] **Chromium** (eigene Skripte `/tmp/kbs33-smoke/smoke.mjs` und `upload.mjs`, headless, 2100×1250, gebaute CLI, Temp-Arbeitsordner, freier Port):
+  - Zustand per PUT: ohne Beispiele nichts unter „Erkannt“. Danach sieben Felder (größte zuerst, Wert, Art, ganze Prozent), die Farbe des Felds berechnet `rgb(47, 91, 255)`.
+  - Ablauf 7.4: Beispiele lösen → Farbpunkte weg aus der Marke, Primär bleibt, „Primär folgt nicht.“ ohne Knopf.
+  - Stecken → `folgi("gesteckt")` → Primär blau „aus Material“, Feld trägt „Primär“, „Primär folgt den Beispielen.“, die Palette ändert sich.
+  - Ablauf 2.6: Klick klappt zwei Aktionen auf; „als Primär übernehmen“ → Orange „aus Material“, „Primär folgt nicht.“ + „folgen lassen“. Akzent übernommen → „aus Material“. Gleiche Farbe als Akzent und Primär geht, Grau als Primär geht. „folgen lassen“ → wieder blau. Alles ohne Neuladen; nach dem Neuladen derselbe Stand.
+  - Mit dem Hochladen von KBS-3.2 (Ablauf 2, Schritte 2–6): drei Bilder → blau wird Primär. Blaues Bild entfernt → Navy. Anderes Feld übernommen → folgt nicht, ein neues Bild ändert Primär nicht mehr.
+  - Keine Konsolenfehler. Bilder in `/tmp/kbs33-smoke/bilder/`.
+- [x] **Wortsuche** (R-12-Wort, Repo-Name, aus `oldNames()` zur Laufzeit) über die vier Dateien, 1 299 Zeilen: 0.
+
 ### KBS-3.3: geänderte ältere Tests
+
+Keine.
 
 ### KBS-3.3: für den PR-Text
 
+- „Erkannt“ im Beispiele-Knoten: bis acht Farbfelder mit Anteil, hell/dunkel, bunt/unbunt. Ein Klick klappt „als Primär übernehmen“ / „als Akzent übernehmen“ auf; „Primär“ steht am Feld gleich Primär. Die Zeile „Primär folgt den Beispielen.“ / „Primär folgt nicht.“ + „folgen lassen“ / „Keine bunte Farbe erkannt. Primär bleibt.“ kommt aus `folgeFarboDe`.
+- „Farbe folgt den Bildern“ (`gestalten/folgo.ts`): nach Hochladen, Entfernen, Stecken und „folgen lassen“; erst die Farbe, dann `zuletzt` im Leinwand-Zustand; alle Schreibvorgänge nacheinander.
+- Akzent aus „Erkannt“ trägt `herkunft {quelle, anteil}` **ohne Dateinamen**, damit kein Name aus `materialo/` in Agordo, Paket oder Export gerät (AK-4). Test `beispiele-eksporto-056`: drei Bilder, Primär gefolgt, Akzent übernommen, Speichern + alle Exportziele über HTTP; kein Name, kein Byte-Fenster der Bilder in einem Ergebnis; mit Positivkontrolle.
+
 ### KBS-3.3: Befunde
+
+- **Ohne `datei` im Akzent (Abweichung von der Form in D-23):** `zweitfarbe.herkunft` landet unverändert in `aspekto.json` des Pakets und in `agordo.json` (siehe Fixture `aspekto-dukolora`). Ein `datei` mit dem Namen aus `materialo/` bräche AK-4 („in keinem Export, keinem Paket, nie im Repo“). Gezeigt wird „aus Material“ trotzdem (`herkunft` ist gesetzt). Wer später den Dateinamen am Akzent zeigen will, braucht dafür einen anderen Ort als den Agordo.
+- **Übernommener Akzent kann den Export sperren:** Ein sehr satter Akzent (im Test `#2f5bff` als Zweitfarbe) bringt die vorhandene Prüfung der gleich schweren Palettenstufen dazu, den Export abzulehnen (Stufen 700/800 weichen um mehr als 0,02 in L ab). Die Leinwand urteilt nicht. Der Exporttest nimmt deshalb das Orange. Das ist das bestehende Verhalten jeder Zweitfarbe, nicht neu.
+- **„#2f5bff“ ist nach `farbArtDe` „hell“** (OKLCH L ≈ 0,55 > `dunkel_bis` 0,35). Das Beispiel in Ablauf 2.3 („#2f5bff · 34 % · dunkel · bunt“) nennt „dunkel“; die Einteilung stammt aus KBS-1.1 und kreilo.json und bleibt so, wie sie ist. Gehört in den Bericht.
+- **Frische des Kontexts:** `folgi` wartet einen Frame und liest dann den neuesten gerenderten Kontext (`folgoValoroMeti` aus „Erkannt“). KBS-3.2 ruft `folgi("dateien")` ohnehin erst nach dem Rendern auf; beides verträgt sich.
+- **D-8:** Die Vorgabe für `folgt` wird beim ersten Lauf von `folgi` gespeichert (meist beim ersten Bild), nicht beim Anlegen des Knotens. Ein Unterschied entsteht nur, wenn Primär zwischen Anlegen und erstem Bild von Hand geändert wird; dann folgt Primär nicht, wie gewollt.
+- **„folgen lassen“ bei gelöster Verbindung** ist nicht angeboten (Mockup); nach dem Stecken rechnet die Hülle ohnehin.
+- Die Aktionsknöpfe tragen `full-width`, erscheinen im Screenshot aber in Inhaltsbreite. Das ist eine Sache der Ero, in diesem Lauf nicht geändert.
 
 ## KBS-3.4 (T6): Schrift aus Fontsource
 
 ### KBS-3.4 im Einzelnen
 
+- [x] **Tests zuerst** `packages/metiejo/src/schrift-servilo-056.test.ts` (18 Tests, offline, `npm` als Double mit eigenem Tarball): Filter je Art (Anzahl aus `tiparoj.json`), leere Art = alle, Suche + Filter (`searchTiparoj` auf dem gefilterten Katalog), Treffer mit Familie/Art/Lizenz, kein Treffer → derselbe Satz wie die alte Route, unbekannte Art 422 `{feld, satz}`, unbekannte Marke 404 `{satz}`; ohne `art` fünf Anfragen der alten Route byte-gleich (sha256 vor der Änderung genommen, Stub aktiv; Handler und `tiparoj.json` gleich `6d34a75a`); `…/schriften` Form und Regler aus `reglerOf` (Bereich, Schritt, Wert); Überschrift/Text/Code und die drei Regler über POST `/leinwand` → rev+1 und in `…/schriften` sichtbar; Regler außerhalb → 422 `{feld: pfad, satz}`, rev unverändert; eigene Familie → „lizenziert, nicht enthalten“, `eigene: true`; `/api/tiparo/:id/css` mit `NpmDeps`-Double → zwei `@font-face` auf `/api/tiparo/:id/<datei>`, Datei mit `font/woff2`, zweiter Abruf aus dem Zwischenspeicher; nur Latin-woff2 aus dem Zwischenspeicher, sonst 404 `{satz}`; Familie ohne Latein → 200 leeres CSS, kein Abruf; ohne `npm` und offline ohne Zwischenspeicher → 503 `{satz: SCHRIFT_OFFLINE_SATZ}`; offline bleibt die Wahl gespeichert.
+- [x] **Erster Lauf:** 17 rot (Stub: 404, `anzahl` fehlt, 200 statt 422 …), 1 grün (kein Treffer, weil ohne `art` die alte Route antwortet). Danach 18/18.
+- [x] **Gepflanzte Fehler** (je rot gesehen, zurückgesetzt, `cmp` gegen Kopie): P1 Satz ohne Treffer um ein Wort geändert → „no hit“ rot; P2 Modul beantwortet auch Anfragen ohne `art` → Byte-Gleichheit rot (vier Prüfsummen weichen ab); P3 Lizenz im Treffer leer → „each hit names …“ rot (der erste Lauf dieses Tests war aus einem Testfehler rot: Leerzeichen im Pfad).
+- [x] **Route** `packages/metiejo/src/tiparo-vojoj.ts` (Stub ersetzt):
+  - `GET /api/marko/:name/tiparoj?q=&art=` nur mit `art`: `art` = Kategorie (`sans-serif`, `serif`, `monospace`, `display`, `handwriting`) oder ihr Etikett (Grotesk …), `""` = alle. Antwort `{treffer: [{id, family, license, category}], anzahl, satz?}`; mit Suchwort die Reihenfolge von `searchTiparoj` (höchstens 12), ohne Suchwort die ersten 12 der Art nach Namen; `satz` = der Satz des Studios. Unbekannte Art 422 `{feld: "art", satz}`, unbekannte Marke 404 `{satz}`. Ohne `art` → `false`, die alte Route antwortet.
+  - `GET /api/marko/:name/schriften` → `{rev, schriften: {display?, body?, code?: {familie, lizenz, tiparo?, eigene?}}, regler: [{pfad, etikedo, min, max, step, wert}]}`; `tiparo` = Fontsource-Id (über `source` und Familie), eigene Schrift (`redistributable: false`) → `lizenz: "lizenziert, nicht enthalten"`, `eigene: true`; `regler` = `ctx.regler` der Gruppe `schrift`, `wert` = `reglerValue`.
+  - `GET /api/tiparo/:id/css` → `fontFilesCss(family, files, "/api/tiparo/<id>")` aus `fetchFontFiles(id, options.npm)`; `GET /api/tiparo/:id/<id>-latin-<w>-normal.woff2` → Datei aus dem Zwischenspeicher. Ohne `npm` oder wenn `fetchFontFiles` wirft → 503 `{satz: SCHRIFT_OFFLINE_SATZ}`. Unbekannte Id oder Datei → 404 `{satz}`. Familie ohne `Latn` → 200 leeres CSS ohne Abruf.
+- [x] **Knoten** `packages/nodredaktilo/src/gestalten/nodoj/schrift.tsx` (Platzhalter ersetzt, Platz `<SchriftEigene />` unverändert), Abrufe in neuem `gestalten/tiparo-datumoj.ts`: Probe „Aa“ + zwei Zeilen (Überschrift-/Text-Schrift), je Rolle Überschrift/Text/Code ein Knopf mit Familie und daneben die Lizenz, beides in Mono; Klick klappt den Katalog im Knoten auf (Suchfeld `fm-kampo`, Art-Knöpfe Alle/Grotesk/Serif/Mono/Display/Handschrift, Trefferliste mit Familie, Art, Lizenz); ein Klick setzt über `skribi({schrift:{rolle, tiparo}})`, der Katalog klappt zu. Regler Größe/Skala/Gewicht (`fm-glitilo`), geschrieben beim Loslassen (`change`) über `skribi({regler})`; die Probe folgt schon beim Ziehen. Der Knoten liest `…/schriften` bei jeder Änderung des Bildo-rev neu (auch eine eigene Schrift von KBS-3.5 erscheint so). `@font-face` je gewählter Katalogschrift einmal über `/api/tiparo/:id/css`; 503 → Ersatzschrift und SCHRIFT_OFFLINE_SATZ (beim nächsten Öffnen neu gefragt). Leer (keine Schrift, keine eigene) → gestrichelt, „Aa“ in der Ersatzschrift (`--fm-font-family-display`).
+- [x] **Läufe:** `schrift-servilo-056` 18/18; `vitest run 054 055 056 047 048 tiparoj` 45 Dateien, 510 Tests grün (inkl. `grafeo-literale-054`, `leinwand-sxelo-056`). `pnpm --filter @fundamento/nodredaktilo lint` grün, Build grün; `pnpm --filter @fundamento/metiejo lint` grün (1 ältere Warnung `komponentoj.ts:42`).
+- [x] **Chromium** (`node /tmp/kbs34-smoke/smoke.mjs <repo> <aus>`, headless, 2100×1250, gebaute CLI, Temp-Arbeitsordner, freier Port, Zwischenspeicher in einem Temp-`XDG_CACHE_HOME`): Ablauf 4 Schritte 1–5 bestanden (Kante Schrift → Vorschau; leer gestrichelt; „frau“ + Serif → nur Serif, Fraunces mit Art und Lizenz; „Inter“; Aa und Zeile 1 in Fraunces, Zeile 2 in Inter, Fraunces 700 und Inter 400 geladen; Namen/Lizenzen in Mono; Vorschau mit Fraunces und Inter ohne Neuladen; Skala → Überschrift im Knoten 16,3 → 18,75 px und in der Vorschau 24 → 29 px). Dazu: kein Treffer → Satz des Studios; Code gesetzt; Chenla (ohne Latein) wählbar, keine Regel, Ersatzschrift, kein Offline-Satz; offline (Schrift-Route im Browser auf 503 gestellt) → Satz und Ersatzschrift, Wahl gespeichert; keine Konsolenfehler außer den vom Skript abgebrochenen CDN-Anfragen der Vorschau. **Netz:** Fontsource-Dateien kamen nur über die eigene Route `/api/tiparo/…` (Server liest npm über `defaultNpmDeps`); die 54 CDN-Anfragen der Vorschau hat das Skript abgebrochen, andere fremde Anfragen: 0.
+- [x] **Höhen** (§2.3, Höchsthöhe 360 bei zugeklapptem Katalog, mit dem eingeklappten Bereich von KBS-3.5): leer 338; zwei Schriften 321; Skala am Ende 324; alle drei Regler am Ende 346; Katalog offen 460 (darf wachsen). Kein Höchstmaß geändert.
+- [x] **Wortsuche** (R-12-Wort, Repo-Name, Erweiterungsschlüssel, zur Laufzeit aus `oldNames()`): vier Dateien, 1 453 Zeilen: 0.
+
 ### KBS-3.4: geänderte ältere Tests
+
+Keine.
 
 ### KBS-3.4: für den PR-Text
 
+- Schrift-Knoten: Fontsource-Katalog im Knoten (Suche, Filter nach Art), Überschrift/Text/Code, echte Schrift über die neue Route `/api/tiparo/:id/css` und `/:datei` (Dateien aus dem vorhandenen npm-Zwischenspeicher `fetchFontFiles`), Regler Größe/Skala/Gewicht über den Schreibweg der Leinwand.
+- `GET …/tiparoj` erhält den optionalen Parameter `art`; ohne ihn antwortet die alte Route byte-gleich (Test mit Prüfsummen).
+- Neu `GET /api/marko/:name/schriften` (D-21).
+- Die Vorschau lädt Fontsource-Schriften weiter vom CDN (`fontFaceCss`); zwei Wege für Schriftdateien bleiben (Befund).
+
 ### KBS-3.4: Befunde
+
+- **`fm-glitilo` hält einen Bereich von mindestens 1** (`eroj/dist/generated/fm-glitilo.js:711`: `max = Math.max(min + 1, max)`). Skala (1,125 bis 1,25) ließe sich so nicht einstellen (das Ero meldete `aria-valuemax="2.125"`). Der Knoten führt das Ero darum über die Schritte des Reglers (0 … n, Schritt 1) und rechnet den Wert selbst um. Gilt auch für jeden späteren Regler mit kleinem Bereich.
+- **Satz ohne Treffer doppelt:** Der Satz des Studios steht in `servilo.ts` inline. `tiparo-vojoj.ts` schreibt ihn gleichlautend als `keinTrefferSatzDe`; der Test hält beide gleich. Besser wäre eine geteilte Konstante (servilo.ts ist eingefroren).
+- **Zwei Wege für Schriftdateien:** Knoten über `/api/tiparo/…` (npm, Zwischenspeicher), Vorschau über das CDN (unverändert, Nicht-Ziel). Der npm-Weg liefert nur Latin 400/700 (`wantedFiles`); andere Schnitte zeigt der Knoten synthetisch.
+- **Probe nebeneinander statt untereinander:** „Aa“ steht links neben den zwei Zeilen (Mockup: untereinander). Untereinander wuchs der Knoten mit dem Bereich von KBS-3.5 und den Reglern am Ende auf 412 (> 360).
+- **Texte nicht aus geteilten Konstanten:** die zwei Probezeilen des Mockups („Eine Marke, die bleibt.“, „Fließtext in der Grundgröße, …“), „Schrift wählen“, „Schrift suchen“, „Alle“, die Kurznamen „Größe“/„Gewicht“ (das Studio sagt „Schriftgröße“/„Schriftgewicht“, sie stehen als `title`/`aria-label`) und die drei Sätze für 404/422 der neuen Routen stehen lokal; keiner davon ist ein Satz der Produktspec.
+- **Größe in der Probe angenähert:** Der Knoten bildet `schrift.groesse` mit der aktuellen Skala statt mit dem Standardwert der Basis ab (die Antwort von `…/schriften` nennt den Standard nicht). Die Vorschau rechnet genau.
+- Der erste Abruf einer Schrift lädt das npm-Paket; bis dahin zeigt der Knoten die Ersatzschrift (tech R-6), ohne Zeitlimit.
 
 ## KBS-3.5 (T7): Eigene Schrift samt ZIP
 
 ### KBS-3.5 im Einzelnen
 
+- **Neu:** `packages/metiejo/src/tiparo-legi.ts` und `zip-legi.ts` (rein, nur `node:zlib`); Tests `tiparo-legi-056`, `zip-legi-056`, `schriftdosieroj-056`; `nodredaktilo/src/gestalten/schriftdosieroj-datumoj.ts`; Fixture `packages/metiejo/test/fixtures/valid/tiparo-056/` (D-26).
+- **Ersetzt:** `schriftdosieroj-vojoj.ts` (Stub), `nodoj/schrift-eigene.tsx` (Platzhalter). Signatur von `eigeneFontFace` und der Export `FONTOJ_DIR` bleiben.
+- **Wege:**
+  - `POST /api/marko/:name/schriftdateien {filename, base64}` → 200 `{familien: [{familie, dateien, fehlt}], uebergangen}`. Erst lesen, dann ablegen: alles wird gelesen, bevor etwas gespeichert wird. Danach gehen nur die Schriftdateien über `storeUpload` nach `fontoj/`, nie die ZIP-Datei. 422 `{satz: NELEGEBLA_DOSIERO_SATZ}` bei: kein Font, Endung passt nicht zu den Bytes, kaputte ZIP, eine kaputte Schrift in einer ZIP (dann gilt die ganze ZIP als unlesbar), andere Art, kaputtes JSON. 422 `{satz: ZIP_OHNE_SCHRIFT_SATZ}` bei einer ZIP ohne Schrift. Zu großer Rumpf → 422 mit `TRO_GRANDA_SATZ`. Unbekannte Marke → 404 `{satz}`.
+  - `GET /marko/:name/fontoj/:datei`: nur eine Schriftdatei aus `fontoj/` dieser Marke, `font/woff2|woff|ttf|otf`, `nosniff`, `no-store`; sonst die schlichte 404-Seite.
+  - `POST /api/marko/:name/schrift-privat {familie, bestaetigt?}`. Ohne `FM_TIPAROJ_REPO`: `{satz: privataState.sentence}`. Mit Variable und ohne `bestaetigt`: `{satz: <Satz „nach deiner Bestätigung“ aus privataState>, frage: true}`, kein Push. Mit `bestaetigt: true`: `uploadFont` für jede Datei der Familie; der erste „Kein Push: …“-Satz beendet den Vorgang, sonst werden die Sätze verbunden. Gibt es die Familie hier nicht, kommt der vorhandene Studio-Satz „Kein Push: Es liegt keine Datei zum Hochladen bereit.“
+  - `eigeneFontFace`: Ohne eine Schrift mit `redistributable: false` im Agordo gibt es `""`, noch bevor der Kontext berührt wird (`leinwand-sxelo-056.test.ts:452` unverändert grün). Sonst gibt es je Datei einer gesetzten Familie in `fontoj/` eine `@font-face`-Regel auf `/marko/:name/fontoj/<datei>`; das Gelesene bleibt je Datei (Größe, mtime) im Speicher.
+- **Leser:** `name` (16 → 1, 17 → 2; Windows Englisch vor Windows/Unicode vor Mac Roman), `OS/2` (`usWeightClass`, `fsSelection` Bit 0), `fvar` (Achse `wght` → `variabel`, `gewicht`…`gewichtBis`). TTF/OTF direkt (beide Endungen nehmen beide Sfnt-Formen), WOFF mit `inflateSync`, WOFF2 mit `brotliDecompressSync` samt eigenem Verzeichnisleser (bekannte Tags, UIntBase128, transformierte Längen). **WOFF2 wird aus den Tabellen gelesen**, ein Rückfall auf den Dateinamen war für die Fixture nicht nötig. Rückfall (`quelle: "dateiname"`) nur, wenn die Bytes zwar ein Font sind, die Tabellen sich aber nicht lesen lassen. „Was fehlt“ wird an Regular, Bold und Italic gemessen; die Sätze kommen aus `schnitteSatzDe`, `variabelSatzDe` und `AUS_DATEINAME`.
+- **ZIP:** Was geht: Verfahren 0 und 8 mit Prüfung von CRC und Größe; `__MACOSX/`, versteckte Dateien und Ordner sowie Ordner werden still übergangen, andere Dateien gezählt (`uebergangenSatzDe`). Was abgelehnt wird: kaputte Datei, kein Endsatz, falsche CRC, Größe stimmt nicht, verschlüsselt (Bit 0 oder 6), ZIP64 (Locator oder 32-Bit-Feld = 0xFFFFFFFF), mehrere Disks, ein anderes Verfahren (auch bei Nicht-Schrift-Einträgen), ein Eintrag über `dateiGrenzeDe(ANFRAGE_GRENZE)` (laut Kopf oder per `maxOutputLength`, D-12).
+- **Knoten:** Ein echter `<button>` „Eigene Schrift hochladen“ (`aria-expanded`) klappt im Knoten auf: die vier Sätze wörtlich aus `EIGENE_SCHRIFT_SAETZE`, „Dateien wählen“ (mehrere, `.woff2,.woff,.ttf,.otf,.zip`, eine Anfrage je Datei nacheinander), ruhige Meldungen. Je Familie: der Name in der eigenen Schrift, die Marke „lizenziert, privat“ (`fm-insigno`), der Satz zu den Schnitten, „Datei fehlt: …“ für fehlende Dateien, „als Überschrift setzen“ und „als Text setzen“ (`skribi({schrift:{rolle, eigene}})`), „Ins private Repo legen“, danach „Bestätigen“ oder „Abbrechen“, wenn der Server fragt. Die Dateien werden als `FontFace` des Dokuments registriert, so dass das „Aa“ von KBS-3.4 ohne Neuladen in der eigenen Schrift steht.
+- **Testschrift (D-26):** `@fontsource/lato@5.3.0` (OFL-1.1), einmal geholt mit `npm pack` nach `/tmp`; Hashes in `HERKUNFT.md`. `git check-ignore -v` auf Ordner und Dateien: kein Treffer (exit 1). `check:privat --fixture` auf einem Temp-Git mit Fixture und allen neuen Dateien: PASS, 15 Dateien, 0 Treffer. Die Tests laufen offline.
+- **Tests:** `tiparo-legi-056` 13, `zip-legi-056` 6, `schriftdosieroj-056` 15, alle grün. Zusammen mit `leinwand-sxelo-056 privata grafeo-literale-054 grafeo-urteil-054 grafeo-urteil-055`: 73 bestanden, 0 rot. Lint beider Pakete grün (metiejo nur mit der alten Warnung `komponentoj.ts:42`). Erster Lauf: 16 und 14 rot aus dem richtigen Grund (Stub bzw. Route fehlt).
+- **Eingesetzte Fehler** (für Tests, die beim ersten Lauf grün waren; jeder rot gesehen, zurückgenommen, `cmp` bestätigt):
+  - P1: Endungsprüfung in `tiparoLegi` entfernt → „no font“ rot.
+  - P2: CRC- und Größenprüfung in `zipLegi` entfernt → „broken“ rot.
+  - P3: Prüfung auf Verschlüsselung entfernt → rot.
+  - P4: ZIP64-Prüfung entfernt → **blieb grün**. Der Testfall wurde schon an anderer Stelle abgefangen. Der Test baut jetzt einen echten ZIP64-Locator und einen Eintrag mit 0xFFFFFFFF; danach P4a (Locator-Prüfung entfernt) und P4b (64-Bit-Größe angenommen) jeweils rot.
+  - P5: anderes Verfahren angenommen → rot.
+  - P6: `eigeneFontFace` berührt zuerst den Kontext → rot.
+- **Chromium (Ablauf 5):** `node /tmp/kbs35-smoke/smoke.mjs <repo> <out>` (2100×1250, gebaute CLI, Temp-Arbeitsordner, freier Port) ergibt SMOKE OK. Geprüft: die vier Sätze, eine unlesbare Datei ruhig benannt und nicht gespeichert, ZIP → „Gefunden: Regular 400, Bold 700. Es fehlt: Italic.“ plus „1 andere Datei übergangen.“, nur die zwei woff2 in `fontoj/`. „als Überschrift setzen“ → „Aa“ in Lato (400 und 700 geladen), Knoten nennt „lizenziert, nicht enthalten“. **Beide Vorschauen** haben `@font-face` auf `fontoj/`, laden Lato und zeigen die Überschriften in Lato. „Ins private Repo legen“ ohne Variable zeigt den vorhandenen Satz, ohne Bestätigung. Nach Neuladen ist die Familie da. Keine Konsolenfehler, keine Anfrage nach außen. Höhe des Knotens mit aufgeklapptem Upload und einer Familie: 694 px; der Knoten wächst nach unten wie bei offenem Katalog.
+
 ### KBS-3.5: geänderte ältere Tests
+
+Keine. `leinwand-sxelo-056.test.ts:452` bleibt wahr, ohne Änderung.
 
 ### KBS-3.5: für den PR-Text
 
+- Eigene Schrift: Dateien oder ZIP werden erst gelesen und dann abgelegt (`tiparo-legi.ts`, `zip-legi.ts`, nur `node:zlib`, keine Abhängigkeit). In `marken/<name>/fontoj/` landen nur die Schriftdateien. Der Knoten zeigt je Familie die erkannten Schnitte und was fehlt. Setzen geht über den Schreibweg der Leinwand („lizenziert, nicht enthalten“). Knoten und Vorschau zeigen die eigene Schrift (`eigeneFontFace` in `fontFaceOf`, `vorschau.ts` unverändert). „Ins private Repo legen“ nutzt nur `privataState`/`uploadFont` und pusht erst nach „Bestätigen“.
+- Neue Testschrift: `packages/metiejo/test/fixtures/valid/tiparo-056/` (Lato, OFL-1.1, Herkunft und Hashes in `HERKUNFT.md`, rund 140 KB).
+- Abweichung: `schrift-privat` nimmt zusätzlich `bestaetigt?: true` und antwortet vorher `{satz, frage: true}`. So läuft die Bestätigung der Spezifikation über den Server, und ohne Variable zeigt der Knoten den Satz sofort.
+
 ### KBS-3.5: Befunde
+
+- **ZIP:** Es gibt keine Grenze für die Summe der Einträge, nur je Eintrag `dateiGrenzeDe(ANFRAGE_GRENZE)` (D-12). Eine ZIP mit vielen großen Einträgen kann ein Vielfaches von 24 MiB entpacken. Das entscheidet der Maintainer.
+- Dieselbe Je-Datei-Grenze begrenzt auch das Entpacken der Tabellen von WOFF und WOFF2 (keine neue Zahl). Ein darüber entpackender Font wird über den Dateinamen gelesen.
+- Ein anderes Verfahren oder Verschlüsselung macht die ganze ZIP unlesbar, auch wenn es nur einen Nicht-Schrift-Eintrag betrifft (Wortlaut der Spezifikation).
+- Rückfall über den Dateinamen: Steht „Variable“ im Namen, wird als Bereich 100 bis 900 angenommen (CSS-Bereich), weil der Name keinen Bereich nennt. Der Vermerk „aus dem Dateinamen“ steht dabei.
+- Die Sätze zu den Schnitten gibt es zweimal, in `tiparo-legi.ts` und `schriftdosieroj-datumoj.ts`, weil das Browser-Bündel `node:zlib` nicht einbinden kann. `schriftdosieroj-056` prüft über eine Temp-Kopie, dass beide gleich rechnen.
+- Neue UI-Wörter ohne gemeinsame Konstante: „Dateien wählen“ und „lizenziert, privat“ (beide aus dem Mockup), „Bestätigen“ und „Abbrechen“ (wie im Studio). Sie stehen lokal in `schrift-eigene.tsx`.
+- Upload und Push schreiben keinen Kroniko-Eintrag; das war nicht verlangt.
+- Der Studio-Satz „Kein Push: Es liegt keine Datei zum Hochladen bereit.“ steht inline in `servilo.ts` und ist deshalb in `schriftdosieroj-vojoj.ts` wörtlich kopiert. Ein Export wäre eine Zeile in einer eingefrorenen Datei; sie wurde nicht angewendet.
 
 ## KBS-4.1 (T8): Tests gesamt, Bilder, Bericht
 
