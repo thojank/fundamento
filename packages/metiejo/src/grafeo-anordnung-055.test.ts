@@ -121,7 +121,8 @@ describe("Spec 055 T1: ARANGXO_055 – absolute start places and maximum heights
       ]),
     );
     expect(tabelo).toEqual({
-      marko: [24, 48, 190, 72, 120],
+      // Spec 056 (D-16): altecoDe reads ARANGXO_056, which raises the Marke (was 72, bottom 120).
+      marko: [24, 48, 190, 360, 408],
       "farbo-primaer": [300, 24, 264, 190, 214],
       "farbo-neutral": [300, 252, 264, 300, 552],
       "farbo-akzent": [300, 570, 264, 190, 760],

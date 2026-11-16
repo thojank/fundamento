@@ -4,6 +4,10 @@
 // Spec 055 (MP-1b, T1): no phase frames any more – every item is a node at an absolute start place
 // (ARANGXO_055, with the maximum height of each node kind), every edge runs on its lane in the gap
 // between two columns, and the contracts of the canvas state and the Stände live here too.
+// Spec 056 (MP-2a, T1): the text nodes, Beispiele and Schrift – their ids, ports and contents in
+// the canvas state, what arrives at the Marke, the follow rule's types, ARANGXO_056, KATALOGO_056,
+// the new changes of the write path and the sentences of the new nodes. The rules on contents live
+// in leinwand-enhavo.ts, which imports only this module.
 // Like grafeo-sicht.ts this module has no import at all – not even a type – so the browser bundle
 // of @fundamento/nodredaktilo takes it through an alias (047 D-2). Pure and deterministic: no
 // clock, no randomness, no storage; outputs follow fixed orders.
@@ -11,8 +15,12 @@
 // ---------------------------------------------------------------------------------------------
 // Data model (tech spec „Datenmodell der Ansicht Gestalten“)
 
-/** The kind of a port; only ports of the same kind connect. MP-1 uses farbo, mezuro and marko. */
-export type Anschlussart = "teksto" | "farbo" | "tiparo" | "mezuro" | "marko";
+/**
+ * The kind of a port; only ports of the same kind connect. MP-1 uses farbo, mezuro and marko;
+ * Spec 056 adds teksto (text nodes → Marke), bildo (Beispiele → Marke) and tiparo (Schrift →
+ * previews, a fixed edge).
+ */
+export type Anschlussart = "teksto" | "farbo" | "tiparo" | "mezuro" | "marko" | "bildo";
 
 /** The sign of a catalog entry: a port kind, or a kind only the catalog shows (picture, KI). */
 export type Zeichen = Anschlussart | "bildo" | "ki";
@@ -60,6 +68,11 @@ export interface BildoMarko {
   id: "marko";
   speco: "marko";
   fazo: "fazo-4";
+  /**
+   * Spec 056 (Teil M): what arrives at the Marke from the canvas state (`markoEnhavoDe`); absent
+   * when nothing arrives or no state was given – then the node looks as before.
+   */
+  enhavo?: MarkoEnhavo;
 }
 
 export interface BildoFarbo {
@@ -165,28 +178,344 @@ export interface Bildo {
   ligoj: BildoLigo[];
 }
 
+/**
+ * Spec 056 (plan D-23): where an Akzent taken over from the Beispiele was found – the shape of the
+ * Agordo's `AgordoHerkunft` for an image or a PDF (restated: no import here). Without `merkmal` the
+ * write path names the colour, as the Enportilo does.
+ */
+export interface LeinwandHerkunft {
+  quelle: "bild" | "pdf";
+  datei?: string;
+  merkmal?: string;
+  anteil?: number;
+}
+
+/** Spec 056: the three font roles of the Agordo (`schriften.display|body|code`). */
+export type SchriftRolle = "display" | "body" | "code";
+
+/** Spec 056: the Schrift sliders the canvas writes (agordilo `reglerOf`, with their ranges). */
+export type SchriftPfad = "schrift.groesse" | "schrift.skala" | "schrift.gewicht";
+
 /** One change the canvas writes (`POST /api/marko/:name/leinwand`), exactly one per request. */
 export type LeinwandSxangxo =
-  | { farbe: { rolle: Exclude<FarboRolo, "neutral">; wert: string | null } }
+  | {
+      farbe: {
+        rolle: Exclude<FarboRolo, "neutral">;
+        wert: string | null;
+        /** Spec 056 (D-23): only for Akzent and only with the catalog argument of the write path. */
+        herkunft?: LeinwandHerkunft;
+      };
+    }
   | { toenung: number }
   | { stufe: { token: string; wert: string | null; schema?: Schema } }
   /** Spec 055 T3: the own Neutral colour (`neutral.farbe`); null goes back to the derivation. */
-  | { neutral: { farbe: string | null } };
+  | { neutral: { farbe: string | null } }
+  /** Spec 056 (D-23): a font of the catalog (Fontsource id) for one role, as the Studio sets it. */
+  | { schrift: { rolle: SchriftRolle; tiparo: string } }
+  /** Spec 056 (D-23): an own font by family name: „lizenziert, nicht enthalten“. */
+  | { schrift: { rolle: SchriftRolle; eigene: string } }
+  /** Spec 056 (D-23): one Schrift slider, within the range of `reglerOf`. */
+  | { regler: { pfad: SchriftPfad; wert: number } };
+
+// ---------------------------------------------------------------------------------------------
+// The nodes of Spec 056: ids, ports, contents (tech spec „Knoten“, „Inhalt je Knoten“)
+
+/** The topics of the text nodes, in the order of the process (product spec A). */
+export const TEKSTO_TEMOJ = [
+  "ausgangslage",
+  "zielgruppe",
+  "wettbewerb",
+  "markenkern",
+  "werte",
+  "persoenlichkeit",
+  "tonalitaet",
+] as const;
+
+export type TekstoTemo = (typeof TEKSTO_TEMOJ)[number];
+
+/** The id of a text node: `teksto-<thema>`. */
+export type TekstoId = `teksto-${TekstoTemo}`;
+
+/** The ids of the text nodes, in the order of the process. */
+export const TEKSTO_IDS: readonly TekstoId[] = TEKSTO_TEMOJ.map(
+  (temo): TekstoId => `teksto-${temo}`,
+);
+
+/** Every node that carries a content of Spec 056. */
+export type EnhavoId = TekstoId | "beispiele" | "schrift";
+
+/** On the canvas of every brand: Ausgangslage, Markenkern, Werte – never removable. */
+export const FIKSAJ_TEKSTOJ: readonly TekstoId[] = [
+  "teksto-ausgangslage",
+  "teksto-markenkern",
+  "teksto-werte",
+];
+
+/** The nodes „+ Knoten“ adds (at most one each), in the order of their slots in ARANGXO_056. */
+export const ALDONEBLAJ: readonly EnhavoId[] = [
+  "teksto-zielgruppe",
+  "teksto-wettbewerb",
+  "teksto-persoenlichkeit",
+  "teksto-tonalitaet",
+  "beispiele",
+  "schrift",
+];
+
+/** The nodes „Dazu“ at the Marke names, in this fixed order (product spec M). */
+export const DAZU_ORDO: readonly TekstoId[] = [
+  "teksto-ausgangslage",
+  "teksto-zielgruppe",
+  "teksto-wettbewerb",
+  "teksto-persoenlichkeit",
+  "teksto-tonalitaet",
+];
+
+/** Whether an id is a node with a content of Spec 056. */
+export function estasEnhavoId(id: string): id is EnhavoId {
+  return id === "beispiele" || id === "schrift" || (TEKSTO_IDS as readonly string[]).includes(id);
+}
+
+/** The `speco` an added node of Spec 056 carries in the canvas state; undefined for the others. */
+export function enhavoSpecoDe(id: string): "teksto" | "beispiele" | "schrift" | undefined {
+  if (id === "beispiele" || id === "schrift") return id;
+  return (TEKSTO_IDS as readonly string[]).includes(id) ? "teksto" : undefined;
+}
+
+/** The text input of the Marke (left): every text node and every value runs into it. */
+export const MARKO_TEKSTO_ENIR = "marko.en.teksto";
+/** The image input of the Marke (top): Beispiele runs into it. */
+export const MARKO_BILDO_ENIR = "marko.en.bildo";
+/** The output of Beispiele at its bottom edge. */
+export const BEISPIELE_ELIR = "beispiele.el";
+/** The output of Schrift: a fixed edge to every preview's Schrift input. */
+export const SCHRIFT_ELIR = "schrift.el";
+
+/** Werte and Persönlichkeit hold at most five entries (product spec A); value ids `w1` … `w5`. */
+export const WERTE_GRENZE = 5;
+
+const WERT_ID = /^w[1-5]$/;
+
+/** Whether a text is a value id (`w1` … `w5`). */
+export function estasWertId(id: string): boolean {
+  return WERT_ID.test(id);
+}
+
+/** The output of one value of Werte: `teksto-werte.el.<wertId>`. */
+export function wertElirDe(wertId: string): string {
+  return `teksto-werte.el.${wertId}`;
+}
+
+/** The Schrift input of a preview (every preview has one, also further ones). */
+export function vorschauTiparoEnir(vorschau: string): string {
+  return `${vorschau}.en.tiparo`;
+}
+
+/** The two inputs of the Marke take many edges (plan D-18); every other input at most one. */
+export function estasMarkoEnir(port: string): boolean {
+  return port === MARKO_TEKSTO_ENIR || port === MARKO_BILDO_ENIR;
+}
+
+/** The six sliders of Tonalität: two opposites each, -2 … 2, the middle „dazwischen“. */
+export const TONALITAET_PAROJ = [
+  { id: "foermlich-locker", links: "förmlich", rechts: "locker" },
+  { id: "sachlich-verspielt", links: "sachlich", rechts: "verspielt" },
+  { id: "ruhig-lebhaft", links: "ruhig", rechts: "lebhaft" },
+  { id: "bescheiden-bestimmt", links: "bescheiden", rechts: "bestimmt" },
+  { id: "klassisch-modern", links: "klassisch", rechts: "modern" },
+  { id: "warm-kuehl", links: "warm", rechts: "kühl" },
+] as const;
+
+export type TonalitaetParo = (typeof TONALITAET_PAROJ)[number]["id"];
+
+/** One value of Werte: its id stays when another value goes. */
+export interface Wert {
+  id: string;
+  text: string;
+}
+
+// The contents are type aliases, not interfaces: an alias of an object type fits
+// `LeinwandStatoKnoto.inhalt` (`Record<string, unknown>`), an interface would not.
+
+export type InhaltAusgangslage = {
+  text?: string;
+};
+
+export type InhaltZielgruppe = {
+  wer?: string;
+  sorge?: string;
+  vertrauen?: string;
+};
+
+/** One competitor: a name and/or an address (never fetched, never checked). */
+export interface WettbewerbZeile {
+  name?: string;
+  adresse?: string;
+}
+
+export type InhaltWettbewerb = {
+  liste?: WettbewerbZeile[];
+};
+
+export type InhaltMarkenkern = {
+  zweck?: string;
+  versprechen?: string;
+};
+
+export type InhaltWerte = {
+  werte?: Wert[];
+};
+
+export type InhaltPersoenlichkeit = {
+  eigenschaften?: string[];
+};
+
+/** Tonalität: -2 … 2 per pair; a missing pair is not set. */
+export type InhaltTonalitaet = Partial<Record<TonalitaetParo, number>>;
+
+/**
+ * A colour read from an image, with the flags the server computes once (plan D-5, `farbArtDe`):
+ * `hell` (lightness above `unbunt.dunkel_bis`), `bunt` (chroma from `unbunt.bunt_ab`), `leit`
+ * (colourful and below `unbunt.pastell_ab`: may become Primär). `anteil` in percent (0.1).
+ */
+export interface ErkanntaFarbo {
+  hex: string;
+  anteil: number;
+  hell: boolean;
+  bunt: boolean;
+  leit: boolean;
+}
+
+/** The formats Beispiele takes. */
+export const BEISPIELE_ARTOJ = ["png", "jpg", "webp", "svg", "pdf"] as const;
+
+export type BeispielArt = (typeof BEISPIELE_ARTOJ)[number];
+
+/**
+ * One image of Beispiele in the brand's work folder. `farben` empty or absent: not measured (JPG,
+ * WebP without the Enportilo's browser) – „Erkannt“ leaves it out. `fehlt` only in answers of
+ * `GET /api/leinwand` (the file is gone); never stored.
+ */
+export interface BeispielDosiero {
+  name: string;
+  art: BeispielArt;
+  farben?: ErkanntaFarbo[];
+  satz?: string;
+  fehlt?: true;
+}
+
+/** A link that gave no image, kept as a reference with its sentence. */
+export interface Verweis {
+  adresse: string;
+  satz?: string;
+}
+
+/**
+ * Whether Primär follows the Beispiele (plan D-6): `zuletzt` = the colour that last came from here,
+ * `seit` = the lead colour at the moment following was (re)enabled.
+ */
+export interface Primaer {
+  folgt: boolean;
+  zuletzt?: string;
+  seit?: string;
+}
+
+export type InhaltBeispiele = {
+  dateien?: BeispielDosiero[];
+  verweise?: Verweis[];
+  primaer?: Primaer;
+};
+
+/** One file of an own font, as the reader found it (`quelle`: its tables or its file name). */
+export interface SchriftDosiero {
+  name: string;
+  gewicht: number;
+  /** Only for a variable font: the upper end of its weight range (`gewicht` is the lower one). */
+  gewichtBis?: number;
+  stil: "normal" | "italic";
+  variabel: boolean;
+  quelle: "tabellen" | "dateiname";
+  /** Only in answers of `GET /api/leinwand`; never stored. */
+  fehlt?: true;
+}
+
+export interface EigeneSchrift {
+  familie: string;
+  dateien: SchriftDosiero[];
+}
+
+/** Schrift: only what is not in the Agordo (the choice and the sliders live there). */
+export type InhaltSchrift = {
+  eigene?: EigeneSchrift[];
+};
+
+/** The content of each node kind (`inhalt` in `leinwand.json`). */
+export interface InhaltMapo {
+  "teksto-ausgangslage": InhaltAusgangslage;
+  "teksto-zielgruppe": InhaltZielgruppe;
+  "teksto-wettbewerb": InhaltWettbewerb;
+  "teksto-markenkern": InhaltMarkenkern;
+  "teksto-werte": InhaltWerte;
+  "teksto-persoenlichkeit": InhaltPersoenlichkeit;
+  "teksto-tonalitaet": InhaltTonalitaet;
+  beispiele: InhaltBeispiele;
+  schrift: InhaltSchrift;
+}
+
+export type Inhalt = InhaltMapo[EnhavoId];
+
+/**
+ * What arrives at the Marke (tech spec „Was bei der Marke ankommt“): the Kern, the connected values
+ * in the order of Werte, the detected colours largest first, and the other connected nodes with a
+ * content. Empty parts are absent; {} = the node looks as before.
+ */
+export interface MarkoEnhavo {
+  kern?: { zweck?: string; versprechen?: string };
+  werte?: Wert[];
+  farben?: { hex: string; anteil: number }[];
+  dazu?: TekstoId[];
+}
+
+/** The line under „Erkannt“: follows, does not follow, or no colourful colour. */
+export type FolgoLinio = "folgt" | "folgt-nicht" | "keine-bunte";
+
+/** What the follow rule reads (plan D-7). */
+export interface FolgoEnigo {
+  /** `erkanntDe(…)` of the Beispiele. */
+  erkannt: readonly ErkanntaFarbo[];
+  /** The lead colour of the draft. */
+  leitfarbe: string;
+  /** Whether the lead colour is the start value of the brand. */
+  estasStartwert: boolean;
+  primaer: Primaer;
+  /** Whether the edge Beispiele → Marke stands (not detached). */
+  verbunden: boolean;
+  /** „folgen lassen“: following is switched on again first. */
+  verlangt?: boolean;
+}
+
+/** The answer of the follow rule: the colour to write (if any), the new state, the line. */
+export interface FolgoRezulto {
+  farbe?: string;
+  primaer: Primaer;
+  linio: FolgoLinio;
+}
 
 // ---------------------------------------------------------------------------------------------
 // Canvas state and Stände (Spec 055 T4, T5: contracts; the file and routes come with LNS-2.2/3.1)
 
 /**
  * One node of the canvas state (`marken/<name>/leinwand.json`). A fixed node carries `id`, `x`, `y`.
- * An added node (today only `vorschau-<n>`, n ≥ 3) carries `speco` and `schema` as well, a place
- * only once it has one (absent = its start slot), and `inhalt`, which 055 passes on unchanged
- * (reserved for Spec 056).
+ * An added node (`vorschau-<n>`, n ≥ 3; Spec 056: the four added text nodes, Beispiele, Schrift)
+ * carries `speco` (and a preview `schema`) as well, a place only once it has one (absent = its start
+ * slot), and `inhalt`. Spec 056: the three fixed text nodes carry `id`, a place only once they have
+ * one, and `inhalt`, without `speco`. A preview's `inhalt` is passed on unchanged; the content of a
+ * Spec 056 node is read by `enhavoDe`.
  */
 export interface LeinwandStatoKnoto {
   id: string;
   x?: number;
   y?: number;
-  speco?: "vorschau";
+  speco?: "vorschau" | "teksto" | "beispiele" | "schrift";
   schema?: Schema;
   inhalt?: Record<string, unknown>;
 }
@@ -197,6 +526,11 @@ export interface LeinwandStato {
   knoten: LeinwandStatoKnoto[];
   /** As `Bildo.kabloj`: only the rows that differ from the Agordo. */
   kabloj: Kabloj;
+  /**
+   * Spec 056 (plan D-19): the outputs whose edge into the Marke is detached
+   * (`"teksto-werte.el.w2"`, `"beispiele.el"`), sorted and unique; absent when none is.
+   */
+  geloest?: string[];
 }
 
 /**
@@ -281,6 +615,153 @@ export const NE_KONEKTITA_SATZ =
   "Nicht verbunden. Ziehe eine Verbindung von der Palette oder der Marke hierher.";
 
 // ---------------------------------------------------------------------------------------------
+// Spec 056: the sentences and words of the new nodes (product spec, verbatim; bold marks dropped)
+
+/** The title of each node of Spec 056. */
+export const ENHAVO_ETIKEDOJ: Readonly<Record<EnhavoId, string>> = {
+  "teksto-ausgangslage": "Ausgangslage",
+  "teksto-zielgruppe": "Zielgruppe",
+  "teksto-wettbewerb": "Wettbewerb",
+  "teksto-markenkern": "Markenkern",
+  "teksto-werte": "Werte",
+  "teksto-persoenlichkeit": "Persönlichkeit",
+  "teksto-tonalitaet": "Tonalität",
+  beispiele: "Beispiele",
+  schrift: "Schrift",
+};
+
+/** The calm help in an empty text node (product spec A, „aus den Vorlagen“); Tonalität has none. */
+export const TEKSTO_HILFOJ: Readonly<Partial<Record<TekstoId, string>>> = {
+  "teksto-ausgangslage": "Warum gibt es das? Wie sieht Erfolg in fünf Jahren aus?",
+  "teksto-zielgruppe": "Welche fünf Wörter würde ein Kunde über euch sagen?",
+  "teksto-wettbewerb": "Was würde der härteste Wettbewerber zugeben?",
+  "teksto-markenkern": "Was ändert sich für den Kunden?",
+  "teksto-werte": "Werte sind Entscheidungshilfen, keine Poster.",
+  "teksto-persoenlichkeit": "Wie wäre die Marke als Mensch?",
+};
+
+/** The three fields of Zielgruppe. */
+export const ZIELGRUPPE_ETIKEDOJ = {
+  wer: "Wer",
+  sorge: "Was sie sorgt",
+  vertrauen: "Was Vertrauen schafft",
+} as const;
+
+/** The two fields of Markenkern and the hint in them (a hint, no check). */
+export const MARKENKERN_ETIKEDOJ = { zweck: "Zweck", versprechen: "Versprechen" } as const;
+export const MARKENKERN_HINWEIS = "Ein bis drei Sätze";
+
+/** Werte: the field, and the calm sentence once five values stand. */
+export const WERT_HINZUFUEGEN = "Wert hinzufügen";
+export const FUENF_WERTE_SATZ = "Fünf Werte reichen. Werte sind Entscheidungshilfen, keine Poster.";
+
+/** Persönlichkeit: the line under three traits (no error) and the sentence at five. */
+export const EIGENSCHAFTEN_HINWEIS = "drei bis fünf Eigenschaften";
+export const FUENF_EIGENSCHAFTEN_SATZ = "Fünf Eigenschaften reichen.";
+
+/** Tonalität: the middle position of a slider. */
+export const TONALITAET_MITTE = "dazwischen";
+
+/** A node whose edge into the Marke is detached (product spec M). */
+export const NE_KONEKTITA_MARKO_SATZ = "Nicht verbunden. Ziehe eine Verbindung zur Marke.";
+
+/** The parts of the Marke node (product spec M). */
+export const MARKO_ETIKEDOJ = {
+  kern: "Kern",
+  werte: "Werte",
+  beispiele: "Beispiele",
+  dazu: "Dazu",
+} as const;
+
+/**
+ * The header notice (plan D-29): „1 Verbindung gelöst“ / „n Verbindungen gelöst“; the shell writes
+ * „ · “ and the button „zurücksetzen“ after it.
+ */
+export function geloestHinweisDe(nombro: number): string {
+  return nombro === 1 ? "1 Verbindung gelöst" : `${nombro} Verbindungen gelöst`;
+}
+
+/** Beispiele: upload, link, references (product spec B). */
+export const BEISPIELE_HILFE =
+  "Bilder hierher ziehen oder hochladen. PNG, JPG, WebP, SVG oder PDF, bis 24 MB je Datei.";
+export const HOCHLADEN = "Hochladen";
+export const LINK_FELD = "Pinterest-Link oder Bildadresse";
+export const PINTEREST_SATZ = "Bilder von Pinterest bitte herunterladen und hier hochladen";
+export const KEIN_BILD_SATZ = "Diese Adresse liefert kein Bild. Der Link bleibt als Verweis.";
+export const DATEI_FEHLT = "Datei fehlt";
+
+/** A file that does not read (images, font files, ZIP), and its addition above the size limit. */
+export const NELEGEBLA_DOSIERO_SATZ = "Diese Datei kann Fundamento nicht lesen";
+export const TRO_GRANDA_SATZ = "Sie ist größer als 24 MB.";
+
+/** „Erkannt“ (product spec B, M). */
+export const ERKANNT = "Erkannt";
+export const ALS_PRIMAER = "als Primär übernehmen";
+export const ALS_AKZENT = "als Akzent übernehmen";
+export const PRIMAER_MARKE = "Primär";
+export const FARB_ARTOJ = {
+  hell: "hell",
+  dunkel: "dunkel",
+  bunt: "bunt",
+  unbunt: "unbunt",
+} as const;
+export const FOLGO_SAETZE: Readonly<Record<FolgoLinio, string>> = {
+  folgt: "Primär folgt den Beispielen.",
+  "folgt-nicht": "Primär folgt nicht.",
+  "keine-bunte": "Keine bunte Farbe erkannt. Primär bleibt.",
+};
+export const FOLGEN_LASSEN = "folgen lassen";
+
+/** Schrift (product spec C). */
+export const SCHRIFT_AA = "Aa";
+export const SCHRIFT_ROLLEN_ETIKEDOJ: Readonly<Record<SchriftRolle, string>> = {
+  display: "Überschrift",
+  body: "Text",
+  code: "Code",
+};
+/** The kinds of the catalog filter → the `category` of data/tiparoj.json (plan D-22). */
+export const SCHRIFT_ARTOJ = [
+  { etikedo: "Grotesk", kategorio: "sans-serif" },
+  { etikedo: "Serif", kategorio: "serif" },
+  { etikedo: "Mono", kategorio: "monospace" },
+  { etikedo: "Display", kategorio: "display" },
+  { etikedo: "Handschrift", kategorio: "handwriting" },
+] as const;
+export const SCHRIFT_OFFLINE_SATZ = "Schrift wird geladen, sobald eine Verbindung besteht";
+export const EIGENE_SCHRIFT = "Eigene Schrift hochladen";
+/** The four sentences of „Eigene Schrift hochladen“, in this order. */
+export const EIGENE_SCHRIFT_SAETZE = [
+  "Lade die Schriftdateien hoch: WOFF2 (am besten), sonst WOFF, TTF oder OTF.",
+  "Entweder eine variable Schrift (eine Datei für alle Schnitte) oder je Schnitt eine Datei: mindestens Regular, sinnvoll dazu Bold und Italic.",
+  "Du kannst auch eine ZIP-Datei hochladen; Fundamento nimmt daraus die Schriftdateien und zeigt, welche Schnitte es gefunden hat.",
+  "Lizenzierte Schriften bleiben privat und gehen in keinen öffentlichen Export.",
+] as const;
+export const ALS_UEBERSCHRIFT = "als Überschrift setzen";
+export const ALS_TEXT = "als Text setzen";
+export const PRIVATES_REPO = "Ins private Repo legen";
+export const AUS_DATEINAME = "aus dem Dateinamen";
+export const ZIP_OHNE_SCHRIFT_SATZ = "In dieser ZIP-Datei sind keine Schriftdateien.";
+
+/** „1 andere Datei übergangen.“ / „3 andere Dateien übergangen.“ */
+export function uebergangenSatzDe(nombro: number): string {
+  return nombro === 1 ? "1 andere Datei übergangen." : `${nombro} andere Dateien übergangen.`;
+}
+
+/**
+ * The detected cuts and what is missing: „Gefunden: Regular 400, Bold 700. Es fehlt: Italic.“;
+ * without anything missing only the first sentence.
+ */
+export function schnitteSatzDe(gefunden: readonly string[], fehlt: readonly string[]): string {
+  const erste = `Gefunden: ${gefunden.join(", ")}.`;
+  return fehlt.length === 0 ? erste : `${erste} Es fehlt: ${fehlt.join(", ")}.`;
+}
+
+/** „Variable Schrift, Gewichte 100 bis 900.“ */
+export function variabelSatzDe(von: number, bis: number): string {
+  return `Variable Schrift, Gewichte ${von} bis ${bis}.`;
+}
+
+// ---------------------------------------------------------------------------------------------
 // Start places (Spec 055 T1, plan §2.2, D-2): absolute, from the mockup's startplaetze()
 
 export interface Pozicio {
@@ -347,36 +828,80 @@ export const ARANGXO_055 = {
   },
 } as const;
 
-const FIKSAJ = ARANGXO_055.nodoj as Readonly<Record<string, Platz>>;
+/** Spec 056: the kinds by maximum height – those of 055, each text node, Beispiele, Schrift. */
+export type AltecoSpeco056 = AltecoSpeco | TekstoId | "beispiele" | "schrift";
+
+/**
+ * Spec 056 (plan §2.3, D-16): every place of ARANGXO_055 unchanged plus the slots of the new nodes –
+ * one column of text nodes left of the Marke (its right edge −70, so every curve into the Marke's
+ * left input runs in the 94-px gap that no node covers), Beispiele left-aligned over the Marke (its
+ * bottom above Primär), Schrift under the Palette – and the maximum heights: those of 055, the Marke
+ * raised for what arrives at it (Kern, five values, colour dots, „Dazu“), one per new node. The
+ * heights hold for usual content (five values, six sliders, eight colours, twelve thumbnails, the
+ * catalog closed); a real height above its maximum is fixed in the node or by a larger gap, never
+ * by a smaller maximum (as 055 D-2). ARANGXO_055 itself stays as it is.
+ */
+export const ARANGXO_056 = {
+  nodoj: {
+    ...ARANGXO_055.nodoj,
+    "teksto-wettbewerb": { x: -350, y: -496, largxo: 280 },
+    "teksto-zielgruppe": { x: -350, y: -258, largxo: 280 },
+    "teksto-ausgangslage": { x: -350, y: 24, largxo: 280 },
+    "teksto-markenkern": { x: -350, y: 214, largxo: 280 },
+    "teksto-werte": { x: -350, y: 452, largxo: 280 },
+    "teksto-persoenlichkeit": { x: -350, y: 740, largxo: 280 },
+    "teksto-tonalitaet": { x: -350, y: 930, largxo: 280 },
+    beispiele: { x: 24, y: -656, largxo: 300 },
+    schrift: { x: 700, y: 562, largxo: 316 },
+  } satisfies Record<string, Platz>,
+  alteco: {
+    ...ARANGXO_055.alteco,
+    marko: 360,
+    "teksto-wettbewerb": 220,
+    "teksto-zielgruppe": 264,
+    "teksto-ausgangslage": 172,
+    "teksto-markenkern": 220,
+    "teksto-werte": 270,
+    "teksto-persoenlichkeit": 172,
+    "teksto-tonalitaet": 300,
+    beispiele: 640,
+    schrift: 360,
+  } satisfies Record<AltecoSpeco056, number>,
+  weitereVorschauen: ARANGXO_055.weitereVorschauen,
+} as const;
+
+const FIKSAJ = ARANGXO_056.nodoj as Readonly<Record<string, Platz>>;
 
 const isStatusNodo = (id: string): boolean => STATUS_ROLOJ.some((rolo) => id === `farbo-${rolo}`);
 const isWeitereVorschau = (id: string): boolean => id.startsWith("vorschau-") && !(id in FIKSAJ);
 
 /** The width a node starts with (the mockup's); 0 for an unknown id. */
 export function largxoDe(id: string): number {
-  return FIKSAJ[id]?.largxo ?? (isWeitereVorschau(id) ? ARANGXO_055.weitereVorschauen.largxo : 0);
+  return FIKSAJ[id]?.largxo ?? (isWeitereVorschau(id) ? ARANGXO_056.weitereVorschauen.largxo : 0);
 }
 
 /** The kind of a node by its maximum height; undefined for an unknown id. */
-export function altecoSpecoDe(id: string): AltecoSpeco | undefined {
+export function altecoSpecoDe(id: string): AltecoSpeco056 | undefined {
   if (id === "marko" || id === "paletro" || id === "farbo-neutral") return id;
   if (id === "farbo-primaer" || id === "farbo-akzent") return "farbo-granda";
   if (isStatusNodo(id)) return "farbo-kompakta";
   if (id.startsWith("vorschau-")) return "vorschau";
+  if (estasEnhavoId(id)) return id;
   return undefined;
 }
 
-/** The maximum height of a node (D-2); 0 for an unknown id. */
+/** The maximum height of a node (D-2, Spec 056 D-16); 0 for an unknown id. */
 export function altecoDe(id: string): number {
   const speco = altecoSpecoDe(id);
-  return speco === undefined ? 0 : ARANGXO_055.alteco[speco];
+  return speco === undefined ? 0 : ARANGXO_056.alteco[speco];
 }
 
 /**
  * The absolute places of the current nodes: a node in `verschoben` (moved in the session, or stored
- * with the canvas state) keeps that place; every fixed node gets its start place from ARANGXO_055;
- * further previews (`vorschau-*` beyond hell/dunkel) take the slots below the fixed ones in the
- * order they come. Entries for nodes that are gone drop out. An unknown id starts at the origin.
+ * with the canvas state) keeps that place; every fixed node – and (Spec 056) every node of „+
+ * Knoten“ – gets its start place from ARANGXO_056; further previews (`vorschau-*` beyond
+ * hell/dunkel) take the slots below the fixed ones in the order they come. Entries for nodes that
+ * are gone drop out. An unknown id starts at the origin.
  */
 export function poziciojKun(
   verschoben: ReadonlyMap<string, Pozicio>,
@@ -397,7 +922,7 @@ export function poziciojKun(
     if (moved !== undefined) out.set(id, { x: moved.x, y: moved.y });
     else if (platz !== undefined) out.set(id, { x: platz.x, y: platz.y });
     else if (weitere !== undefined) {
-      const { x, y, dy } = ARANGXO_055.weitereVorschauen;
+      const { x, y, dy } = ARANGXO_056.weitereVorschauen;
       out.set(id, { x, y: y + weitere * dy });
     } else out.set(id, { x: 0, y: 0 });
   }
@@ -418,12 +943,39 @@ export interface Anschluss {
 const isFarboRolo = (text: string): text is FarboRolo =>
   (FARBO_ROLOJ as readonly string[]).includes(text);
 
-/** Where a node stands in the flow Marke → Farbe → Palette → Vorschau; edges only go forward. */
-const RANGO: Readonly<Record<string, number>> = { marko: 0, farbo: 1, paletro: 2, vorschau: 3 };
+/**
+ * Where a node stands in the flow Marke → Farbe → Palette → Vorschau; edges only go forward. Spec
+ * 056: text nodes and Beispiele stand one stage before the Marke; Schrift has no stage at all (its
+ * edge to the previews is fixed, never drawn by hand).
+ */
+const RANGO: Readonly<Record<string, number>> = {
+  teksto: -1,
+  beispiele: -1,
+  marko: 0,
+  farbo: 1,
+  paletro: 2,
+  vorschau: 3,
+};
+
+/** The text nodes with one output of their own (Werte has one per value). */
+const TEKSTO_ELIR =
+  /^(teksto-(ausgangslage|zielgruppe|wettbewerb|markenkern|persoenlichkeit|tonalitaet))\.el$/;
 
 /** The node, direction and kind of a port id; undefined for anything that is no port. */
 export function anschlussDe(port: string): Anschluss | undefined {
   if (port === "marko.el") return { nodo: "marko", direkto: "el", art: "marko" };
+  // Spec 056: the two inputs of the Marke, the outputs of text nodes, values, Beispiele, Schrift.
+  if (port === MARKO_TEKSTO_ENIR) return { nodo: "marko", direkto: "en", art: "teksto" };
+  if (port === MARKO_BILDO_ENIR) return { nodo: "marko", direkto: "en", art: "bildo" };
+  if (port === BEISPIELE_ELIR) return { nodo: "beispiele", direkto: "el", art: "bildo" };
+  if (port === SCHRIFT_ELIR) return { nodo: "schrift", direkto: "el", art: "tiparo" };
+  const teksto = TEKSTO_ELIR.exec(port)?.[1];
+  if (teksto !== undefined) return { nodo: teksto, direkto: "el", art: "teksto" };
+  const wert = /^teksto-werte\.el\.(.+)$/.exec(port)?.[1];
+  if (wert !== undefined)
+    return estasWertId(wert) ? { nodo: "teksto-werte", direkto: "el", art: "teksto" } : undefined;
+  const tiparo = /^(vorschau-[a-z0-9-]+)\.en\.tiparo$/.exec(port)?.[1];
+  if (tiparo !== undefined) return { nodo: tiparo, direkto: "en", art: "tiparo" };
   if (port === "paletro.el") return { nodo: "paletro", direkto: "el", art: "marko" };
   // Spec 055 (D-18): the colour input at the top of Neutral, the end of the fixed edge from Primär.
   if (port === NEUTRAL_FARBO_ENIR) return { nodo: "farbo-neutral", direkto: "en", art: "farbo" };
@@ -545,7 +1097,8 @@ export interface LigoSitzung {
 
 /**
  * The edges of the session after a new Bildo: the Agordo's edges without the detached ones, then
- * the drawn ones, each replacing the edge at its input. An input carries at most one edge. Edges
+ * the drawn ones, each replacing the edge at its input. An input carries at most one edge – except
+ * the two inputs of the Marke (Spec 056, D-18), which keep every edge (the same edge once). Edges
  * at nodes that exist neither in the Bildo nor in the session drop out, and so does a drawn edge
  * the rules refuse. A drawn colour edge carries the colour of its source node from the Bildo. To
  * keep an input empty after removing a drawn edge, the session also lists the Agordo's edge it
@@ -571,7 +1124,8 @@ export function ligojKun(sitzung: LigoSitzung, bildo: Bildo): BildoLigo[] {
     const ligo: BildoLigo = { id: ligoId(de, al), de, al, art: el.art };
     const hex = el.art === "farbo" ? hexDe.get(el.nodo) : undefined;
     if (hex !== undefined) ligo.hex = hex;
-    out = [...out.filter((l) => l.al !== al), ligo];
+    const multe = estasMarkoEnir(al);
+    out = [...out.filter((l) => (multe ? l.id !== ligo.id : l.al !== al)), ligo];
   }
   return out;
 }
@@ -778,9 +1332,44 @@ export const KATALOGO_054: readonly KatalogoEnskribo[] = [
 ];
 
 /**
+ * Spec 056 (plan D-24): the catalog with the nodes of this run. Under „Eingabe“ the Marke, then the
+ * text nodes and Beispiele in the order of the process; Schrift under „Gestalt“ is a real node now.
+ * The placeholders „Text“, „Werte“, „Tonalität“, „Material“ and „Wettbewerb“ of KATALOGO_054 go;
+ * every other entry stays as it is there. KATALOGO_054 itself stays as it is.
+ */
+export const KATALOGO_056: readonly KatalogoEnskribo[] = [
+  { grupo: "Eingabe", nomo: "Marke", zeichen: "marko", lauf: "MP-1", nodo: "marko" },
+  ...(
+    [
+      ["Ausgangslage", "teksto", "teksto-ausgangslage"],
+      ["Zielgruppe", "teksto", "teksto-zielgruppe"],
+      ["Wettbewerb", "teksto", "teksto-wettbewerb"],
+      ["Beispiele", "bildo", "beispiele"],
+      ["Markenkern", "teksto", "teksto-markenkern"],
+      ["Werte", "teksto", "teksto-werte"],
+      ["Persönlichkeit", "teksto", "teksto-persoenlichkeit"],
+      ["Tonalität", "teksto", "teksto-tonalitaet"],
+    ] as const
+  ).map(
+    ([nomo, zeichen, nodo]): KatalogoEnskribo => ({
+      grupo: "Eingabe",
+      nomo,
+      zeichen,
+      lauf: "MP-2",
+      nodo,
+    }),
+  ),
+  ...KATALOGO_054.filter((e) => e.grupo !== "Eingabe").map(
+    (e): KatalogoEnskribo =>
+      e.grupo === "Gestalt" && e.nomo === "Schrift" ? { ...e, lauf: "MP-2", nodo: "schrift" } : e,
+  ),
+];
+
+/**
  * The state of every catalog entry for the nodes on the canvas (Bildo and session): a
  * Funktionsfarbe not on the canvas → `anlegen`; Akzent while empty → `setzen`; the component
- * preview → `weitere`; any other MP-1 entry → `da`; every later run → `spaeter`.
+ * preview → `weitere`; any other MP-1 entry → `da`; every later run → `spaeter`. Spec 056: the
+ * three fixed text nodes → `da`; a node of „+ Knoten“ → `anlegen`, once on the canvas `da`.
  */
 export function aldonebloj(
   katalogo: readonly KatalogoEnskribo[],
@@ -789,7 +1378,11 @@ export function aldonebloj(
   const byId = new Map(nodoj.map((n) => [n.id, n] as const));
   return katalogo.map((enskribo): Aldoneblo => {
     let stato: AldonStato = "da";
-    if (enskribo.lauf !== "MP-1") stato = "spaeter";
+    const nodo = enskribo.nodo;
+    if (nodo !== undefined && estasEnhavoId(nodo)) {
+      if (!(FIKSAJ_TEKSTOJ as readonly string[]).includes(nodo))
+        stato = byId.has(nodo) ? "da" : "anlegen";
+    } else if (enskribo.lauf !== "MP-1") stato = "spaeter";
     else if (enskribo.nodo === "vorschau") stato = "weitere";
     else if (enskribo.nodo === "farbo-akzent") {
       const akzent = byId.get("farbo-akzent");
