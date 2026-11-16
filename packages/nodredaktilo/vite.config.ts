@@ -12,6 +12,9 @@ const grafeoSicht = fileURLToPath(new URL("../metiejo/src/grafeo-sicht.ts", impo
 const gestaltenSicht = fileURLToPath(
   new URL("../metiejo/src/grafeo-gestalten-sicht.ts", import.meta.url),
 );
+// Spec 056 (MP-2a, plan D-4): the rules on the contents of the new nodes, shared with the server;
+// its only import is the module above.
+const enhavo = fileURLToPath(new URL("../metiejo/src/leinwand-enhavo.ts", import.meta.url));
 
 // biome-ignore lint/style/noDefaultExport: Vite loads its config from the default export.
 export default defineConfig({
@@ -20,6 +23,7 @@ export default defineConfig({
     alias: {
       "@fundamento/metiejo/grafeo": grafeoSicht,
       "@fundamento/metiejo/gestalten": gestaltenSicht,
+      "@fundamento/metiejo/enhavo": enhavo,
     },
   },
   // Library mode leaves `process.env.NODE_ENV` in place; the browser has no `process`.

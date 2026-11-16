@@ -6,6 +6,10 @@
 // (`POST /api/marko/:name/leinwand` in servilo.ts) loads the draft, calls `leinwandSchreiben` and
 // writes the result with `setDraft`. The write path knows no `kabloj`: it always writes the stored
 // Agordo, never the effective view.
+// Spec 056 (MP-2a, T1, plan D-23): with the font catalog and the sliders as an optional fourth
+// argument it also sets a font of the catalog or an own font for heading, text or code, one of the
+// three Schrift sliders within its range, and Akzent with its origin (`zweitfarbe.herkunft`).
+// Without that argument it behaves exactly as before.
 
 import {
   type Agordo,
@@ -14,17 +18,23 @@ import {
   DERIVED_PALETTES,
   type DerivedPaletteName,
   parseAgordoColor,
+  type Regler,
   readAgordo,
+  withRegler,
   ZWEITFARBE_PALETTE,
   ZWEITFARBE_STEPS,
 } from "@fundamento/agordilo";
 import {
   type FarboRolo,
+  type LeinwandHerkunft,
   type LeinwandSxangxo,
   NELEGEBLA_SATZ,
   type Schema,
+  type SchriftPfad,
+  type SchriftRolle,
 } from "./grafeo-gestalten-sicht.js";
 import { hexOf } from "./sxtupoj.js";
+import { fontoOf, licencedFonto, type Tiparo } from "./tiparoj.js";
 
 // ---------------------------------------------------------------------------------------------
 // The calm sentences of a refusal (product spec: „ruhig am Feld, in neutraler Farbe, auf Deutsch“)
@@ -56,6 +66,27 @@ export type SkriboRezulto =
   | { speco: "ok"; agordo: Agordo }
   | { speco: "rifuzita"; feld: string; satz: string }
   | { speco: "malformita"; mesagxo: string };
+
+/**
+ * Spec 056 (D-23): what the write path needs for fonts and sliders – the font catalog
+ * (`readTiparoj().tiparoj`) and the sliders (`reglerOf(bases.gestalt)`). The route passes it.
+ */
+export interface SkriboKatalogo {
+  tiparoj: readonly Tiparo[];
+  regler: readonly Regler[];
+}
+
+/** Spec 056: a Schrift slider outside its range, in the manner of the Tönung sentence. */
+export function reglerSatzDe(regler: Pick<Regler, "label" | "min" | "max">): string {
+  return `„${regler.label}“ ist eine Zahl von ${regler.min} bis ${regler.max}.`;
+}
+
+const SCHRIFT_ROLLEN: readonly SchriftRolle[] = ["display", "body", "code"];
+const SCHRIFT_PFADE: readonly SchriftPfad[] = [
+  "schrift.groesse",
+  "schrift.skala",
+  "schrift.gewicht",
+];
 
 // ---------------------------------------------------------------------------------------------
 // Colours
@@ -153,6 +184,7 @@ function kunFarbo(
   agordo: Agordo,
   rolle: Exclude<FarboRolo, "neutral">,
   wert: string | null,
+  herkunft?: LeinwandHerkunft,
 ): Agordo {
   const next = structuredClone(agordo) as Agordo & Record<string, unknown>;
   if (rolle === "primaer") {
@@ -163,7 +195,14 @@ function kunFarbo(
   }
   if (rolle === "akzent") {
     if (wert === null) delete next.zweitfarbe;
-    else next.zweitfarbe = { farbe: wert };
+    else if (herkunft === undefined) next.zweitfarbe = { farbe: wert };
+    // Spec 056 (D-23): the origin as the Enportilo writes it; without a feature it names the
+    // colour (enportilo/zweitfarbe.ts: „Farbe <wert>“).
+    else
+      next.zweitfarbe = {
+        farbe: wert,
+        herkunft: { ...herkunft, merkmal: herkunft.merkmal ?? `Farbe ${wert}` },
+      };
     return next;
   }
   const zusatzfarben: Record<string, string> = { ...(next.zusatzfarben ?? {}) };
@@ -198,6 +237,18 @@ function kunToenung(agordo: Agordo, toenung: unknown): Agordo {
   return next as unknown as Agordo;
 }
 
+type Fonto = NonNullable<NonNullable<Agordo["schriften"]>["display"]>;
+
+/**
+ * Spec 056 (D-23): one font role, as the Studio's `schriftenOf` with `patched` merges it – the
+ * other roles stay.
+ */
+function kunSchrift(agordo: Agordo, rolle: SchriftRolle, fonto: Fonto): Agordo {
+  const next = structuredClone(agordo);
+  next.schriften = { ...(agordo.schriften ?? {}), [rolle]: fonto };
+  return next;
+}
+
 // ---------------------------------------------------------------------------------------------
 // The body
 
@@ -206,26 +257,104 @@ const isObjekto = (x: unknown): x is Record<string, unknown> =>
 
 type Legita = { speco: "ok"; sxangxo: LeinwandSxangxo } | { speco: "malformita"; mesagxo: string };
 
+const plena = (x: unknown): x is string => typeof x === "string" && x.trim() !== "";
+
+/**
+ * Spec 056 (D-23): the origin of an Akzent: `quelle` bild or pdf, optionally `merkmal` (a text)
+ * and `anteil` (a finite number), nothing else; undefined for any other shape. A `datei` makes it
+ * malformed: no file name from a request reaches the Agordo or an export (AK-4, QA run 1).
+ */
+function herkunftEl(roh: unknown): LeinwandHerkunft | undefined {
+  if (!isObjekto(roh) || (roh.quelle !== "bild" && roh.quelle !== "pdf")) return undefined;
+  if (Object.keys(roh).some((k) => !["quelle", "merkmal", "anteil"].includes(k))) return undefined;
+  const herkunft: LeinwandHerkunft = { quelle: roh.quelle };
+  if ("merkmal" in roh) {
+    if (!plena(roh.merkmal)) return undefined;
+    herkunft.merkmal = roh.merkmal;
+  }
+  if ("anteil" in roh) {
+    if (typeof roh.anteil !== "number" || !Number.isFinite(roh.anteil)) return undefined;
+    herkunft.anteil = roh.anteil;
+  }
+  return herkunft;
+}
+
+/** Spec 056 (D-23): `{schrift: {rolle, tiparo | eigene}}` and `{regler: {pfad, wert}}`. */
+function sxangxo056El(korpo: Record<string, unknown>): Legita | undefined {
+  const malformita = (mesagxo: string): Legita => ({ speco: "malformita", mesagxo });
+  if ("schrift" in korpo) {
+    const schrift = korpo.schrift;
+    const rolle = isObjekto(schrift) ? schrift.rolle : undefined;
+    if (!isObjekto(schrift) || !SCHRIFT_ROLLEN.includes(rolle as SchriftRolle))
+      return malformita("schrift needs rolle (display, body, code) and tiparo or eigene");
+    const kampoj = Object.keys(schrift).filter((k) => k !== "rolle");
+    const [kampo] = kampoj;
+    const wert = kampo === undefined ? undefined : schrift[kampo];
+    if (kampoj.length !== 1 || (kampo !== "tiparo" && kampo !== "eigene") || !plena(wert))
+      return malformita("schrift needs rolle (display, body, code) and tiparo or eigene");
+    const r = rolle as SchriftRolle;
+    return {
+      speco: "ok",
+      sxangxo:
+        kampo === "tiparo"
+          ? { schrift: { rolle: r, tiparo: wert } }
+          : { schrift: { rolle: r, eigene: wert } },
+    };
+  }
+  if ("regler" in korpo) {
+    const regler = korpo.regler;
+    const pfad = isObjekto(regler) ? regler.pfad : undefined;
+    const wert = isObjekto(regler) ? regler.wert : undefined;
+    if (
+      !SCHRIFT_PFADE.includes(pfad as SchriftPfad) ||
+      typeof wert !== "number" ||
+      !Number.isFinite(wert)
+    )
+      return malformita(
+        "regler needs pfad (schrift.groesse, schrift.skala, schrift.gewicht) and wert",
+      );
+    return { speco: "ok", sxangxo: { regler: { pfad: pfad as SchriftPfad, wert } } };
+  }
+  return undefined;
+}
+
 /**
  * The shape of the body: exactly one of `farbe`, `toenung`, `stufe`, `neutral`, with a known role,
  * a string token and a value that is a string or null; `neutral` carries `farbe` and nothing else
  * (Spec 055 T3). The values themselves are read afterwards (422);
  * `toenung` and `schema` are left as they came, so their bounds give a refusal with a field.
+ * Spec 056 (D-23), only with `kun056`: also `schrift` and `regler`, and `farbe.herkunft` for Akzent
+ * (any other role, or another shape, is malformed). Without it nothing of that is read.
  */
-export function sxangxoEl(korpo: unknown): Legita {
+export function sxangxoEl(korpo: unknown, kun056 = false): Legita {
   const malformita = (mesagxo: string): Legita => ({ speco: "malformita", mesagxo });
+  const ununura = kun056
+    ? "send exactly one change: farbe, toenung, stufe, neutral, schrift or regler"
+    : "send exactly one change: farbe, toenung, stufe or neutral";
   if (!isObjekto(korpo)) return malformita("the body is no JSON object");
   const sxlosiloj = Object.keys(korpo);
-  if (sxlosiloj.length !== 1)
-    return malformita("send exactly one change: farbe, toenung, stufe or neutral");
+  if (sxlosiloj.length !== 1) return malformita(ununura);
   const wertOk = (x: Record<string, unknown>): boolean =>
     "wert" in x && (x.wert === null || typeof x.wert === "string");
+  if (kun056) {
+    const legita = sxangxo056El(korpo);
+    if (legita !== undefined) return legita;
+  }
   if (isObjekto(korpo.farbe)) {
     const { rolle } = korpo.farbe;
     if (!FARBO_ROLLEN.includes(rolle as Exclude<FarboRolo, "neutral">) || !wertOk(korpo.farbe))
       return malformita(
         "farbe needs rolle (primaer, akzent, success, warning, danger, info) and wert",
       );
+    if (kun056 && "herkunft" in korpo.farbe) {
+      const herkunft = herkunftEl(korpo.farbe.herkunft);
+      const wert = korpo.farbe.wert;
+      if (rolle !== "akzent" || typeof wert !== "string" || herkunft === undefined)
+        return malformita(
+          "herkunft only for akzent with a colour: quelle (bild, pdf), merkmal, anteil",
+        );
+      return { speco: "ok", sxangxo: { farbe: { rolle: "akzent", wert, herkunft } } };
+    }
     return {
       speco: "ok",
       sxangxo: {
@@ -261,7 +390,7 @@ export function sxangxoEl(korpo: unknown): Legita {
       return malformita("neutral needs farbe (a colour or null) and nothing else");
     return { speco: "ok", sxangxo: { neutral: { farbe } } };
   }
-  return malformita("send exactly one change: farbe, toenung, stufe or neutral");
+  return malformita(ununura);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -269,25 +398,30 @@ export function sxangxoEl(korpo: unknown): Legita {
 
 /**
  * The field a refusal names: `farbe.primaer`, `toenung`, `stufe.color.palette.accent.500`,
- * `neutral.farbe`.
+ * `neutral.farbe`; Spec 056: `schrift.display|body|code` and the slider's path.
  */
 export function feldDe(sxangxo: LeinwandSxangxo): string {
   if ("farbe" in sxangxo) return `farbe.${sxangxo.farbe.rolle}`;
   if ("stufe" in sxangxo) return `stufe.${sxangxo.stufe.token}`;
   if ("neutral" in sxangxo) return "neutral.farbe";
+  if ("schrift" in sxangxo) return `schrift.${sxangxo.schrift.rolle}`;
+  if ("regler" in sxangxo) return sxangxo.regler.pfad;
   return "toenung";
 }
 
 /**
  * Applies one change of the canvas to the stored Agordo (tech spec, steps 2–5). Pure: no I/O, no
- * clock, no check. `stufoj` is `paletroStufojDe(calibration)`.
+ * clock, no check. `stufoj` is `paletroStufojDe(calibration)`. Spec 056 (D-23): with `katalogo`
+ * also fonts, the Schrift sliders and Akzent's origin; an unknown font id or a slider outside its
+ * range is refused with its field. Without `katalogo` exactly as before.
  */
 export function leinwandSchreiben(
   agordo: Agordo,
   korpo: unknown,
   stufoj: ReadonlyMap<DerivedPaletteName, ReadonlySet<string>>,
+  katalogo?: SkriboKatalogo,
 ): SkriboRezulto {
-  const legita = sxangxoEl(korpo);
+  const legita = sxangxoEl(korpo, katalogo !== undefined);
   if (legita.speco === "malformita") return legita;
   const { sxangxo } = legita;
   const feld = feldDe(sxangxo);
@@ -295,10 +429,25 @@ export function leinwandSchreiben(
 
   let next: Agordo;
   if ("farbe" in sxangxo) {
-    const { rolle, wert } = sxangxo.farbe;
+    const { rolle, wert, herkunft } = sxangxo.farbe;
     if (wert === null && rolle === "primaer") return rifuzo(PRIMAER_SATZ);
     if (wert !== null && farboHex(wert) === undefined) return rifuzo(NELEGEBLA_SATZ);
-    next = kunFarbo(agordo, rolle, wert === null ? null : wert.trim());
+    next = kunFarbo(agordo, rolle, wert === null ? null : wert.trim(), herkunft);
+  } else if ("schrift" in sxangxo && katalogo !== undefined) {
+    const { schrift } = sxangxo;
+    let fonto: Fonto;
+    if ("tiparo" in schrift) {
+      const tiparo = katalogo.tiparoj.find((t) => t.id === schrift.tiparo.trim());
+      if (tiparo === undefined) return rifuzo(NEVALIDA_SATZ);
+      fonto = fontoOf(tiparo);
+    } else fonto = licencedFonto(schrift.eigene.trim(), ["Latn"]);
+    next = kunSchrift(agordo, schrift.rolle, fonto);
+  } else if ("regler" in sxangxo && katalogo !== undefined) {
+    const { pfad, wert } = sxangxo.regler;
+    const regler = katalogo.regler.find((r) => r.path === pfad);
+    if (regler === undefined) return rifuzo(NEVALIDA_SATZ);
+    if (wert < regler.min || wert > regler.max) return rifuzo(reglerSatzDe(regler));
+    next = withRegler(agordo, pfad, wert);
   } else if ("stufe" in sxangxo) {
     const { token, wert, schema = "hell" } = sxangxo.stufe;
     if (!valida(stufoj, token)) return rifuzo(STUFO_SATZ);
@@ -311,8 +460,11 @@ export function leinwandSchreiben(
     const { farbe } = sxangxo.neutral;
     if (farbe !== null && farboHex(farbe) === undefined) return rifuzo(NELEGEBLA_SATZ);
     next = kunNeutralfarbo(agordo, farbe === null ? null : farbe.trim());
-  } else {
+  } else if ("toenung" in sxangxo) {
     next = kunToenung(agordo, sxangxo.toenung);
+  } else {
+    // A schrift or regler change is only read with the catalog (sxangxoEl); never reached.
+    return { speco: "malformita", mesagxo: "schrift and regler need the catalog" };
   }
 
   const legitaAgordo = readAgordo(next);

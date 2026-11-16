@@ -2,6 +2,8 @@
 // (Text, Farbe – which carries itself, so its sign takes the brand's Primär –, Schrift, Maß,
 // Marke); bottom right „Verkleinern“, „Vergrößern“ and „Einpassen“. Both are React Flow panels, so
 // they stay put while the canvas pans and zooms.
+// Spec 056 (T2): the kind Bild joins (Beispiele → Marke); the order of the mockup: Text, Bild,
+// Schrift, Maß, Marke, then „Farbe trägt sich selbst“. The signs are round, as the ports.
 
 import type { Anschlussart } from "@fundamento/metiejo/gestalten";
 import { Panel, useReactFlow } from "@xyflow/react";
@@ -30,10 +32,11 @@ const STILO = `
 /** The kinds in the legend's order (mockup). */
 const LEGENDO: readonly { art: Anschlussart; teksto: string }[] = [
   { art: "teksto", teksto: "Text" },
-  { art: "farbo", teksto: "Farbe trägt sich selbst" },
+  { art: "bildo", teksto: "Bild" },
   { art: "tiparo", teksto: "Schrift" },
   { art: "mezuro", teksto: "Maß" },
   { art: "marko", teksto: "Marke" },
+  { art: "farbo", teksto: "Farbe trägt sich selbst" },
 ];
 
 /** The duration of a zoom step and of „Einpassen“; 0 keeps them instant (no motion). */

@@ -14,6 +14,7 @@ import {
   ADJUSTABLE_RULES,
   type Agordo,
   type Derivation,
+  type Regler,
   readAgordo,
   reglerOf,
 } from "@fundamento/agordilo";
@@ -70,6 +71,7 @@ import {
   type Vollstaendigkeit,
   vollstaendigkeitOf,
 } from "./asistanto/stato.js";
+import { beispieleVojoj } from "./beispiele-vojoj.js";
 import { kahelojElProponoj, kahelojElTrovoj } from "./buehne.js";
 import { pruefmarkojOf, pruefungHtml } from "./buehne-pruefung.js";
 import { buildOf, expertHinweis, standOf } from "./eksperto.js";
@@ -104,7 +106,7 @@ import {
   wirksamerAgordo,
 } from "./grafeo-gestalten.js";
 import { gestaltenScreen, LEINWAND_CSS_HREF } from "./grafeo-gestalten-ekrano.js";
-import type { LeinwandStato } from "./grafeo-gestalten-sicht.js";
+import type { LeinwandStato, LeinwandStatoKnoto } from "./grafeo-gestalten-sicht.js";
 import { leinwandSchreiben, paletroStufojDe } from "./grafeo-skribo.js";
 import { CLIENT_SCRIPT, escapeHtml, grafeoScreen, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
@@ -119,6 +121,7 @@ import {
 import { knownFonts } from "./kontrolo.js";
 import { kreiloScreen } from "./kreilo/ekrano.js";
 import { describeKaraktero, kreiloProponoj } from "./kreilo/kreilo.js";
+import { enhavoDe } from "./leinwand-enhavo.js";
 import {
   LEINWAND_STATO_FELD,
   LEINWAND_STATO_SATZ,
@@ -150,7 +153,8 @@ import {
 } from "./messung.js";
 import { NORDSTELO_DIR, type NordsteloHistorio, nordsteloScreen } from "./nordstelo.js";
 import { transkribi } from "./parolo/parolo.js";
-import { type PrivataDeps, privataState, uploadFont } from "./privata.js";
+import { type PrivataDeps, type PrivataState, privataState, uploadFont } from "./privata.js";
+import { eigeneFontFace, FONTOJ_DIR, schriftdosierojVojoj } from "./schriftdosieroj-vojoj.js";
 import {
   farbenDeBases,
   leinwandAnstatauxigi,
@@ -199,7 +203,15 @@ import {
   zaehlilo,
   zaehliloSatz,
 } from "./takso/takso.js";
-import { fontFaceCss, fontoOf, licencedFonto, readTiparoj, searchTiparoj } from "./tiparoj.js";
+import { tiparoVojoj } from "./tiparo-vojoj.js";
+import {
+  fontFaceCss,
+  fontoOf,
+  licencedFonto,
+  readTiparoj,
+  searchTiparoj,
+  type Tiparoj,
+} from "./tiparoj.js";
 import type { NpmDeps } from "./tiparoj-npm.js";
 import {
   type Bases,
@@ -402,7 +414,69 @@ export function patched(agordo: Agordo, patch: Record<string, unknown>): Agordo 
   return next as unknown as Agordo;
 }
 
-function readBody(request: IncomingMessage, limit = 32 * 1024 * 1024): Promise<string> {
+/**
+ * Spec 056 (plan D-11): the largest request body the server reads (32 MiB, the value `readBody`
+ * always had, named – not changed).
+ */
+export const ANFRAGE_GRENZE = 32 * 1024 * 1024;
+
+/**
+ * Spec 056 (plan D-11): the largest file an upload can carry in a request of `grenze` bytes – a
+ * file travels as base64, three bytes in four characters, so just under three quarters of the
+ * request (the JSON envelope takes the rest). `dateiGrenzeDe(ANFRAGE_GRENZE)` is 24 MiB: the
+ * „24 MB“ of BEISPIELE_HILFE and TRO_GRANDA_SATZ.
+ */
+export function dateiGrenzeDe(grenze: number): number {
+  return Math.floor((grenze * 3) / 4);
+}
+
+/** Spec 056 (D-11): what `korpoDe` read – the body, or that it was larger than ANFRAGE_GRENZE. */
+export type KorpoLego = { teksto: string } | { troGranda: true };
+
+/**
+ * Spec 056 (plan D-13, §2.2): what `servilo.ts` hands to the route modules of the node tickets
+ * (`beispiele-vojoj.ts`, `tiparo-vojoj.ts`, `schriftdosieroj-vojoj.ts`). servilo.ts is frozen after
+ * KBS-2.1: a ticket that needs more reports it to the orchestrator.
+ */
+export interface VojoKunteksto {
+  /** The server's options: `workdir`, `esploro.fetch`, `npm`, `deps`, `settings`, … */
+  options: ServiloOptions;
+  /** The renderer of the Enportilo (JPG/WebP decoding): `options.esploro.bildilo` or Playwright. */
+  bildilo: Bildilo;
+  /** The draft of a brand as the server holds it (rev and Agordo), or undefined: no such brand. */
+  draftOf: (name: string) => { agordo: Agordo; rev: number } | undefined;
+  /**
+   * Every change of a draft goes through here (a new rev, the draft on disk, Kroniko entries); as
+   * the Studio's routes use it. `fonto` default "regilo".
+   */
+  setDraft: (name: string, agordo: Agordo, fonto?: KronikoEro["fonto"]) => void;
+  /** One Kroniko entry of the brand (e.g. „Ins private Repo legen“). */
+  kroniko: (name: string, entry: KronikoInput) => KronikoEro;
+  /** The body as text; above `limit` (default ANFRAGE_GRENZE) it rejects and drops the connection. */
+  readBody: (request: IncomingMessage, limit?: number) => Promise<string>;
+  /**
+   * D-11: the body as text, or `{troGranda: true}` when it is larger than ANFRAGE_GRENZE – the rest
+   * is read and dropped, so the route can still answer 422 with TRO_GRANDA_SATZ.
+   */
+  korpoDe: (request: IncomingMessage) => Promise<KorpoLego>;
+  sendJson: (response: ServerResponse, value: unknown, status?: number) => void;
+  sendHtml: (response: ServerResponse, html: string, status?: number) => void;
+  /** The plain 404 page (as every `/marko/*` route). The 056 JSON routes answer `{satz}` instead. */
+  notFound: (response: ServerResponse) => void;
+  /** The Fontsource catalog (`data/tiparoj.json`), read once per process. */
+  tiparoj: Tiparoj;
+  /** The sliders of the Gestalt (`reglerOf(bases.gestalt)`). */
+  regler: readonly Regler[];
+  bases: Bases;
+  /** The private font repository's state (`privataState(options.settings)`), read once. */
+  privata: PrivataState;
+  /** Drops the cached `/api/leinwand` answer of a brand; call it after changing its files. */
+  leinwandBildoForigi: (name: string) => void;
+  /** ANFRAGE_GRENZE; `dateiGrenzeDe(ANFRAGE_GRENZE)` is the largest file of one upload. */
+  ANFRAGE_GRENZE: number;
+}
+
+function readBody(request: IncomingMessage, limit = ANFRAGE_GRENZE): Promise<string> {
   return new Promise((done, fail) => {
     const chunks: Buffer[] = [];
     let size = 0;
@@ -418,6 +492,76 @@ function readBody(request: IncomingMessage, limit = 32 * 1024 * 1024): Promise<s
     request.on("end", () => done(Buffer.concat(chunks).toString("utf8")));
     request.on("error", fail);
   });
+}
+
+/**
+ * Spec 056 (plan D-11): the body up to ANFRAGE_GRENZE. Above it the rest is read and dropped (the
+ * connection stays, unlike `readBody`), so the route can still answer 422 with TRO_GRANDA_SATZ.
+ */
+function korpoDe(request: IncomingMessage): Promise<KorpoLego> {
+  return new Promise((done, fail) => {
+    const chunks: Buffer[] = [];
+    let size = 0;
+    request.on("data", (chunk: Buffer) => {
+      size += chunk.length;
+      if (size <= ANFRAGE_GRENZE) chunks.push(chunk);
+    });
+    request.on("end", () =>
+      done(
+        size > ANFRAGE_GRENZE
+          ? { troGranda: true }
+          : { teksto: Buffer.concat(chunks).toString("utf8") },
+      ),
+    );
+    request.on("error", fail);
+  });
+}
+
+/** Spec 056: whether `name` is a plain file name in `dir` that exists (no path, no traversal). */
+function dosieroEkzistas(dir: string, name: string): boolean {
+  let sekura = "";
+  try {
+    sekura = safeFilename(name);
+  } catch {}
+  return sekura !== "" && sekura === name && existsSync(join(dir, name));
+}
+
+/**
+ * Spec 056 (plan §2.1): the canvas state as `GET /api/leinwand` answers it – every image of
+ * Beispiele that is not in the brand's `materialo/` and every own font file that is not in its
+ * `fontoj/` carries `fehlt: true`. Only the answer: the file never holds it (the reader drops it).
+ * `dosieroj` says whether the state names any such file (then the answer is not cached).
+ */
+function statoKunFehlt(
+  dir: string,
+  stato: LeinwandStato,
+): { stato: LeinwandStato; dosieroj: boolean } {
+  let dosieroj = false;
+  const knoten = stato.knoten.map((knoto): LeinwandStatoKnoto => {
+    if (knoto.id === "beispiele") {
+      const beispiele = enhavoDe("beispiele", knoto.inhalt);
+      if (beispiele?.dateien === undefined || beispiele.dateien.length === 0) return knoto;
+      dosieroj = true;
+      const dateien = beispiele.dateien.map(({ fehlt: _f, ...d }) =>
+        dosieroEkzistas(join(dir, MATERIALO_DIR), d.name) ? d : { ...d, fehlt: true as const },
+      );
+      return { ...knoto, inhalt: { ...knoto.inhalt, dateien } };
+    }
+    if (knoto.id === "schrift") {
+      const schrift = enhavoDe("schrift", knoto.inhalt);
+      if (schrift?.eigene === undefined || schrift.eigene.length === 0) return knoto;
+      dosieroj = true;
+      const eigene = schrift.eigene.map((familio) => ({
+        familie: familio.familie,
+        dateien: familio.dateien.map(({ fehlt: _f, ...d }) =>
+          dosieroEkzistas(join(dir, FONTOJ_DIR), d.name) ? d : { ...d, fehlt: true as const },
+        ),
+      }));
+      return { ...knoto, inhalt: { ...knoto.inhalt, eigene } };
+    }
+    return knoto;
+  });
+  return { stato: dosieroj ? { ...stato, knoten } : stato, dosieroj };
 }
 
 /** The German sentence of an issue the start screen shows. */
@@ -1500,6 +1644,29 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     sendHtml(response, "<!doctype html><title>404</title><p>Nicht gefunden.", 404);
   };
 
+  /** Spec 056 (plan D-13, §2.2): what the route modules of the node tickets get. */
+  const vojoKunteksto: VojoKunteksto = {
+    options,
+    bildilo,
+    draftOf,
+    setDraft: (name, agordo, fonto = "regilo") => {
+      const draft = draftOf(name);
+      if (draft !== undefined) setDraft(name, draft, agordo, fonto);
+    },
+    kroniko,
+    readBody,
+    korpoDe,
+    sendJson,
+    sendHtml,
+    notFound,
+    tiparoj,
+    regler,
+    bases,
+    privata,
+    leinwandBildoForigi,
+    ANFRAGE_GRENZE,
+  };
+
   const sendStatic = (response: ServerResponse, root: string, rest: string): void => {
     const file = resolve(root, rest);
     if (!file.startsWith(root + sep) || !existsSync(file) || rest.includes("..")) {
@@ -1575,17 +1742,25 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         ? { body: fonto }
         : { display: fonto, body: fonto };
 
-  const fontFaceOf = (agordo: Agordo): string => {
+  const fontFaceOf = (agordo: Agordo, name: string): string => {
     const families = new Set(
       [agordo.schriften?.display, agordo.schriften?.body, agordo.schriften?.code]
         .filter((font) => font?.redistributable === true)
         .map((font) => font?.family),
     );
-    return tiparoj.tiparoj
+    const fontsource = tiparoj.tiparoj
       .filter((tiparo) => families.has(tiparo.family))
       .map(fontFaceCss)
       .join("\n");
+    // Spec 056 (D-13): the brand's own fonts (KBS-3.5); "" leaves the rules as they were.
+    const eigene = eigeneFontFace(vojoKunteksto, name, agordo);
+    return eigene === "" ? fontsource : fontsource === "" ? eigene : `${fontsource}\n${eigene}`;
   };
+
+  // Spec 056 (plan D-13, §2.2): the three route modules of the node tickets, asked in this order
+  // before the generic `/api/marko/*` and `/marko/:name/*` handlers; the first that answers true
+  // has handled the request.
+  const VOJOJ_056 = [beispieleVojoj, tiparoVojoj, schriftdosierojVojoj] as const;
 
   async function handle(
     request: IncomingMessage,
@@ -1729,9 +1904,26 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         return;
       }
       const palettes = paletrojDe(wirksam, bases);
-      const bildo = gestaltenDe(read.agordo, { start, kabloj: wirksameKabloj, palettes, rev });
-      const korpo = serializeLeinwandAntwort(bildo, stato, dosiero.speco === "unlesbar");
-      if (senKabloj) leinwandBildoj.set(markoName, { rev, dosiero: dosieroBajtoj, korpo });
+      // Spec 056 (D-3): with a state the Marke carries what arrives at it and Primär may show „aus
+      // Material“; without one the Bildo and the answer are those of Spec 055, byte for byte.
+      const bildo = gestaltenDe(read.agordo, {
+        start,
+        kabloj: wirksameKabloj,
+        palettes,
+        rev,
+        ...(stato === null ? {} : { stato }),
+      });
+      // Spec 056 (§2.1): files that are gone are marked in the answer; such an answer depends on
+      // the brand's folders too, so it is not cached.
+      const fehlt =
+        stato === null ? undefined : statoKunFehlt(markoDir(options.workdir, markoName), stato);
+      const korpo = serializeLeinwandAntwort(
+        bildo,
+        fehlt?.stato ?? stato,
+        dosiero.speco === "unlesbar",
+      );
+      if (senKabloj && fehlt?.dosieroj !== true)
+        leinwandBildoj.set(markoName, { rev, dosiero: dosieroBajtoj, korpo });
       response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(korpo);
       return;
     }
@@ -1740,6 +1932,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     // counts: no check, no rule; the draft, its rev and the Kroniko stay. An unreadable file is
     // first renamed to its backup name. 404 as /api/marko/*; 422 `{feld, satz}` for a wrong shape;
     // 200 `{gespeichert}`. Before the generic /api/marko/* handlers.
+    // Spec 056 (D-13): the routes of Beispiele, of the font catalog and of own fonts.
+    for (const vojo of VOJOJ_056) {
+      if (await vojo(vojoKunteksto, request, response, method, path, url)) return;
+    }
     const leinwandStatoVojo = /^\/api\/marko\/([a-z0-9-]+)\/leinwand-stato$/.exec(path);
     if (leinwandStatoVojo !== null && (method === "PUT" || method === "DELETE")) {
       const [, name = ""] = leinwandStatoVojo;
@@ -1895,7 +2091,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         notFound(response);
         return;
       }
-      const rezulto = leinwandSchreiben(draft.agordo, body, paletroStufojDe(bases.calibration));
+      // Spec 056 (D-23): with the font catalog and the sliders, fonts and Schrift sliders too.
+      const rezulto = leinwandSchreiben(draft.agordo, body, paletroStufojDe(bases.calibration), {
+        tiparoj: tiparoj.tiparoj,
+        regler,
+      });
       if (rezulto.speco === "malformita") {
         problemo("sxangxo-invalid", rezulto.mesagxo, "send one change of the canvas", 400);
         return;
@@ -2022,7 +2222,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
           aspekto: name,
           scheme,
           cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${rev}`,
-          fontFace: fontFaceOf(agordo),
+          fontFace: fontFaceOf(agordo, name),
           fonto: `/api/grafeo?marko=${encodeURIComponent(name)}`,
           studioHref: `/studio/${encodeURIComponent(name)}/farbe${scheme === "light" ? "" : `?scheme=${scheme}`}`,
           neEksportebla: !derivation.exportable,
@@ -3218,7 +3418,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         const rev = draft.rev;
         const agordo = kabloj.agordo ?? messung.schritt("marke-laden", shown);
         const teile = messung.schritt("css-js", () => ({
-          fontFace: fontFaceOf(agordo),
+          fontFace: fontFaceOf(agordo, name),
           scheme:
             url.searchParams.get("scheme") === "dark" ? ("dark" as const) : ("light" as const),
           attributes: Object.fromEntries(

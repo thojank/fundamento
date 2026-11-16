@@ -25,8 +25,17 @@
 //   - `data-nr-vorschau-kabloj`: the `kabloj` text of that settled state ("" = as in the Agordo).
 //   - `data-nr-vorschau-laedt`: present while at least one connected preview loads a new address.
 // A preview that is not connected, or removed, takes no part.
+//
+// Spec 056 (T2): every preview (the further ones too) carries the Schrift input `<id>.en.tiparo`
+// below its Marke input – the end of the fixed edge Schrift → Vorschau while the Schrift node is on
+// the canvas, a ring without it (a port added later would not be measured by React Flow).
 
-import { NE_KONEKTITA_SATZ, type Schema, vorschauHref } from "@fundamento/metiejo/gestalten";
+import {
+  NE_KONEKTITA_SATZ,
+  type Schema,
+  vorschauHref,
+  vorschauTiparoEnir,
+} from "@fundamento/metiejo/gestalten";
 import type { NodeProps } from "@xyflow/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Anschluss } from "../anschluss.js";
@@ -280,6 +289,7 @@ export function VorschauNodo({ data }: NodeProps<VorschauFlowNodo>) {
         {NE_KONEKTITA_SATZ}
       </div>
       <Anschluss port={port} supro={54} />
+      <Anschluss port={vorschauTiparoEnir(nodo.id)} supro={80} />
     </NodoSxelo>
   );
 }

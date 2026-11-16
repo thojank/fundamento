@@ -17,11 +17,13 @@ import {
   type Bildo,
   type BildoFarbo,
   type BildoLigo,
+  type BildoMarko,
   type BildoNodo,
   type DerivedPaletteName,
   FARBO_ROLOJ,
   type FarboRolo,
   type Kabloj,
+  type LeinwandStato,
   ligoId,
   NEUTRAL_FARBO_ENIR,
   ROLO_ETIKEDOJ,
@@ -32,6 +34,7 @@ import {
   type Vico,
   vorschauHref,
 } from "./grafeo-gestalten-sicht.js";
+import { markoEnhavoDe, primaerStatoKun } from "./leinwand-enhavo.js";
 import { hexOf } from "./sxtupoj.js";
 import type { Bases } from "./vorschau.js";
 
@@ -47,6 +50,12 @@ export interface GestaltenEingaben {
   palettes: DerivedPalettes | undefined;
   /** The draft's revision, for the preview addresses. */
   rev: number;
+  /**
+   * Spec 056 (plan D-3, R-9): the canvas state of the brand, as `parseLeinwandStato` read it. With
+   * it the Marke carries `enhavo` and Primär „aus Material“ when its lead colour came from the
+   * Beispiele; without it the Bildo is exactly that of Spec 055.
+   */
+  stato?: Pick<LeinwandStato, "knoten" | "geloest">;
 }
 
 /** The canonical JSON of a Bildo: the bytes `/api/leinwand` answers and the tests compare. */
@@ -271,9 +280,21 @@ function ligojDe(farboj: readonly BildoFarbo[], vorschauen: readonly string[]): 
  * The Bildo of the view Gestalten (054 T1, 055 T1): Marke, the seven colour nodes of the stored
  * Agordo, the Palette of the effective one, and two previews (light, dark) – nodes only, no phase
  * frames; the edges that follow from the stored Agordo. No Regulo, no report, no problem count.
+ * Spec 056: with the canvas state the Marke carries what arrives at it (`enhavo`, absent when
+ * nothing does) and Primär shows „aus Material“ when the Beispiele say so (`primaerStatoKun`). The
+ * new nodes and the edges into the Marke stay in the state, not in the Bildo (plan D-3).
  */
 export function gestaltenDe(agordo: Agordo, e: GestaltenEingaben): Bildo {
   const farboj = farbojDe(agordo, e.start, e.palettes);
+  const marko: BildoMarko = { id: "marko", speco: "marko", fazo: "fazo-4" };
+  if (e.stato !== undefined) {
+    const enhavo = markoEnhavoDe(e.stato.knoten, e.stato.geloest ?? []);
+    if (Object.keys(enhavo).length > 0) marko.enhavo = enhavo;
+    const beispiele = e.stato.knoten.find((k) => k.id === "beispiele")?.inhalt;
+    const primaer = farboj.find((farbo) => farbo.rolo === "primaer");
+    if (primaer !== undefined && primaerStatoKun(agordo.leitfarbe, beispiele) === "aus-material")
+      primaer.stato = "aus-material";
+  }
   const vorschauen = (["hell", "dunkel"] as const).map(
     (schema): BildoNodo => ({
       id: `vorschau-${schema}`,
@@ -284,7 +305,7 @@ export function gestaltenDe(agordo: Agordo, e: GestaltenEingaben): Bildo {
     }),
   );
   const nodoj: BildoNodo[] = [
-    { id: "marko", speco: "marko", fazo: "fazo-4" },
+    marko,
     ...farboj,
     {
       id: "paletro",

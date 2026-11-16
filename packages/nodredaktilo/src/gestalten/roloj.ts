@@ -7,6 +7,9 @@
 //
 // The view has no CSS file (047 B-2). Each module keeps its rules in a string and injects it once
 // with `useStilo`; a node file that replaces a placeholder does the same with its own id.
+// Spec 056 (T2, Teil V, plan D-17): every edge is a dashed curve with round ends in `ROLOJ.kanto`
+// (a colour edge keeps its colour); an edge from an empty or detached source is only fainter; ports
+// and signs are round, filled when connected, a ring otherwise, in their kind's colour.
 
 import type { Anschlussart, Zeichen } from "@fundamento/metiejo/gestalten";
 import { type CSSProperties, useInsertionEffect } from "react";
@@ -35,6 +38,11 @@ export const ROLOJ = {
   mallauta: "var(--fm-color-text-muted)",
   /** The ring of a selected phase or of a node without a colour of its own. */
   ringo: "var(--fm-color-focus-ring)",
+  /**
+   * Spec 056 (Teil V): every edge that is no colour edge – Marke, Maß, Text, Bild, Schrift – the
+   * light grey of the mockup's `--kg`, the role React Flow's edges already take (`--xy-edge-stroke`).
+   */
+  kanto: "var(--fm-color-text-muted)",
   ombro: "var(--fm-elevation-shadow-floating)",
   ombroTavolo: "var(--fm-elevation-shadow-overlay)",
 } as const;
@@ -62,6 +70,7 @@ export const ART_NOMOJ: Readonly<Record<Anschlussart, string>> = {
   tiparo: "Schrift",
   mezuro: "Maß",
   marko: "Marke",
+  bildo: "Bild",
 };
 
 /** The colour a port, sign or edge of `art` is drawn in: the brand colour for Farbe, else a role. */
@@ -214,7 +223,7 @@ export const BAZA_STILO = `
   inline-size: var(--fm-spacing-medium);
   block-size: var(--fm-spacing-medium);
   border: var(--fm-border-width-strong) var(--fm-stroke-solid) var(--nr-g-art);
-  border-radius: var(--fm-radius-none);
+  border-radius: var(--fm-radius-full);
   background: transparent;
 }
 .nr-g-signo[data-nr-plena] { background: var(--nr-g-art); }
@@ -226,15 +235,15 @@ export const BAZA_STILO = `
   min-inline-size: 0;
   min-block-size: 0;
   border: var(--fm-border-width-strong) var(--fm-stroke-solid) var(--nr-g-art);
-  border-radius: var(--fm-radius-none);
+  border-radius: var(--fm-radius-full);
   background: ${ROLOJ.scenejo};
 }
 .react-flow .react-flow__handle.nr-g-anschluss[data-nr-plena] { background: var(--nr-g-art); }
 
-.nr-g-kanto { fill: none; stroke-linejoin: miter; stroke-width: calc(var(--fm-border-width-default) * 1.5); }
+.nr-g-kanto { fill: none; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 4 4; stroke-width: calc(var(--fm-border-width-default) * 1.5); }
 .react-flow__edge:hover .nr-g-kanto { stroke-width: calc(var(--fm-border-width-default) * 2.75); }
 .react-flow__edge.selected .nr-g-kanto { stroke-width: calc(var(--fm-border-width-default) * 3); }
-.nr-g-kanto[data-nr-matt] { stroke-dasharray: 4 4; stroke-opacity: var(--fm-opacity-disabled); }
+.nr-g-kanto[data-nr-matt] { stroke-opacity: var(--fm-opacity-disabled); }
 .nr-g-lumo { fill: none; stroke: ${ROLOJ.teksto}; stroke-width: calc(var(--fm-border-width-default) * 2.5); stroke-linecap: round; opacity: 0; stroke-dasharray: 9 200; pointer-events: none; }
 
 @media (prefers-reduced-motion: no-preference) {

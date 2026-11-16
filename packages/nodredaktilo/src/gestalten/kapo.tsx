@@ -7,8 +7,11 @@
 // lesen, Startanordnung“ (while the stored state does not read, until the next write), „gespeichert
 // HH:MM“ or calmly NE_KONSERVITA_SATZ, the slot `staende` for „Stand speichern“ and „Stände“
 // (LNS-3.1), then „Anordnung zurücksetzen“, before „Leinwand hell | dunkel“.
+// Spec 056 (T2, plan D-29): the notice counts – „1 Verbindung gelöst · zurücksetzen“, „n
+// Verbindungen gelöst · zurücksetzen“ – the changed colour rows and the detached edges into the
+// Marke; „gilt nur in dieser Sitzung“ goes (both persist in the canvas state since Spec 055/056).
 
-import { NE_KONSERVITA_SATZ, type Schema } from "@fundamento/metiejo/gestalten";
+import { geloestHinweisDe, NE_KONSERVITA_SATZ, type Schema } from "@fundamento/metiejo/gestalten";
 import type { ReactNode } from "react";
 import { ROLOJ, useStilo } from "./roloj.js";
 
@@ -91,18 +94,26 @@ export interface KapoProps {
   skemo: Schema;
   /** Sets the canvas's own scheme. */
   elektiSkemon: (skemo: Schema) => void;
-  /** The slot for the notice „Verbindungen geändert · gilt nur in dieser Sitzung“ (`LigoHinweis`). */
+  /** The slot for the notice „n Verbindungen gelöst · zurücksetzen“ (`LigoHinweis`). */
   ligoHinweis: ReactNode;
 }
 
 /**
  * T7 (E-11, AK-19): the notice while the session's connections differ from those of the Agordo,
- * with „zurücksetzen“, which brings the Agordo's connections back. Calm text, no judgment.
+ * with „zurücksetzen“, which brings the Agordo's connections back. Calm text, no judgment. Spec 056
+ * (D-29): „n Verbindungen gelöst · zurücksetzen“; `nombro` counts the changed colour rows and the
+ * detached edges into the Marke, and „zurücksetzen“ plugs those too.
  */
-export function LigoHinweis({ zuruecksetzen }: { zuruecksetzen: () => void }) {
+export function LigoHinweis({
+  nombro,
+  zuruecksetzen,
+}: {
+  nombro: number;
+  zuruecksetzen: () => void;
+}) {
   return (
-    <span className="nr-g-ligo-hinweis" aria-live="polite" data-nr-ligo-hinweis="">
-      Verbindungen geändert · gilt nur in dieser Sitzung
+    <span className="nr-g-ligo-hinweis" aria-live="polite" data-nr-ligo-hinweis={String(nombro)}>
+      {`${geloestHinweisDe(nombro)} ·`}
       <fm-butono size="small" emphasis="low" data-nr-ligoj-zuruecksetzen="" onClick={zuruecksetzen}>
         zurücksetzen
       </fm-butono>
