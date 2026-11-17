@@ -102,6 +102,16 @@ const MUSTER = SXABLONOJ.map((sxablono) =>
 ).join("");
 
 /**
+ * Spec 058 (MP-2c, T9, MAW-4.2, part H): the one accent place of the view „Komponenten“ – a badge
+ * in the accent roles of the brand (`color.sekundo.badge.fill` / `.text`), own markup because no
+ * Ero shows the accent, never an action, a link or the focus. Its rule comes with it, so
+ * `previewBody` and the shared preview stylesheet stay as they are.
+ */
+export function akzentInsignoKorpo(): string {
+  return `<style>.mt-akzent-insigno { display: inline-flex; align-items: center; padding: var(--fm-spacing-xsmall) var(--fm-spacing-small); border-radius: var(--fm-radius-role-pill); background-color: var(--fm-color-sekundo-badge-fill); color: var(--fm-color-sekundo-badge-text); font-family: var(--fm-typography-label-2-font-family); font-size: var(--fm-typography-label-2-font-size); font-weight: var(--fm-typography-label-2-font-weight); line-height: var(--fm-typography-label-2-line-height); }</style>${surface("Akzent", `<div class="mt-zeile"><span class="mt-akzent-insigno" data-mt-akzent="marke">Akzent</span></div>`)}`;
+}
+
+/**
  * The body of the preview for a step, a page of the Studio (`studio-<seite>`) or a component page
  * (`komponento-<kind>-<name>`, with the chosen cell) at a width.
  */

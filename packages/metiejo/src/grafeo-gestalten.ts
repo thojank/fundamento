@@ -2,6 +2,9 @@
 // of the effective Agordo, and the effective Agordo itself from the session's `kabloj` (E-11).
 // Pure: no I/O, no clock, no check – the Bildo carries no Regulo, no report and no problem count
 // (E-1). The shared types and rules live import-free in grafeo-gestalten-sicht.ts for the bundle.
+// Spec 058 (MP-2c, T1): with the option `{stufe: 58}` every preview carries its stored view and
+// layout choice and the 058 address (the effective layout, the abdruck of the page „Marke“);
+// without it the Bildo is that of Spec 056, byte for byte.
 
 import {
   type Agordo,
@@ -14,6 +17,8 @@ import {
 } from "@fundamento/agordilo";
 import { serializeCanonicalJson } from "@fundamento/modelo";
 import {
+  ansichtDe,
+  aufbauWahlDe,
   type Bildo,
   type BildoFarbo,
   type BildoLigo,
@@ -23,9 +28,11 @@ import {
   FARBO_ROLOJ,
   type FarboRolo,
   type Kabloj,
+  LAYOUT_ID,
   type LeinwandStato,
   ligoId,
   NEUTRAL_FARBO_ENIR,
+  type Opcioj058,
   ROLO_ETIKEDOJ,
   ROLO_PALETRO,
   STATUS_ROLOJ,
@@ -34,7 +41,8 @@ import {
   type Vico,
   vorschauHref,
 } from "./grafeo-gestalten-sicht.js";
-import { markoEnhavoDe, primaerStatoKun } from "./leinwand-enhavo.js";
+import { abdruckDe, markeInhaltDe, wirksamerAufbau } from "./leinwand-auswertung.js";
+import { enhavoDe, markoEnhavoDe, primaerStatoKun } from "./leinwand-enhavo.js";
 import { hexOf } from "./sxtupoj.js";
 import type { Bases } from "./vorschau.js";
 
@@ -283,8 +291,11 @@ function ligojDe(farboj: readonly BildoFarbo[], vorschauen: readonly string[]): 
  * Spec 056: with the canvas state the Marke carries what arrives at it (`enhavo`, absent when
  * nothing does) and Primär shows „aus Material“ when the Beispiele say so (`primaerStatoKun`). The
  * new nodes and the edges into the Marke stay in the state, not in the Bildo (plan D-3).
+ * Spec 058: with `{stufe: 58}` each preview carries `ansicht` and `aufbau` as stored (defaults
+ * „marke“, „auto“) and the 058 address: the view's `sxtupo`, for „Marke“ the effective layout
+ * (`wirksamerAufbau` with the Layout-Beispiel) and `inh = abdruckDe(markeInhaltDe(…))`. No new node.
  */
-export function gestaltenDe(agordo: Agordo, e: GestaltenEingaben): Bildo {
+export function gestaltenDe(agordo: Agordo, e: GestaltenEingaben, opcioj?: Opcioj058): Bildo {
   const farboj = farbojDe(agordo, e.start, e.palettes);
   const marko: BildoMarko = { id: "marko", speco: "marko", fazo: "fazo-4" };
   if (e.stato !== undefined) {
@@ -295,15 +306,41 @@ export function gestaltenDe(agordo: Agordo, e: GestaltenEingaben): Bildo {
     if (primaer !== undefined && primaerStatoKun(agordo.leitfarbe, beispiele) === "aus-material")
       primaer.stato = "aus-material";
   }
-  const vorschauen = (["hell", "dunkel"] as const).map(
-    (schema): BildoNodo => ({
-      id: `vorschau-${schema}`,
+  const vorschauen = (["hell", "dunkel"] as const).map((schema): BildoNodo => {
+    const id = `vorschau-${schema}` as const;
+    if (opcioj?.stufe !== 58)
+      return {
+        id,
+        speco: "vorschau",
+        fazo: "fazo-5",
+        schema,
+        href: vorschauHref(agordo.name, schema, e.rev, e.kabloj),
+      };
+    const knoten = e.stato?.knoten ?? [];
+    const knoto = knoten.find((k) => k.id === id);
+    const ansicht = ansichtDe(knoto);
+    const layout = enhavoDe(LAYOUT_ID, knoten.find((k) => k.id === LAYOUT_ID)?.inhalt);
+    const inh = abdruckDe(
+      markeInhaltDe(
+        { knoten, geloest: e.stato?.geloest ?? [] },
+        agordo.etikedoj?.marko ?? agordo.name,
+      ),
+    );
+    return {
+      id,
       speco: "vorschau",
       fazo: "fazo-5",
       schema,
-      href: vorschauHref(agordo.name, schema, e.rev, e.kabloj),
-    }),
-  );
+      ansicht,
+      aufbau: aufbauWahlDe(knoto),
+      href: vorschauHref(agordo.name, schema, e.rev, e.kabloj, {
+        stufe: 58,
+        ansicht,
+        aufbau: wirksamerAufbau(knoto, layout),
+        inh,
+      }),
+    };
+  });
   const nodoj: BildoNodo[] = [
     marko,
     ...farboj,

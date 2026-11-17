@@ -4,6 +4,10 @@
 // „Anordnung zurücksetzen“ leaves, and the answer of `GET /api/leinwand`. The edge: reading the file
 // of a brand, and writing it – an unreadable file is first renamed to its backup name, so nothing a
 // person had is overwritten. No rule, no judgement: only the shape counts.
+// Spec 058 (MP-2c, T1): Grundlagen and the Layout-Beispiel (fixed, content without a place),
+// „Namen und Beschreibung“ (`speco: "ki"`, content and its own detached edges), the Markenprofil on
+// the Marke and the view and layout of every preview – each field on its own, so every file of
+// Spec 055 and 056 reads exactly as before. „zurücksetzen“ keeps contents and preview choices.
 
 import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -12,10 +16,15 @@ import {
   ARANGXO_055,
   type Bildo,
   enhavoSpecoDe,
+  estasAnsicht,
+  estasAufbauWahl,
   FARBO_ROLOJ,
   type FarboRolo,
   FIKSAJ_TEKSTOJ,
+  GRUNDLAGEN_ID,
   type Kabloj,
+  KI_NAMEN_ID,
+  LAYOUT_ID,
   type LeinwandAntwort,
   type LeinwandStato,
   type LeinwandStatoKnoto,
@@ -61,14 +70,47 @@ function inhaltDe(id: string, roh: unknown): Record<string, unknown> | undefined
   return senFehlt(id, roh) as Record<string, unknown> | undefined;
 }
 
+/** Spec 058: the view and the layout choice of a preview, each only when it reads. */
+function wahlDe(eintrag: Record<string, unknown>): Pick<LeinwandStatoKnoto, "ansicht" | "aufbau"> {
+  return {
+    ...(estasAnsicht(eintrag.ansicht) ? { ansicht: eintrag.ansicht } : {}),
+    ...(estasAufbauWahl(eintrag.aufbau) ? { aufbau: eintrag.aufbau } : {}),
+  };
+}
+
+/**
+ * Spec 058: a fixed node (Marke, colours, Palette, the two previews). As before it needs a place –
+ * unless the Marke carries a profile or a preview a view or a layout choice: then it stays without
+ * one. Every other field drops out, so a file of Spec 055 or 056 reads exactly as before.
+ */
+function fiksaKnotoDe(
+  id: string,
+  eintrag: Record<string, unknown>,
+  pozicio: { x: number; y: number } | undefined,
+): LeinwandStatoKnoto | undefined {
+  const knoto: LeinwandStatoKnoto = { id, ...(pozicio ?? {}) };
+  if (id === "marko") {
+    const inhalt = inhaltDe(id, eintrag.inhalt);
+    if (inhalt !== undefined && Object.keys(inhalt).length > 0) knoto.inhalt = inhalt;
+  }
+  if (id === "vorschau-hell" || id === "vorschau-dunkel") Object.assign(knoto, wahlDe(eintrag));
+  return pozicio === undefined && Object.keys(knoto).length === 1 ? undefined : knoto;
+}
+
 /** One node entry, or undefined for an unknown id or wrong types. */
 function knotoDe(eintrag: unknown): LeinwandStatoKnoto | undefined {
   if (!isObjekto(eintrag) || typeof eintrag.id !== "string") return undefined;
   const { id } = eintrag;
   const pozicio = pozicioDe(eintrag);
-  if (FIKSAJ_IDS.has(id)) return pozicio === undefined ? undefined : { id, ...pozicio };
+  if (FIKSAJ_IDS.has(id)) return fiksaKnotoDe(id, eintrag, pozicio);
+  // Spec 058: Grundlagen and the Layout-Beispiel are fixed nodes with a content, like the fixed
+  // text nodes of 056: a place and/or the content; with neither the entry is dropped.
   // Spec 056: a fixed text node keeps a place and/or its content; with neither it is dropped.
-  if ((FIKSAJ_TEKSTOJ as readonly string[]).includes(id)) {
+  if (
+    (FIKSAJ_TEKSTOJ as readonly string[]).includes(id) ||
+    id === GRUNDLAGEN_ID ||
+    id === LAYOUT_ID
+  ) {
     const inhalt = inhaltDe(id, eintrag.inhalt);
     if (pozicio === undefined && inhalt === undefined) return undefined;
     return { id, ...(pozicio ?? {}), ...(inhalt === undefined ? {} : { inhalt }) };
@@ -80,6 +122,19 @@ function knotoDe(eintrag: unknown): LeinwandStatoKnoto | undefined {
     const inhalt = inhaltDe(id, eintrag.inhalt);
     return { id, speco, ...(pozicio ?? {}), ...(inhalt === undefined ? {} : { inhalt }) };
   }
+  // Spec 058: „Namen und Beschreibung“, added through „+ Knoten“; its `geloest` is read once every
+  // node is known (`parseLeinwandStato`).
+  if (id === KI_NAMEN_ID) {
+    if (eintrag.speco !== "ki") return undefined;
+    const inhalt = inhaltDe(id, eintrag.inhalt);
+    return {
+      id,
+      speco: "ki",
+      ...(pozicio ?? {}),
+      ...(inhalt === undefined ? {} : { inhalt }),
+      ...(eintrag.geloest === undefined ? {} : { geloest: eintrag.geloest as string[] }),
+    };
+  }
   const numero = ALDONITA.exec(id)?.[1];
   if (numero === undefined || Number(numero) < 3) return undefined;
   if (eintrag.speco !== "vorschau" || !isSchema(eintrag.schema)) return undefined;
@@ -89,6 +144,8 @@ function knotoDe(eintrag: unknown): LeinwandStatoKnoto | undefined {
     knoto.y = pozicio.y;
   }
   if (isObjekto(eintrag.inhalt)) knoto.inhalt = eintrag.inhalt;
+  // Spec 058: the view and the layout choice of a further preview.
+  Object.assign(knoto, wahlDe(eintrag));
   return knoto;
 }
 
@@ -132,6 +189,13 @@ export function parseLeinwandStato(teksto: string): LeinwandStatoLego {
     gesehen.add(knoto.id);
     knoten.push(knoto);
   }
+  // Spec 058: the detached edges into „Namen und Beschreibung“, read like those into the Marke.
+  for (const [indekso, knoto] of knoten.entries()) {
+    if (knoto.id !== KI_NAMEN_ID || knoto.geloest === undefined) continue;
+    const { geloest: roh058, ...rest } = knoto;
+    const ki = geloestDe(roh058, knoten);
+    knoten[indekso] = ki.length > 0 ? { ...rest, geloest: ki } : rest;
+  }
   const geloest = geloestDe(roh.geloest, knoten);
   const stato: LeinwandStato = { version: 1, knoten, kabloj: kablojDe(roh.kabloj) };
   if (geloest.length > 0) stato.geloest = geloest;
@@ -147,12 +211,20 @@ export function serializeLeinwandStato(stato: LeinwandStato): string {
  * The state „Anordnung zurücksetzen“ leaves: the added nodes stay (with their content, without a
  * place, so they take their start slot), no fixed node keeps a place, `kabloj` is `{}`. Spec 056:
  * every node keeps its content (a fixed text node stays with its content, without a place), and
- * `geloest` goes – every edge into the Marke is connected again.
+ * `geloest` goes – every edge into the Marke is connected again. Spec 058: a preview keeps its view
+ * and layout choice, the Marke its profile, „Namen und Beschreibung“ its result; its own detached
+ * edges go too – only places and connections are reset.
  */
 export function leinwandStatoRekomenco(stato: LeinwandStato | null): LeinwandStato {
   const knoten = (stato?.knoten ?? [])
-    .filter((k) => k.speco !== undefined || k.inhalt !== undefined)
-    .map(({ x: _x, y: _y, ...rest }) => rest);
+    .filter(
+      (k) =>
+        k.speco !== undefined ||
+        k.inhalt !== undefined ||
+        k.ansicht !== undefined ||
+        k.aufbau !== undefined,
+    )
+    .map(({ x: _x, y: _y, geloest: _g, ...rest }) => rest);
   return { version: 1, knoten, kabloj: {} };
 }
 

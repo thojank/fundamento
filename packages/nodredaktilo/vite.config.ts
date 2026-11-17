@@ -15,6 +15,10 @@ const gestaltenSicht = fileURLToPath(
 // Spec 056 (MP-2a, plan D-4): the rules on the contents of the new nodes, shared with the server;
 // its only import is the module above.
 const enhavo = fileURLToPath(new URL("../metiejo/src/leinwand-enhavo.ts", import.meta.url));
+// Spec 058 (MP-2c, T1): the model-free rules of the evaluation, shared with the server (its only
+// imports are the two modules above), and the identifier of a brand name (import-free).
+const auswertung = fileURLToPath(new URL("../metiejo/src/leinwand-auswertung.ts", import.meta.url));
+const ident = fileURLToPath(new URL("../metiejo/src/ident.ts", import.meta.url));
 
 // biome-ignore lint/style/noDefaultExport: Vite loads its config from the default export.
 export default defineConfig({
@@ -24,6 +28,8 @@ export default defineConfig({
       "@fundamento/metiejo/grafeo": grafeoSicht,
       "@fundamento/metiejo/gestalten": gestaltenSicht,
       "@fundamento/metiejo/enhavo": enhavo,
+      "@fundamento/metiejo/auswertung": auswertung,
+      "@fundamento/metiejo/ident": ident,
     },
   },
   // Library mode leaves `process.env.NODE_ENV` in place; the browser has no `process`.

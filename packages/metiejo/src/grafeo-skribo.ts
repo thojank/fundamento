@@ -10,6 +10,9 @@
 // argument it also sets a font of the catalog or an own font for heading, text or code, one of the
 // three Schrift sliders within its range, and Akzent with its origin (`zweitfarbe.herkunft`).
 // Without that argument it behaves exactly as before.
+// Spec 058 (MP-2c, T4): the key `{name}` writes the display name `etikedoj.marko` (trimmed; empty
+// or equal to the identifier removes it). Identifier, folder and address never change. A body
+// without the key goes the same way as before.
 
 import {
   type Agordo,
@@ -249,6 +252,20 @@ function kunSchrift(agordo: Agordo, rolle: SchriftRolle, fonto: Fonto): Agordo {
   return next;
 }
 
+/**
+ * Spec 058 (T4): the display name. Trimmed into `etikedoj.marko`; empty, or equal to the
+ * identifier (`agordo.name`), removes it, as the start form sets it only when it differs (B-9).
+ * The other display names of `etikedoj` stay; an empty map goes.
+ */
+function kunNomo(agordo: Agordo, name: string): Agordo {
+  const wert = name.trim();
+  const etikedoj: Record<string, string> = { ...(agordo.etikedoj ?? {}) };
+  if (wert === "" || wert === agordo.name) delete etikedoj.marko;
+  else etikedoj.marko = wert;
+  const { etikedoj: _alt, ...rest } = agordo;
+  return Object.keys(etikedoj).length === 0 ? (rest as Agordo) : { ...rest, etikedoj };
+}
+
 // ---------------------------------------------------------------------------------------------
 // The body
 
@@ -340,6 +357,9 @@ export function sxangxoEl(korpo: unknown, kun056 = false): Legita {
     const legita = sxangxo056El(korpo);
     if (legita !== undefined) return legita;
   }
+  // Spec 058 (T4): the value is read afterwards, so a name that is no text is refused with its
+  // field (422), as `toenung` is.
+  if ("name" in korpo) return { speco: "ok", sxangxo: { name: korpo.name as string } };
   if (isObjekto(korpo.farbe)) {
     const { rolle } = korpo.farbe;
     if (!FARBO_ROLLEN.includes(rolle as Exclude<FarboRolo, "neutral">) || !wertOk(korpo.farbe))
@@ -406,6 +426,7 @@ export function feldDe(sxangxo: LeinwandSxangxo): string {
   if ("neutral" in sxangxo) return "neutral.farbe";
   if ("schrift" in sxangxo) return `schrift.${sxangxo.schrift.rolle}`;
   if ("regler" in sxangxo) return sxangxo.regler.pfad;
+  if ("name" in sxangxo) return "name";
   return "toenung";
 }
 
@@ -428,7 +449,11 @@ export function leinwandSchreiben(
   const rifuzo = (satz: string): SkriboRezulto => ({ speco: "rifuzita", feld, satz });
 
   let next: Agordo;
-  if ("farbe" in sxangxo) {
+  if ("name" in sxangxo) {
+    // Spec 058 (T4): only whether it is text; never a check of the name itself (E-1).
+    if (typeof sxangxo.name !== "string") return rifuzo(NEVALIDA_SATZ);
+    next = kunNomo(agordo, sxangxo.name);
+  } else if ("farbe" in sxangxo) {
     const { rolle, wert, herkunft } = sxangxo.farbe;
     if (wert === null && rolle === "primaer") return rifuzo(PRIMAER_SATZ);
     if (wert !== null && farboHex(wert) === undefined) return rifuzo(NELEGEBLA_SATZ);

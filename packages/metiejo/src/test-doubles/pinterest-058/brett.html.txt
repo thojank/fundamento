@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!-- Spec 058 (MAW-3.5): an INVENTED page in the shape of a public board – no copy of a real page.
+     Fourteen distinct images (0001 … 0014) in several sizes, plus an avatar, a page asset and an
+     image of another host, which must not count. -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Werkstatt &amp; Holz | Pinterest</title>
+<meta content="Werkstatt &amp; Holz" property="og:title">
+<meta property="og:image" content="https://i.pinimg.com/1200x/a1/b2/c3/a1b2c3d4e5f60001.jpg">
+<link rel="icon" href="https://s.pinimg.com/webapp/favicon-erfunden.png">
+</head>
+<body>
+<div id="__PWS_ROOT__">
+<img alt="" src="https://i.pinimg.com/75x75_RS/9f/9f/9f/9f9f9f000000avat.jpg">
+<img alt="Pin" src="https://bilder.example/236x/a1/b2/c3/a1b2c3d4e5f60099.jpg">
+<img alt="Pin" src="https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60001.jpg">
+<img alt="Pin" src="https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60011.jpg">
+<img alt="Pin" src="//i.pinimg.com/474x/a1/b2/c3/a1b2c3d4e5f60012.jpg">
+<img alt="Pin" src="https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60013.jpg">
+<img alt="Pin" src="https://i.pinimg.com/564x/a1/b2/c3/a1b2c3d4e5f60014.jpg">
+</div>
+<script id="__PWS_INITIAL_PROPS__" type="application/json">{"initialReduxState":{"boards":{"b1":{"name":"Werkstatt & Holz","image_cover_url":"https://i.pinimg.com/222x/a1/b2/c3/a1b2c3d4e5f60001.jpg"}},"pins":{"p1":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60001.jpg"},"736x":{"url":"https://i.pinimg.com/736x/a1/b2/c3/a1b2c3d4e5f60001.jpg"},"orig":{"url":"https://i.pinimg.com/originals/a1/b2/c3/a1b2c3d4e5f60001.jpg"}},"pinner":{"image_medium_url":"https://i.pinimg.com/75x75_RS/9f/9f/9f/9f9f9f000000avat.jpg"}},"p2":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60002.jpg"},"736x":{"url":"https://i.pinimg.com/736x/a1/b2/c3/a1b2c3d4e5f60002.jpg"}}},"p3":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60003.jpg"},"736x":{"url":"https://i.pinimg.com/736x/a1/b2/c3/a1b2c3d4e5f60003.jpg"}}},"p4":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60004.jpg"},"736x":{"url":"https://i.pinimg.com/736x/a1/b2/c3/a1b2c3d4e5f60004.jpg"}}},"p5":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60005.png"}}},"p6":{"images":{"736x":{"url":"https://i.pinimg.com/736x/a1/b2/c3/a1b2c3d4e5f60006.jpg"}}},"p7":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60007.jpg"}}},"p8":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60008.jpg"}}},"p9":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60009.jpg"}}},"p10":{"images":{"236x":{"url":"https://i.pinimg.com/236x/a1/b2/c3/a1b2c3d4e5f60010.webp"}}}}}}</script>
+</body>
+</html>

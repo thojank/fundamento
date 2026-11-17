@@ -8,6 +8,11 @@
 // the canvas state, what arrives at the Marke, the follow rule's types, ARANGXO_056, KATALOGO_056,
 // the new changes of the write path and the sentences of the new nodes. The rules on contents live
 // in leinwand-enhavo.ts, which imports only this module.
+// Spec 058 (MP-2c, T1): the nodes Grundlagen, „Namen und Beschreibung“ and Layout-Beispiel, the
+// Markenprofil on the Marke and the choice of view and layout per preview – their ids, ports, types
+// and contents, ARANGXO_058, KATALOGO_058, the 058 preview address and the calm sentences. Every
+// older output stays as it is: the new places, ports and addresses come behind the option
+// `{stufe: 58}` or with ids no older file or caller knows.
 // Like grafeo-sicht.ts this module has no import at all – not even a type – so the browser bundle
 // of @fundamento/nodredaktilo takes it through an alias (047 D-2). Pure and deterministic: no
 // clock, no randomness, no storage; outputs follow fixed orders.
@@ -141,8 +146,15 @@ export interface BildoVorschau {
   speco: "vorschau";
   fazo: "fazo-5";
   schema: Schema;
-  /** From `vorschauHref`: `?sxtupo=vorschau&…&scheme=…&rev=…[&kabloj=…]`. */
+  /**
+   * From `vorschauHref`: `?sxtupo=vorschau&…&scheme=…&rev=…[&kabloj=…]`; with `{stufe: 58}` the
+   * address of the chosen view (`sxtupo=marke&…&aufbau=…&inh=…` or `sxtupo=komponenten&…`).
+   */
   href: string;
+  /** Spec 058 (only with `{stufe: 58}`): the stored view of the node, default „marke“. */
+  ansicht?: Ansicht;
+  /** Spec 058 (only with `{stufe: 58}`): the stored layout choice of the node, default „auto“. */
+  aufbau?: AufbauWahl;
 }
 
 export type BildoNodo = BildoMarko | BildoFarbo | BildoPaletro | BildoVorschau;
@@ -215,7 +227,12 @@ export type LeinwandSxangxo =
   /** Spec 056 (D-23): an own font by family name: „lizenziert, nicht enthalten“. */
   | { schrift: { rolle: SchriftRolle; eigene: string } }
   /** Spec 056 (D-23): one Schrift slider, within the range of `reglerOf`. */
-  | { regler: { pfad: SchriftPfad; wert: number } };
+  | { regler: { pfad: SchriftPfad; wert: number } }
+  /**
+   * Spec 058 (type only; MAW-3.2 implements it): the display name `etikedoj.marko`, trimmed; empty
+   * or equal to the identifier removes the field. Identifier, folder and address never change.
+   */
+  | { name: string };
 
 // ---------------------------------------------------------------------------------------------
 // The nodes of Spec 056: ids, ports, contents (tech spec „Knoten“, „Inhalt je Knoten“)
@@ -315,6 +332,14 @@ export function estasMarkoEnir(port: string): boolean {
   return port === MARKO_TEKSTO_ENIR || port === MARKO_BILDO_ENIR;
 }
 
+/**
+ * Spec 058: the inputs that take many edges – the two of the Marke and the two of „Namen und
+ * Beschreibung“ (`ki-namen.en.teksto`, `ki-namen.en.bildo`); every other input at most one.
+ */
+export function estasMultaEnir(port: string): boolean {
+  return estasMarkoEnir(port) || port === KI_NAMEN_TEKSTO_ENIR || port === KI_NAMEN_BILDO_ENIR;
+}
+
 /** The six sliders of Tonalität: two opposites each, -2 … 2, the middle „dazwischen“. */
 export const TONALITAET_PAROJ = [
   { id: "foermlich-locker", links: "förmlich", rechts: "locker" },
@@ -401,12 +426,21 @@ export interface BeispielDosiero {
   farben?: ErkanntaFarbo[];
   satz?: string;
   fehlt?: true;
+  /**
+   * Spec 058: the `i.pinimg.com` address the file was taken from (a Pinterest preview), so the
+   * preview shows „genommen“ and the same image is not stored twice.
+   */
+  quelle?: string;
 }
 
-/** A link that gave no image, kept as a reference with its sentence. */
+/**
+ * A link that gave no image, kept as a reference with its sentence. Spec 058: a Pinterest link
+ * whose preview was shown carries its title and may omit the sentence.
+ */
 export interface Verweis {
   adresse: string;
   satz?: string;
+  titel?: string;
 }
 
 /**
@@ -515,9 +549,22 @@ export interface LeinwandStatoKnoto {
   id: string;
   x?: number;
   y?: number;
-  speco?: "vorschau" | "teksto" | "beispiele" | "schrift";
+  /** Spec 058: `ki` for the added node „Namen und Beschreibung“ (`ki-namen`). */
+  speco?: "vorschau" | "teksto" | "beispiele" | "schrift" | "ki";
   schema?: Schema;
   inhalt?: Record<string, unknown>;
+  /**
+   * Spec 058: the view of a preview (fixed or added); absent = „marke“. A fixed preview may carry
+   * it without a place.
+   */
+  ansicht?: Ansicht;
+  /** Spec 058: the layout choice of a preview (fixed or added); absent = „auto“. */
+  aufbau?: AufbauWahl;
+  /**
+   * Spec 058, only on `ki-namen`: the outputs whose edge into this node is detached (sorted,
+   * unique, only outputs of nodes on the canvas); absent when none is.
+   */
+  geloest?: string[];
 }
 
 /** The whole canvas state as the file holds it (canonical JSON, `version: 1`). */
@@ -875,25 +922,41 @@ const FIKSAJ = ARANGXO_056.nodoj as Readonly<Record<string, Platz>>;
 const isStatusNodo = (id: string): boolean => STATUS_ROLOJ.some((rolo) => id === `farbo-${rolo}`);
 const isWeitereVorschau = (id: string): boolean => id.startsWith("vorschau-") && !(id in FIKSAJ);
 
-/** The width a node starts with (the mockup's); 0 for an unknown id. */
-export function largxoDe(id: string): number {
+/** The width a node starts with (the mockup's); 0 for an unknown id. Spec 058: with `{stufe: 58}`
+ * the widths of ARANGXO_058 (the three new nodes, the wide Marke and previews). */
+export function largxoDe(id: string, opcioj?: Opcioj058): number {
+  if (opcioj?.stufe === 58)
+    return (
+      FIKSAJ_058[id]?.largxo ?? (isWeitereVorschau(id) ? ARANGXO_058.weitereVorschauen.largxo : 0)
+    );
   return FIKSAJ[id]?.largxo ?? (isWeitereVorschau(id) ? ARANGXO_056.weitereVorschauen.largxo : 0);
 }
 
-/** The kind of a node by its maximum height; undefined for an unknown id. */
-export function altecoSpecoDe(id: string): AltecoSpeco056 | undefined {
+/**
+ * The kind of a node by its maximum height; undefined for an unknown id. Spec 058: with
+ * `{stufe: 58}` the three new nodes have a kind of their own as well.
+ */
+export function altecoSpecoDe(id: string): AltecoSpeco056 | undefined;
+export function altecoSpecoDe(id: string, opcioj?: Opcioj058): AltecoSpeco058 | undefined;
+export function altecoSpecoDe(id: string, opcioj?: Opcioj058): AltecoSpeco058 | undefined {
   if (id === "marko" || id === "paletro" || id === "farbo-neutral") return id;
   if (id === "farbo-primaer" || id === "farbo-akzent") return "farbo-granda";
   if (isStatusNodo(id)) return "farbo-kompakta";
   if (id.startsWith("vorschau-")) return "vorschau";
   if (estasEnhavoId(id)) return id;
+  if (opcioj?.stufe === 58 && (NODOJ_058 as readonly string[]).includes(id)) return id as Nodo058;
   return undefined;
 }
 
-/** The maximum height of a node (D-2, Spec 056 D-16); 0 for an unknown id. */
-export function altecoDe(id: string): number {
-  const speco = altecoSpecoDe(id);
-  return speco === undefined ? 0 : ARANGXO_056.alteco[speco];
+/**
+ * The maximum height of a node (D-2, Spec 056 D-16); 0 for an unknown id. Spec 058: with
+ * `{stufe: 58}` the heights of ARANGXO_058.
+ */
+export function altecoDe(id: string, opcioj?: Opcioj058): number {
+  const speco = altecoSpecoDe(id, opcioj);
+  if (speco === undefined) return 0;
+  if (opcioj?.stufe === 58) return ARANGXO_058.alteco[speco];
+  return ARANGXO_056.alteco[speco as AltecoSpeco056];
 }
 
 /**
@@ -906,7 +969,11 @@ export function altecoDe(id: string): number {
 export function poziciojKun(
   verschoben: ReadonlyMap<string, Pozicio>,
   nodoj: readonly { id: string }[],
+  /** Spec 058: the start places of ARANGXO_058 instead of ARANGXO_056. */
+  opcioj?: Opcioj058,
 ): Map<string, Pozicio> {
+  const arangxo = opcioj?.stufe === 58 ? ARANGXO_058 : ARANGXO_056;
+  const fiksaj = opcioj?.stufe === 58 ? FIKSAJ_058 : FIKSAJ;
   const weitereSlot = new Map(
     nodoj
       .map((n) => n.id)
@@ -917,12 +984,12 @@ export function poziciojKun(
   for (const { id } of nodoj) {
     if (out.has(id)) continue;
     const moved = verschoben.get(id);
-    const platz = FIKSAJ[id];
+    const platz = fiksaj[id];
     const weitere = weitereSlot.get(id);
     if (moved !== undefined) out.set(id, { x: moved.x, y: moved.y });
     else if (platz !== undefined) out.set(id, { x: platz.x, y: platz.y });
     else if (weitere !== undefined) {
-      const { x, y, dy } = ARANGXO_056.weitereVorschauen;
+      const { x, y, dy } = arangxo.weitereVorschauen;
       out.set(id, { x, y: y + weitere * dy });
     } else out.set(id, { x: 0, y: 0 });
   }
@@ -952,6 +1019,9 @@ const RANGO: Readonly<Record<string, number>> = {
   teksto: -1,
   beispiele: -1,
   marko: 0,
+  // Spec 058: „Namen und Beschreibung“ (`ki-namen`) takes what the Marke takes. The Layout-Beispiel
+  // has no stage, like Schrift: its edge to the previews is fixed, never drawn by hand.
+  ki: 0,
   farbo: 1,
   paletro: 2,
   vorschau: 3,
@@ -969,6 +1039,14 @@ export function anschlussDe(port: string): Anschluss | undefined {
   if (port === MARKO_BILDO_ENIR) return { nodo: "marko", direkto: "en", art: "bildo" };
   if (port === BEISPIELE_ELIR) return { nodo: "beispiele", direkto: "el", art: "bildo" };
   if (port === SCHRIFT_ELIR) return { nodo: "schrift", direkto: "el", art: "tiparo" };
+  // Spec 058: Grundlagen's output, the two inputs of „Namen und Beschreibung“, the output of the
+  // Layout-Beispiel and the image input of every preview.
+  if (port === GRUNDLAGEN_ELIR) return { nodo: GRUNDLAGEN_ID, direkto: "el", art: "teksto" };
+  if (port === KI_NAMEN_TEKSTO_ENIR) return { nodo: KI_NAMEN_ID, direkto: "en", art: "teksto" };
+  if (port === KI_NAMEN_BILDO_ENIR) return { nodo: KI_NAMEN_ID, direkto: "en", art: "bildo" };
+  if (port === LAYOUT_ELIR) return { nodo: LAYOUT_ID, direkto: "el", art: "bildo" };
+  const bildo = /^(vorschau-[a-z0-9-]+)\.en\.bildo$/.exec(port)?.[1];
+  if (bildo !== undefined) return { nodo: bildo, direkto: "en", art: "bildo" };
   const teksto = TEKSTO_ELIR.exec(port)?.[1];
   if (teksto !== undefined) return { nodo: teksto, direkto: "el", art: "teksto" };
   const wert = /^teksto-werte\.el\.(.+)$/.exec(port)?.[1];
@@ -1063,6 +1141,8 @@ export function validaLigo(ligoj: readonly BildoLigo[], de: string, al: string):
   const rangoDe = RANGO[specoDe(el.nodo)];
   const rangoAl = RANGO[specoDe(en.nodo)];
   if (rangoDe === undefined || rangoAl === undefined || rangoDe >= rangoAl) return false;
+  // Spec 058: a preview's image input takes only the fixed edge from the Layout-Beispiel.
+  if (en.art === "bildo" && en.nodo.startsWith("vorschau-")) return false;
   // A path from the target node back to the source node would close a cycle.
   const naechste = new Map<string, string[]>();
   for (const ligo of ligoj) {
@@ -1124,7 +1204,7 @@ export function ligojKun(sitzung: LigoSitzung, bildo: Bildo): BildoLigo[] {
     const ligo: BildoLigo = { id: ligoId(de, al), de, al, art: el.art };
     const hex = el.art === "farbo" ? hexDe.get(el.nodo) : undefined;
     if (hex !== undefined) ligo.hex = hex;
-    const multe = estasMarkoEnir(al);
+    const multe = estasMultaEnir(al);
     out = [...out.filter((l) => (multe ? l.id !== ligo.id : l.al !== al)), ligo];
   }
   return out;
@@ -1211,11 +1291,28 @@ export function kablojEl(teksto: string): Kabloj | undefined {
  * Bühne), its scheme, the rev, and `kabloj` when the view differs from the Agordo. The kabloj text
  * only holds `[a-z:,-]`, so it stands in the query as it is.
  */
-export function vorschauHref(marko: string, schema: Schema, rev: number, kabloj: Kabloj): string {
+export function vorschauHref(
+  marko: string,
+  schema: Schema,
+  rev: number,
+  kabloj: Kabloj,
+  /**
+   * Spec 058: the address of the chosen view – `sxtupo=marke` with the effective layout (never
+   * „auto“: a value that is no layout id becomes the first layout) and `inh` (the abdruck of what
+   * the page shows, never brand text), or `sxtupo=komponenten` without both.
+   */
+  opcioj?: VorschauOpcioj058,
+): string {
   const teksto = kablojTeksto(kabloj);
-  return `/marko/${encodeURIComponent(marko)}/vorschau?sxtupo=vorschau&breite=mittel&scheme=${
+  const sxtupo =
+    opcioj?.stufe !== 58 ? "vorschau" : opcioj.ansicht === "komponenten" ? "komponenten" : "marke";
+  const fino =
+    opcioj?.stufe !== 58 || sxtupo === "komponenten"
+      ? ""
+      : `&aufbau=${estasAufbauId(opcioj.aufbau) ? opcioj.aufbau : AUFBAUOJ[0]}&inh=${encodeURIComponent(opcioj.inh)}`;
+  return `/marko/${encodeURIComponent(marko)}/vorschau?sxtupo=${sxtupo}&breite=mittel&scheme=${
     schema === "hell" ? "light" : "dark"
-  }&rev=${rev}${teksto === "" ? "" : `&kabloj=${teksto}`}`;
+  }&rev=${rev}${teksto === "" ? "" : `&kabloj=${teksto}`}${fino}`;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1379,7 +1476,11 @@ export function aldonebloj(
   return katalogo.map((enskribo): Aldoneblo => {
     let stato: AldonStato = "da";
     const nodo = enskribo.nodo;
-    if (nodo !== undefined && estasEnhavoId(nodo)) {
+    // Spec 058: „Namen und Beschreibung“ is added at most once; Grundlagen and the Layout-Beispiel
+    // stand on every canvas. No older catalog names these nodes.
+    if (nodo === KI_NAMEN_ID) stato = byId.has(nodo) ? "da" : "anlegen";
+    else if (nodo === GRUNDLAGEN_ID || nodo === LAYOUT_ID) stato = "da";
+    else if (nodo !== undefined && estasEnhavoId(nodo)) {
       if (!(FIKSAJ_TEKSTOJ as readonly string[]).includes(nodo))
         stato = byId.has(nodo) ? "da" : "anlegen";
     } else if (enskribo.lauf !== "MP-1") stato = "spaeter";
@@ -1392,4 +1493,455 @@ export function aldonebloj(
     }
     return { ...enskribo, stato };
   });
+}
+
+// ---------------------------------------------------------------------------------------------
+// Spec 058 (MP-2c, T1): ids, ports and types of the new nodes and choices (tech spec „Daten“)
+
+/** The opt-in of Spec 058 for the shared functions; without it they answer as before. */
+export interface Opcioj058 {
+  stufe: 58;
+}
+
+/** The node „Marke · Grundlagen“: fixed, leftmost input, output Text into the Marke. */
+export const GRUNDLAGEN_ID = "teksto-grundlagen";
+/** The node „Namen und Beschreibung“ (`speco: "ki"`): added through „+ Knoten“, at most once. */
+export const KI_NAMEN_ID = "ki-namen";
+/** The node „Layout-Beispiel“: fixed, before the previews, output Bild into every preview. */
+export const LAYOUT_ID = "layout-beispiel";
+
+/** The three nodes of Spec 058, in the order of the process. */
+export const NODOJ_058 = [GRUNDLAGEN_ID, KI_NAMEN_ID, LAYOUT_ID] as const;
+
+export type Nodo058 = (typeof NODOJ_058)[number];
+
+/** Grundlagen's output (right): a Text edge into `marko.en.teksto`, detachable. */
+export const GRUNDLAGEN_ELIR = "teksto-grundlagen.el";
+/** The Text input of „Namen und Beschreibung“: takes many edges. */
+export const KI_NAMEN_TEKSTO_ENIR = "ki-namen.en.teksto";
+/** The image input of „Namen und Beschreibung“: takes many edges (Beispiele). */
+export const KI_NAMEN_BILDO_ENIR = "ki-namen.en.bildo";
+/** The output of the Layout-Beispiel: a fixed edge to every preview's image input. */
+export const LAYOUT_ELIR = "layout-beispiel.el";
+
+/** The image input of a preview (every preview has one, also further ones): `<id>.en.bildo`. */
+export function vorschauBildoEnir(vorschau: string): string {
+  return `${vorschau}.en.bildo`;
+}
+
+/**
+ * The sub-folder of the brand's `materialo/` that holds the one Layout-Beispiel (behind the
+ * existing `.gitignore`, in no export).
+ */
+export const LAYOUT_DOSIERUJO = "layout";
+
+/** The three prepared layouts of the view „Marke“, the first is the default. */
+export const AUFBAUOJ = ["titel", "raster", "liste"] as const;
+
+export type AufbauId = (typeof AUFBAUOJ)[number];
+
+/** The layout choice of a preview: by the Layout-Beispiel („auto“) or by hand. */
+export type AufbauWahl = "auto" | AufbauId;
+
+/** The two views of a preview; „marke“ is the default. */
+export const ANSICHTOJ = ["marke", "komponenten"] as const;
+
+export type Ansicht = (typeof ANSICHTOJ)[number];
+
+/** Whether a value is a layout id (never „auto“). */
+export function estasAufbauId(x: unknown): x is AufbauId {
+  return typeof x === "string" && (AUFBAUOJ as readonly string[]).includes(x);
+}
+
+/** Whether a value is a layout choice („auto“ or a layout id). */
+export function estasAufbauWahl(x: unknown): x is AufbauWahl {
+  return x === "auto" || estasAufbauId(x);
+}
+
+/** Whether a value is a view of a preview. */
+export function estasAnsicht(x: unknown): x is Ansicht {
+  return typeof x === "string" && (ANSICHTOJ as readonly string[]).includes(x);
+}
+
+/** The view of a preview node as stored; absent or unreadable → „marke“. */
+export function ansichtDe(knoto: { ansicht?: unknown } | undefined): Ansicht {
+  return estasAnsicht(knoto?.ansicht) ? knoto.ansicht : "marke";
+}
+
+/** The layout choice of a preview node as stored; absent or unreadable → „auto“. */
+export function aufbauWahlDe(knoto: { aufbau?: unknown } | undefined): AufbauWahl {
+  return estasAufbauWahl(knoto?.aufbau) ? knoto.aufbau : "auto";
+}
+
+/** The 058 preview address: the view, the effective layout and the abdruck of the page. */
+export interface VorschauOpcioj058 extends Opcioj058 {
+  ansicht: Ansicht;
+  /** The effective layout (`wirksamerAufbau`); only for „marke“. */
+  aufbau: AufbauId;
+  /** `abdruckDe(markeInhaltDe(…))`; only for „marke“. */
+  inh: string;
+}
+
+/** The three purposes of a model call from the canvas. */
+export const ZWECKOJ = ["profil", "namen", "aufbau"] as const;
+
+export type Zweck = (typeof ZWECKOJ)[number];
+
+/** `detaloj.zweck` of the Kroniko entry of each purpose (plan D-3). */
+export const KRONIKO_ZWECKOJ: Readonly<Record<Zweck, string>> = {
+  profil: "leinwand-profil",
+  namen: "leinwand-namen",
+  aufbau: "leinwand-aufbau",
+};
+
+/** What one model call cost (tech spec „Typen“). `zeit`: ISO time of the answer. */
+export type Kosto = { enigo: number; eligo: number; usd?: number; modelo: string; zeit: string };
+
+/** One Leitgedanke of the profile. */
+export type Leitgedanke = { titel: string; text: string };
+
+/** A proposed colour with its reason. */
+export type FarbVorschlag = { hex: string; grund: string };
+
+/** A proposed font pair (catalog ids) with its reason. */
+export type SchriftVorschlag = { display: string; body: string; grund: string };
+
+/** The design proposal of the profile. */
+export type ProfilVorschlag = {
+  primaer?: FarbVorschlag;
+  akzent?: FarbVorschlag;
+  neutral?: FarbVorschlag;
+  schrift?: SchriftVorschlag;
+};
+
+/**
+ * The values the five parts of the proposal had at the time of the evaluation (`profilEingabenDe`):
+ * colours as written, fonts as catalog id (else the family).
+ */
+export type ProfilEingaben = {
+  primaer?: string;
+  akzent?: string;
+  neutral?: string;
+  display?: string;
+  body?: string;
+};
+
+/** The parts of the proposal that can be taken over one by one. */
+export const VORSCHLAG_TEILOJ = ["primaer", "akzent", "neutral", "schrift"] as const;
+
+export type VorschlagTeil = (typeof VORSCHLAG_TEILOJ)[number];
+
+/** The Markenprofil on the Marke (tech spec „Typen“). */
+export type Profil = {
+  kernsatz?: string;
+  /** Exactly the first three readable ones. */
+  leitgedanken?: Leitgedanke[];
+  /** Three to five words. */
+  charakter?: string[];
+  passt?: string[];
+  reibt?: string[];
+  vorschlag?: ProfilVorschlag;
+  /** The names of the parts that did not read. */
+  verworfen?: string[];
+  /** The abdruck of the inputs at the time of the evaluation (`eingabenAbdruckDe`). */
+  abdruck: string;
+  eingaben: ProfilEingaben;
+  /** The id of the Stand „vor Übernahme“, once it was saved. */
+  gesichert?: string;
+  kosto: Kosto;
+};
+
+/** One name idea with its one-line reason. */
+export type NamenIdee = { name: string; grund: string };
+
+/** The result of „Namen und Beschreibung“ (tech spec „Typen“). */
+export type NamenVorschlag = {
+  /** Six to eight, fewer when unreadable. */
+  namen: NamenIdee[];
+  beschreibung?: string;
+  verworfen?: string[];
+  abdruck: string;
+  gesichert?: string;
+  kosto: Kosto;
+};
+
+/** The features of a Layout-Beispiel (tech spec „Typen“). */
+export type Merkmale = {
+  titelbild: "gross" | "klein" | "keins";
+  inhalt: "karten" | "liste" | "fliesstext";
+  dichte: "luftig" | "dicht";
+  achse: "mittig" | "links";
+  schrift: "gross" | "zurueckhaltend";
+};
+
+/** The values of each feature, in this order; a value outside makes only that feature unreadable. */
+export const MERKMALE_WERTE = {
+  titelbild: ["gross", "klein", "keins"],
+  inhalt: ["karten", "liste", "fliesstext"],
+  dichte: ["luftig", "dicht"],
+  achse: ["mittig", "links"],
+  schrift: ["gross", "zurueckhaltend"],
+} as const satisfies { [K in keyof Merkmale]: readonly Merkmale[K][] };
+
+/** The features as stored and read: each feature on its own, so a part can be missing. */
+export type MerkmaleLego = Partial<Merkmale>;
+
+/** Grundlagen: the description (the name is `etikedoj.marko` of the Agordo, not stored here). */
+export type InhaltGrundlagen = {
+  beschreibung?: string;
+};
+
+/** „Namen und Beschreibung“: the last result. */
+export type InhaltKiNamen = {
+  vorschlag?: NamenVorschlag;
+};
+
+/** The Layout-Beispiel: its file, the features and words read by the model, its abdruck, cost. */
+export type InhaltLayout = {
+  datei?: BeispielDosiero;
+  merkmale?: MerkmaleLego;
+  worte?: string;
+  abdruck?: string;
+  kosto?: Kosto;
+};
+
+/** The Marke: the Markenprofil, once evaluated. */
+export type InhaltMarko = {
+  profil?: Profil;
+};
+
+/** Every node that carries a content, Spec 056 and Spec 058. */
+export type EnhavoId058 = EnhavoId | Nodo058 | "marko";
+
+/** The content of each node kind of Spec 056 and Spec 058. */
+export interface InhaltMapo058 extends InhaltMapo {
+  "teksto-grundlagen": InhaltGrundlagen;
+  "ki-namen": InhaltKiNamen;
+  "layout-beispiel": InhaltLayout;
+  marko: InhaltMarko;
+}
+
+export type Inhalt058 = InhaltMapo058[EnhavoId058];
+
+/** Whether an id is a node with a content of Spec 056 or Spec 058. */
+export function estasEnhavoId058(id: string): id is EnhavoId058 {
+  return estasEnhavoId(id) || id === "marko" || (NODOJ_058 as readonly string[]).includes(id);
+}
+
+/**
+ * The raw pieces of the view „Marke“ (`markeInhaltDe`): only what the brand gives, the fallbacks
+ * are `markeKorpo`'s (MAW-4.2). Every text is brand text: it never stands in an address.
+ */
+export interface MarkeInhalt {
+  name: string;
+  kernsatz?: string;
+  beschreibung?: string;
+  leitgedanken?: Leitgedanke[];
+  werte?: string[];
+  charakter?: string[];
+  persoenlichkeit?: string[];
+}
+
+// ---------------------------------------------------------------------------------------------
+// Spec 058: start places (ARANGXO_058)
+
+/** Spec 058: the kinds by maximum height – those of 056 and the three new nodes. */
+export type AltecoSpeco058 = AltecoSpeco056 | Nodo058;
+
+/**
+ * Spec 058 (plan §3.2): the start places with the option `{stufe: 58}`. The text column of 056
+ * stays; Grundlagen stands on top of it, a little further left (its right edge on the column's,
+ * so its curve into the Marke runs in the same gap). The Marke is the „Tafel“ of the mockup
+ * (700 px wide); Beispiele moves above its right half, so the image edge into the Marke's top
+ * input (its middle) runs right of „Namen und Beschreibung“, which stands above the Marke's left
+ * half – every Text curve into either node then runs in the gap left of both. Everything right of
+ * the Marke moves by its added width (510 px); the Layout-Beispiel stands under Schrift in the
+ * Palette's column, before the previews, so every edge into a preview leaves that column to the
+ * right. The previews are wide and high enough for the page „Marke“ (`vorschau-knoten-
+ * aufbauten.html`); `vorschauKadro.alto` is the height of the frame inside a preview. The heights
+ * are maxima for usual content, as in 056 (a real height above is fixed in the node or by a larger
+ * gap, never by a smaller maximum). ARANGXO_056 itself stays as it is.
+ */
+export const ARANGXO_058 = {
+  nodoj: {
+    "teksto-grundlagen": { x: -380, y: -980, largxo: 310 },
+    "teksto-wettbewerb": ARANGXO_056.nodoj["teksto-wettbewerb"],
+    "teksto-zielgruppe": ARANGXO_056.nodoj["teksto-zielgruppe"],
+    "teksto-ausgangslage": ARANGXO_056.nodoj["teksto-ausgangslage"],
+    "teksto-markenkern": ARANGXO_056.nodoj["teksto-markenkern"],
+    "teksto-werte": ARANGXO_056.nodoj["teksto-werte"],
+    "teksto-persoenlichkeit": ARANGXO_056.nodoj["teksto-persoenlichkeit"],
+    "teksto-tonalitaet": ARANGXO_056.nodoj["teksto-tonalitaet"],
+    beispiele: { x: 400, y: -1296, largxo: 300 },
+    "ki-namen": { x: 24, y: -616, largxo: 326 },
+    marko: { x: 24, y: 48, largxo: 700 },
+    "farbo-primaer": { x: 810, y: 24, largxo: 264 },
+    "farbo-neutral": { x: 810, y: 252, largxo: 264 },
+    "farbo-akzent": { x: 810, y: 570, largxo: 264 },
+    "farbo-success": { x: 810, y: 778, largxo: 264 },
+    "farbo-warning": { x: 810, y: 892, largxo: 264 },
+    "farbo-danger": { x: 810, y: 1006, largxo: 264 },
+    "farbo-info": { x: 810, y: 1120, largxo: 264 },
+    paletro: { x: 1210, y: 24, largxo: 316 },
+    schrift: { x: 1210, y: 562, largxo: 316 },
+    "layout-beispiel": { x: 1210, y: 946, largxo: 316 },
+    "vorschau-hell": { x: 1646, y: 24, largxo: 720 },
+    "vorschau-dunkel": { x: 1646, y: 824, largxo: 720 },
+  } satisfies Record<string, Platz>,
+  alteco: {
+    ...ARANGXO_056.alteco,
+    marko: 1240,
+    vorschau: 760,
+    // QA-Lauf 1 (B3): Schrift as measured after „Vorschlag übernehmen“ – two catalog fonts, all
+    // three roles, the three sliders and, while the fonts cannot load, the two-line offline sentence.
+    schrift: 361,
+    "teksto-grundlagen": 300,
+    "ki-namen": 640,
+    "layout-beispiel": 440,
+  } satisfies Record<AltecoSpeco058, number>,
+  /** Further previews below the two fixed ones: the k-th (0-based) at x, y + k · dy. */
+  weitereVorschauen: { x: 1646, y: 1624, largxo: 720, dy: 800 },
+  /** The frame of the page inside a preview node: its height (its width is the node's). */
+  vorschauKadro: { alto: 560 },
+} as const;
+
+const FIKSAJ_058 = ARANGXO_058.nodoj as Readonly<Record<string, Platz>>;
+
+// ---------------------------------------------------------------------------------------------
+// Spec 058: the catalog „+ Knoten“ (plan D-1, product spec D)
+
+/**
+ * Spec 058: the catalog of this run. Under „Eingabe“ the Marke, then Grundlagen (on every canvas),
+ * then the entries of KATALOGO_056; under „Vorschlag“ first „Namen und Beschreibung“ (sign `ki`,
+ * node `ki-namen`, at most once); under „Vorschau“ the Layout-Beispiel (on every canvas) before
+ * „Komponenten“. Every other entry as in KATALOGO_056, which itself stays as it is.
+ */
+export const KATALOGO_058: readonly KatalogoEnskribo[] = KATALOGO_056.flatMap(
+  (e): KatalogoEnskribo[] => {
+    if (e.nodo === "marko")
+      return [
+        e,
+        {
+          grupo: "Eingabe",
+          nomo: "Marke · Grundlagen",
+          zeichen: "teksto",
+          lauf: "MP-2",
+          nodo: GRUNDLAGEN_ID,
+        },
+      ];
+    if (e.grupo === "Vorschlag" && e.nomo === "Richtung")
+      return [
+        {
+          grupo: "Vorschlag",
+          nomo: "Namen und Beschreibung",
+          zeichen: "ki",
+          lauf: "MP-2",
+          nodo: KI_NAMEN_ID,
+        },
+        e,
+      ];
+    if (e.nodo === "vorschau")
+      return [
+        {
+          grupo: "Vorschau",
+          nomo: "Layout-Beispiel",
+          zeichen: "bildo",
+          lauf: "MP-2",
+          nodo: LAYOUT_ID,
+        },
+        e,
+      ];
+    return [e];
+  },
+);
+
+// ---------------------------------------------------------------------------------------------
+// Spec 058: the calm sentences and words (product spec, verbatim; bold marks dropped)
+
+/** The titles of the new nodes. */
+export const ETIKEDOJ_058: Readonly<Record<Nodo058, string>> = {
+  "teksto-grundlagen": "Marke · Grundlagen",
+  "ki-namen": "Namen und Beschreibung",
+  "layout-beispiel": "Layout-Beispiel",
+};
+
+/** Grundlagen: the two fields and the hint in the description. */
+export const GRUNDLAGEN_ETIKEDOJ = { name: "Name", beschreibung: "Beschreibung" } as const;
+export const GRUNDLAGEN_HINWEIS = "Was ist das, für wen, was macht es besonders";
+
+/** The KI buttons. */
+export const VORSCHLAGEN = "Vorschlagen";
+export const MARKE_AUSWERTEN = "Marke auswerten";
+export const AUFBAU_ERKENNEN = "Aufbau erkennen";
+export const NEU = "Neu";
+export const UEBERNEHMEN = "übernehmen";
+export const UEBERNOMMEN = "übernommen";
+export const VORSCHLAG_UEBERNEHMEN = "Vorschlag übernehmen";
+export const VERALTET = "veraltet";
+export const KI_LAEUFT = "läuft …";
+
+/** KI calls (product spec, edge cases „KI-Aufrufe“). */
+export const KEIN_SPRACHMODELL_SATZ = "Kein Sprachmodell eingerichtet";
+export const KEINE_EINGABE_SATZ = "Noch keine Eingabe mit Inhalt";
+export const KI_NICHT_GEANTWORTET_SATZ =
+  "Das Sprachmodell hat nicht geantwortet. Nichts wurde geändert.";
+export const KI_UNLESBAR_SATZ = "Die Antwort ließ sich nicht lesen. Nichts wurde geändert.";
+export const KI_TEILWEISE_SATZ = "Ein Teil des Vorschlags ließ sich nicht lesen.";
+export const KEINE_BILDER_SATZ = "Das eingerichtete Sprachmodell liest keine Bilder.";
+
+/** Taking over (product spec, edge cases „Übernehmen“, E-2). */
+export const STAND_FEHLT_SATZ = "Stand ließ sich nicht sichern, nichts übernommen.";
+export const NAME_FREI_SATZ = "Ob ein Name frei ist, prüft Fundamento nicht.";
+
+/** The name of the Stand before a takeover: „vor Übernahme, HH:MM“ (the caller's clock). */
+export function vorUebernahmeDe(stundo: number, minuto: number): string {
+  const du = (n: number): string => String(n).padStart(2, "0");
+  return `vor Übernahme, ${du(stundo)}:${du(minuto)}`;
+}
+
+/** The Marken-Knoten (mockup B). */
+export const ENTWURF_UNGEPRUEFT = "Entwurf · ungeprüft";
+export const GESTALTUNGSVORSCHLAG = "Gestaltungsvorschlag";
+export const MARKENPROFIL_EINZELHEITEN = "Markenprofil · Einzelheiten";
+export const WORAUS_ES_ENTSTAND = "Woraus es entstand";
+export const NOCH_NICHT_AUSGEWERTET_SATZ =
+  "Noch nicht ausgewertet. „Marke auswerten“ fasst alle Eingaben zu einem Markenprofil zusammen.";
+
+/** „noch offen: Zielgruppe, Wettbewerb“ – the calm grey line of the overview; "" when none is. */
+export function offenSatzDe(etikedoj: readonly string[]): string {
+  return etikedoj.length === 0 ? "" : `noch offen: ${etikedoj.join(", ")}`;
+}
+
+/** The Layout-Beispiel (product spec G). */
+export const BILD_GEHT_SATZ = "Das Bild geht dafür an das Sprachmodell.";
+export const NUR_BILD_SATZ = "Aufbau erkennen geht nur mit einem Bild";
+
+/** The preview node (product spec G, mockup `vorschau-knoten-aufbauten.html`). */
+export const ANSICHT_ETIKEDOJ: Readonly<Record<Ansicht, string>> = {
+  marke: "Marke",
+  komponenten: "Komponenten",
+};
+export const AUFBAU_ETIKEDOJ: Readonly<Record<AufbauId, string>> = {
+  titel: "Großer Titel",
+  raster: "Kartenraster",
+  liste: "Ruhige Liste",
+};
+export const ANSICHT = "Ansicht";
+export const AUFBAU = "Aufbau";
+export const WIE_LAYOUT = "wie Layout-Beispiel";
+export const AUFBAU_KOMPONENTEN_SATZ = "Der Aufbau gilt für die Ansicht ‚Marke‘.";
+
+/** The title of a preview node by its view: „Vorschau · Marke“, „Vorschau · Komponenten“. */
+export function vorschauTitoloDe(ansicht: Ansicht): string {
+  return `Vorschau · ${ANSICHT_ETIKEDOJ[ansicht]}`;
+}
+
+/** The reason line while the Layout-Beispiel chooses: „wie Layout-Beispiel · <grund>“. */
+export function wieLayoutSatzDe(grund: string): string {
+  return `${WIE_LAYOUT} · ${grund}`;
+}
+
+/** The line of a hand choice: „Kartenraster, von Hand gewählt · wie Layout-Beispiel“. */
+export function vonHandSatzDe(aufbau: AufbauId): string {
+  return `${AUFBAU_ETIKEDOJ[aufbau]}, von Hand gewählt · ${WIE_LAYOUT}`;
 }

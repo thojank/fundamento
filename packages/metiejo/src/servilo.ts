@@ -51,7 +51,13 @@ import {
   zweitfarbeAblehnungOf,
   zweitfarbeAlsAktionOf,
 } from "./asistanto/iloj.js";
-import { Budget, CostLimitReached, type Fetch, type Provider } from "./asistanto/ki.js";
+import {
+  Budget,
+  type ChatOptions,
+  CostLimitReached,
+  type Fetch,
+  type Provider,
+} from "./asistanto/ki.js";
 import {
   appendKroniko,
   type KronikoEro,
@@ -106,10 +112,21 @@ import {
   wirksamerAgordo,
 } from "./grafeo-gestalten.js";
 import { gestaltenScreen, LEINWAND_CSS_HREF } from "./grafeo-gestalten-ekrano.js";
-import type { LeinwandStato, LeinwandStatoKnoto } from "./grafeo-gestalten-sicht.js";
+import {
+  AUFBAUOJ,
+  estasAufbauId,
+  KI_NICHT_GEANTWORTET_SATZ,
+  LAYOUT_DOSIERUJO,
+  LAYOUT_ID,
+  type LeinwandStato,
+  type LeinwandStatoKnoto,
+  type MarkeInhalt,
+} from "./grafeo-gestalten-sicht.js";
 import { leinwandSchreiben, paletroStufojDe } from "./grafeo-skribo.js";
 import { CLIENT_SCRIPT, escapeHtml, grafeoScreen, previewDocument } from "./html.js";
 import { identOf } from "./ident.js";
+import { kiProfilVojoj } from "./ki-profil-vojoj.js";
+import { kiVojoj } from "./ki-vojoj.js";
 import { type Klartext, klartextOf, satzOf, vorschlagOf } from "./klartext.js";
 import {
   komponentoList,
@@ -121,6 +138,8 @@ import {
 import { knownFonts } from "./kontrolo.js";
 import { kreiloScreen } from "./kreilo/ekrano.js";
 import { describeKaraktero, kreiloProponoj } from "./kreilo/kreilo.js";
+import { layoutVojoj } from "./layout-vojoj.js";
+import { markeInhaltDe } from "./leinwand-auswertung.js";
 import { enhavoDe } from "./leinwand-enhavo.js";
 import {
   LEINWAND_STATO_FELD,
@@ -132,6 +151,7 @@ import {
   serializeLeinwandAntwort,
 } from "./leinwand-stato.js";
 import { markenListeDe } from "./marken-liste.js";
+import { markenVojoj } from "./marken-vojoj.js";
 import {
   createMarko,
   listMarkoj,
@@ -222,6 +242,7 @@ import {
   startAgordo,
 } from "./vorschau.js";
 import { previewBody } from "./vorschau-korpo.js";
+import { komponentenKorpo, markeKorpo } from "./vorschau-marke.js";
 
 /** Spec 033 S6: the requests of the UTC day per provider, beside the brands. */
 export const ANFRAGOJ_FILE = ".anfragoj.json";
@@ -474,6 +495,24 @@ export interface VojoKunteksto {
   leinwandBildoForigi: (name: string) => void;
   /** ANFRAGE_GRENZE; `dateiGrenzeDe(ANFRAGE_GRENZE)` is the largest file of one upload. */
   ANFRAGE_GRENZE: number;
+  /**
+   * Spec 058 (plan §3.3): the existing model access for the KI routes of the canvas (VOJOJ_058).
+   * They call `chatCompletion` (asistanto/ki.ts) only with these; no new limit, timeout or retry.
+   */
+  ki: {
+    /** The provider of the .env; undefined → 503 `{satz: satz()}`. */
+    provider: Provider | undefined;
+    /** The calm sentence without a model (`kiSatz()`). */
+    satz: () => string;
+    /** A fresh `new Budget(options.ki?.limo ?? 60_000)` per call. */
+    budget: () => Budget;
+    /** The fetch double, the gate, `sleep` and the redacted log – as the research agent passes. */
+    chatOptions: () => ChatOptions;
+    /** The existing sentences for the cost and the day limit, else KI_NICHT_GEANTWORTET_SATZ. */
+    fehlerSatz: (error: unknown) => string;
+    /** A failed turn into the Kroniko with what it cost (nothing without a cost on the error). */
+    failedTurn: (name: string, entry: KronikoInput, error: unknown, satz: string) => void;
+  };
 }
 
 function readBody(request: IncomingMessage, limit = ANFRAGE_GRENZE): Promise<string> {
@@ -535,9 +574,19 @@ function dosieroEkzistas(dir: string, name: string): boolean {
 function statoKunFehlt(
   dir: string,
   stato: LeinwandStato,
+  /** Spec 058 (`stufe=58`): the Layout-Beispiel's file in `materialo/layout/` as well. */
+  kun058 = false,
 ): { stato: LeinwandStato; dosieroj: boolean } {
   let dosieroj = false;
   const knoten = stato.knoten.map((knoto): LeinwandStatoKnoto => {
+    if (kun058 && knoto.id === LAYOUT_ID) {
+      const datei = enhavoDe(LAYOUT_ID, knoto.inhalt)?.datei;
+      if (datei === undefined) return knoto;
+      dosieroj = true;
+      const { fehlt: _f, ...d } = datei;
+      const ekzistas = dosieroEkzistas(join(dir, MATERIALO_DIR, LAYOUT_DOSIERUJO), d.name);
+      return { ...knoto, inhalt: { ...knoto.inhalt, datei: ekzistas ? d : { ...d, fehlt: true } } };
+    }
     if (knoto.id === "beispiele") {
       const beispiele = enhavoDe("beispiele", knoto.inhalt);
       if (beispiele?.dateien === undefined || beispiele.dateien.length === 0) return knoto;
@@ -625,6 +674,12 @@ const KEINE_KABLOJ: { teksto: string; agordo: Agordo | undefined } = {
   agordo: undefined,
 };
 
+/** Spec 058: the layout of the page „Marke“ from its address; anything else is the first one. */
+function aufbauParametro(params: URLSearchParams): (typeof AUFBAUOJ)[number] {
+  const aufbau = params.get("aufbau");
+  return estasAufbauId(aufbau) ? aufbau : AUFBAUOJ[0];
+}
+
 /** Spec 047 (NE-1): the dist dir of the built canvas, or null when it is not there. */
 function leinwandDist(): string | null {
   try {
@@ -699,12 +754,26 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   // Spec 055 (T4, D-14): the answer also carries the canvas state, so an entry holds only for the
   // same rev and the same bytes of `leinwand.json` (null: no file).
   const leinwandBildoj = new Map<string, { rev: number; dosiero: string | null; korpo: string }>();
+  // Spec 058: the answers with `stufe=58` are held apart, so the older answer never changes.
+  const leinwandBildoj058 = new Map<
+    string,
+    { rev: number; dosiero: string | null; korpo: string }
+  >();
   /**
    * Spec 055 (D-14): drops the cached `/api/leinwand` answer of a brand. Every route that writes
    * `leinwand.json` calls it (PUT/DELETE `leinwand-stato`; LNS-3.1: „Öffnen“ of a Stand).
    */
   const leinwandBildoForigi = (name: string): void => {
     leinwandBildoj.delete(name);
+    leinwandBildoj058.delete(name);
+  };
+  /** Spec 058: what the page „Marke“ shows of a brand, from its stored canvas state. */
+  const markeInhaltOf = (name: string, agordo: Agordo): MarkeInhalt => {
+    const dosiero = leinwandStatoLegi(options.workdir, name);
+    return markeInhaltDe(
+      dosiero.speco === "stato" ? dosiero.stato : { knoten: [] },
+      agordo.etikedoj?.marko ?? name,
+    );
   };
   let belegung: Agordo | null | undefined;
   const belegungOf = (): Agordo | null => {
@@ -1665,6 +1734,25 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     privata,
     leinwandBildoForigi,
     ANFRAGE_GRENZE,
+    // Spec 058 (plan §3.3): the model access of the KI routes, wired as the research agent's.
+    ki: {
+      provider: options.ki?.provider,
+      satz: () => kiSatz(),
+      budget: () => new Budget(options.ki?.limo ?? 60_000),
+      chatOptions: () => ({
+        ...(options.ki?.fetch === undefined ? {} : { fetch: options.ki.fetch }),
+        ...(options.ki?.sleep === undefined ? {} : { sleep: options.ki.sleep }),
+        ...gated,
+        log: (line: string) => io.stderr(`${redact(line)}\n`),
+      }),
+      fehlerSatz: (error) =>
+        error instanceof DayLimitReached
+          ? dayLimitSatz(error)
+          : error instanceof CostLimitReached
+            ? `Die Kostengrenze dieser Runde ist erreicht (${error.limit} Tokens). Formuliere den Wunsch kürzer oder in mehreren Schritten.`
+            : KI_NICHT_GEANTWORTET_SATZ,
+      failedTurn,
+    },
   };
 
   const sendStatic = (response: ServerResponse, root: string, rest: string): void => {
@@ -1761,6 +1849,10 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
   // before the generic `/api/marko/*` and `/marko/:name/*` handlers; the first that answers true
   // has handled the request.
   const VOJOJ_056 = [beispieleVojoj, tiparoVojoj, schriftdosierojVojoj] as const;
+  // Spec 058 (plan D-1, §3.3): the four route modules of this run, asked in this order right after
+  // VOJOJ_056: „Marken“ (MAW-3.1), the KI state and names (MAW-3.3), the profile (MAW-4.1), the
+  // Layout-Beispiel and „Aufbau erkennen“ (MAW-4.2). The only registration of the run.
+  const VOJOJ_058 = [markenVojoj, kiVojoj, kiProfilVojoj, layoutVojoj] as const;
 
   async function handle(
     request: IncomingMessage,
@@ -1861,7 +1953,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       const dosieroKabloj =
         stato !== null && !url.searchParams.has("kabloj") ? stato.kabloj : undefined;
       const senKabloj = kablojTeksto(kabloj) === "" && kablojTeksto(dosieroKabloj ?? {}) === "";
-      const cached = senKabloj ? leinwandBildoj.get(markoName) : undefined;
+      // Spec 058: `stufe=58` adds the previews' choices and 058 addresses; any other value or none
+      // answers as before.
+      const stufe58 = url.searchParams.get("stufe") === "58";
+      const kasxmemoro = stufe58 ? leinwandBildoj058 : leinwandBildoj;
+      const cached = senKabloj ? kasxmemoro.get(markoName) : undefined;
       if (cached?.rev === draft.rev && cached.dosiero === dosieroBajtoj) {
         response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(cached.korpo);
         return;
@@ -1906,24 +2002,29 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       const palettes = paletrojDe(wirksam, bases);
       // Spec 056 (D-3): with a state the Marke carries what arrives at it and Primär may show „aus
       // Material“; without one the Bildo and the answer are those of Spec 055, byte for byte.
-      const bildo = gestaltenDe(read.agordo, {
+      const eingaben = {
         start,
         kabloj: wirksameKabloj,
         palettes,
         rev,
         ...(stato === null ? {} : { stato }),
-      });
+      };
+      const bildo = stufe58
+        ? gestaltenDe(read.agordo, eingaben, { stufe: 58 })
+        : gestaltenDe(read.agordo, eingaben);
       // Spec 056 (§2.1): files that are gone are marked in the answer; such an answer depends on
       // the brand's folders too, so it is not cached.
       const fehlt =
-        stato === null ? undefined : statoKunFehlt(markoDir(options.workdir, markoName), stato);
+        stato === null
+          ? undefined
+          : statoKunFehlt(markoDir(options.workdir, markoName), stato, stufe58);
       const korpo = serializeLeinwandAntwort(
         bildo,
         fehlt?.stato ?? stato,
         dosiero.speco === "unlesbar",
       );
       if (senKabloj && fehlt?.dosieroj !== true)
-        leinwandBildoj.set(markoName, { rev, dosiero: dosieroBajtoj, korpo });
+        kasxmemoro.set(markoName, { rev, dosiero: dosieroBajtoj, korpo });
       response.writeHead(200, { "content-type": TYPES[".json"] ?? "" }).end(korpo);
       return;
     }
@@ -1934,6 +2035,9 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     // 200 `{gespeichert}`. Before the generic /api/marko/* handlers.
     // Spec 056 (D-13): the routes of Beispiele, of the font catalog and of own fonts.
     for (const vojo of VOJOJ_056) {
+      if (await vojo(vojoKunteksto, request, response, method, path, url)) return;
+    }
+    for (const vojo of VOJOJ_058) {
       if (await vojo(vojoKunteksto, request, response, method, path, url)) return;
     }
     const leinwandStatoVojo = /^\/api\/marko\/([a-z0-9-]+)\/leinwand-stato$/.exec(path);
@@ -3426,17 +3530,24 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               .map((key) => [`data-fm-${key}`, url.searchParams.get(key) ?? ""])
               .filter(([, value]) => value !== ""),
           ),
-          body: previewBody(
-            isSxtupoKey(sxtupo) ||
-              sxtupo.startsWith("studio-") ||
-              sxtupo.startsWith("komponento-") ||
-              sxtupo.startsWith("buehne-")
-              ? sxtupo
-              : "vorschau",
-            breite,
-            agordo,
-            zeloOf(url.searchParams),
-          ),
+          // Spec 058 (plan D-1): the views „Marke“ and „Komponenten“ of a preview node; every
+          // other `sxtupo` (an unknown one too) is answered as before.
+          body:
+            sxtupo === "marke"
+              ? markeKorpo(markeInhaltOf(name, draft.agordo), aufbauParametro(url.searchParams))
+              : sxtupo === "komponenten"
+                ? komponentenKorpo(breite, agordo, zeloOf(url.searchParams))
+                : previewBody(
+                    isSxtupoKey(sxtupo) ||
+                      sxtupo.startsWith("studio-") ||
+                      sxtupo.startsWith("komponento-") ||
+                      sxtupo.startsWith("buehne-")
+                      ? sxtupo
+                      : "vorschau",
+                    breite,
+                    agordo,
+                    zeloOf(url.searchParams),
+                  ),
         }));
         // Spec 036, Befund 3.5: the stage's frame „Jetzt“ shows the open problems of the draft's
         // check per component (the step's state counts the same problems).

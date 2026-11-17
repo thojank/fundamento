@@ -10,6 +10,9 @@
 // Spec 056 (T2, plan D-29): the notice counts – „1 Verbindung gelöst · zurücksetzen“, „n
 // Verbindungen gelöst · zurücksetzen“ – the changed colour rows and the detached edges into the
 // Marke; „gilt nur in dieser Sitzung“ goes (both persist in the canvas state since Spec 055/056).
+// Spec 058 (T2, MAW-2.1): the brand reads the live display name (`nomo`, `[data-nr-kapo-nomo]`);
+// the slot `marken` („Neue Marke“, „Marken“; gestalten/marken.tsx, MAW-3.1) follows „+ Knoten“;
+// „Anordnen“ (`[data-nr-anordnen]`) stands right before „Anordnung zurücksetzen“.
 
 import { geloestHinweisDe, NE_KONSERVITA_SATZ, type Schema } from "@fundamento/metiejo/gestalten";
 import type { ReactNode } from "react";
@@ -72,8 +75,18 @@ export const STATO_UNLESBAR_SATZ = "Anordnung ließ sich nicht lesen, Startanord
 
 export interface KapoProps {
   marko: string;
-  /** The brand's name as written (`bildo.marko.etikedo`). */
-  etikedo: string;
+  /**
+   * Spec 058: the live display name (`nomo` of the shell: typed in Grundlagen, else
+   * `bildo.marko.etikedo`, else the identifier).
+   */
+  nomo: string;
+  /**
+   * Spec 058: the slot for „Neue Marke“ and „Marken“ (`<Marken />`, gestalten/marken.tsx), in the
+   * left group right after „+ Knoten“. Null: nothing there.
+   */
+  marken?: ReactNode;
+  /** Spec 058: „Anordnen“ – every node laid out left to right from its measured size. */
+  anordnen: () => void;
   menuoMalfermita: boolean;
   /** Opens or closes the list „+ Knoten“. */
   menuo: () => void;
@@ -127,7 +140,9 @@ const SKEMOJ: readonly Schema[] = ["hell", "dunkel"];
 
 export function Kapo({
   marko,
-  etikedo,
+  nomo: etikedo,
+  marken = null,
+  anordnen,
   menuoMalfermita,
   menuo,
   gespeichert,
@@ -153,8 +168,9 @@ export function Kapo({
         >
           + Knoten
         </fm-butono>
+        {marken}
         <span className="nr-g-trenilo" />
-        <strong>{etikedo}</strong>
+        <strong data-nr-kapo-nomo="">{etikedo}</strong>
         <span className="nr-g-etikedo">Entwurf · ungeprüft</span>
         <span className="nr-g-trenilo" />
         <nav className="nr-g-segmento" aria-label="Ansicht">
@@ -188,6 +204,9 @@ export function Kapo({
           </span>
         )}
         {staende}
+        <fm-butono size="small" emphasis="medium" data-nr-anordnen="" onClick={anordnen}>
+          Anordnen
+        </fm-butono>
         <fm-butono
           size="small"
           emphasis="medium"

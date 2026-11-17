@@ -89,7 +89,7 @@ describe("Spec 056 T1: the new port ids (tech spec table)", () => {
       "marko.en",
       "marko.en.farbo",
       "marko.en.tiparo",
-      "vorschau-hell.en.bildo",
+      // Spec 058 (MAW-1.1): `vorschau-hell.en.bildo` is a port now (the Layout-Beispiel's input).
     ].filter((port) => anschlussDe(port) !== undefined);
     expect(keine).toEqual([]);
   });
