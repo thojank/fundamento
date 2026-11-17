@@ -17,8 +17,9 @@
 // Spec 056 (T2, Teil V): ports are round – filled when connected, a ring otherwise – in their kind's
 // colour (Text, Bild, Schrift, Maß, Marke; a colour port in its colour). The two inputs of the
 // Marke take many edges (D-18): grabbing one picks up the selected edge there, else the last one.
+// Spec 058 (MAW-3.3): the same for the two inputs of „Namen und Beschreibung“ (`estasMultaEnir`).
 
-import { anschlussDe, estasMarkoEnir, validaLigo } from "@fundamento/metiejo/gestalten";
+import { anschlussDe, estasMultaEnir, validaLigo } from "@fundamento/metiejo/gestalten";
 import { Handle, Position, useConnection } from "@xyflow/react";
 import type { CSSProperties, MouseEvent } from "react";
 import { useGestalten } from "./kunteksto.js";
@@ -120,7 +121,7 @@ export function Anschluss({ port, supro, hex, rando, tenilo }: AnschlussProps) {
   }
   // A fixed edge (D-18) stays where it is: its end is never picked up.
   const enaj = el ? [] : ligoj.filter((l) => l.al === port && l.fest !== true).map((l) => l.id);
-  const ena = estasMarkoEnir(port) ? undefined : enaj[0];
+  const ena = estasMultaEnir(port) ? undefined : enaj[0];
   const stilo = {
     ...(rando === undefined ? { top: supro } : {}),
     "--nr-g-art": artKoloro(anschluss.art, hex),

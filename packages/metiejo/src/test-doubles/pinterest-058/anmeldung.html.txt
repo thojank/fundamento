@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<!-- Spec 058 (MAW-3.5): an INVENTED login page in the shape of one – no copy of a real page. -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Pinterest</title>
+<meta property="og:image" content="https://s.pinimg.com/images/erfunden-logo.png">
+</head>
+<body>
+<form action="/login/" method="post"><input name="id" type="email"><input name="password" type="password"></form>
+<script id="__PWS_INITIAL_PROPS__" type="application/json">{"isAuthenticated":false,"context":{"login":true}}</script>
+</body>
+</html>

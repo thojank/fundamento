@@ -13,6 +13,15 @@
 // Contract (KBS-2.1): `NodeProps<BeispieleFlowNodo>`; frame `<NodoSxelo id="beispiele">` (dashed
 // while empty, „×“ in the head while empty, faded while `beispiele.el` is detached); port
 // `BEISPIELE_ELIR` at the bottom edge; content through `inhaltDe("beispiele")` / `inhaltMeti`.
+//
+// Spec 058 (MP-2c, T8, MAW-3.5, product spec F): a Pinterest link in the field asks for its preview
+// (`{url, vorschau: true}`). A preview shows the title and up to twelve thumbnails, loaded by the
+// browser straight from `i.pinimg.com` (`referrerpolicy="no-referrer"`, `loading="lazy"`, plan D-4,
+// no route of ours in between); the images stay in this session, the content keeps the link and its
+// title. „als Beispiel nehmen“ and „alle nehmen“ take images with the existing `{url}` call, one
+// after another; a taken file carries its address as `quelle` and the image shows „genommen“. After
+// a reload the link shows its title and „Vorschau zeigen“, which asks again only on a click.
+// Removing the link keeps the taken images. Pinterest's sentence stands only at the fallback.
 
 import {
   BEISPIELE_ARTOJ,
@@ -24,6 +33,7 @@ import {
   type InhaltBeispiele,
   LINK_FELD,
   NE_KONSERVITA_SATZ,
+  NELEGEBLA_DOSIERO_SATZ,
 } from "@fundamento/metiejo/gestalten";
 import type { NodeProps } from "@xyflow/react";
 import { type DragEvent, useCallback, useEffect, useRef, useState } from "react";
@@ -33,9 +43,15 @@ import {
   beispielForigi,
   beispielHochladen,
   beispielLigi,
+  beispielVorschau,
+  bildNomoDe,
+  estasGenommen,
+  estasPinterestAdreso,
   kunDosiero,
   kunVerweis,
   materialoFonto,
+  PINTEREST_BILDER_ZAHL,
+  type PinterestBild,
   senDosiero,
   senVerweis,
 } from "../beispiele-datumoj.js";
@@ -115,14 +131,33 @@ const STILO = `
 .nr-g-beispiele-zeile > fm-kampo::part(control) { min-inline-size: 0; inline-size: 100%; }
 .nr-g-beispiele-verweise { margin: 0; padding: var(--fm-spacing-small) var(--fm-spacing-large) 0; list-style: none; }
 .nr-g-beispiele-verweise > li {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--fm-spacing-small);
   padding-block-end: var(--fm-spacing-small);
   font-size: var(--fm-typography-caption-font-size);
   line-height: var(--fm-typography-caption-line-height);
 }
-.nr-g-beispiele-verweise > li > span { flex: 1; min-inline-size: 0; }
+.nr-g-beispiele-verweis { display: flex; align-items: flex-start; gap: var(--fm-spacing-small); }
+.nr-g-beispiele-verweis > span { flex: 1; min-inline-size: 0; }
+.nr-g-beispiele-titel { display: block; color: ${ROLOJ.teksto}; }
+.nr-g-pinterest-raster {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--fm-spacing-small);
+  padding-block-start: var(--fm-spacing-small);
+}
+.nr-g-pinterest-bild { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); min-inline-size: 0; }
+.nr-g-pinterest-bild > img {
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--fm-radius-small);
+  background: ${ROLOJ.pinto};
+}
+.nr-g-pinterest-bild[data-nr-genommen] > img { opacity: 0.5; }
+.nr-g-pinterest-bild > span { color: ${ROLOJ.mallauta}; text-align: center; }
+.nr-g-pinterest-bild > fm-butono { inline-size: 100%; }
+.nr-g-pinterest-bild > fm-butono::part(control) { inline-size: 100%; min-inline-size: 0; white-space: normal; }
+.nr-g-pinterest-aktoj { display: flex; gap: var(--fm-spacing-small); padding-block-start: var(--fm-spacing-small); }
 .nr-g-beispiele-verweise .mono { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .nr-g-beispiele-verweise .nr-g-mallauta { display: block; }
 @media (prefers-reduced-motion: no-preference) {
@@ -163,6 +198,10 @@ export function BeispieleNodo({ data }: NodeProps<BeispieleFlowNodo>) {
   const [meldoj, setMeldoj] = useState<readonly string[]>([]);
   const [laboras, setLaboras] = useState(false);
   const [trenata, setTrenata] = useState(false);
+  /** Spec 058: the images of each Pinterest preview shown in this session, by link. */
+  const [vorschauen, setVorschauen] = useState<Readonly<Record<string, readonly PinterestBild[]>>>(
+    {},
+  );
   /** A number per file this session stored, so a replaced image is not taken from the cache. */
   const [versioj, setVersioj] = useState<Readonly<Record<string, number>>>({});
   // The follow rule runs once the new content is rendered (it reads it from the context).
@@ -200,6 +239,12 @@ export function BeispieleNodo({ data }: NodeProps<BeispieleFlowNodo>) {
         setVersioj((nun) => ({ ...nun, [datei.name]: (nun[datei.name] ?? 0) + 1 }));
       } else if (rezulto.speco === "verweis") {
         meti(kunVerweis(aktuala.current, rezulto.verweis), false);
+        // A preview asked again that gave nothing: the link falls back, its old images go.
+        const { adresse } = rezulto.verweis;
+        setVorschauen(({ [adresse]: _, ...resto }) => resto);
+      } else if (rezulto.speco === "vorschau") {
+        meti(kunVerweis(aktuala.current, rezulto.verweis), false);
+        setVorschauen((nun) => ({ ...nun, [rezulto.verweis.adresse]: rezulto.bilder }));
       } else {
         novaj.push(
           meldoDe(nomo, rezulto.speco === "nelegebla" ? rezulto.satz : NE_KONSERVITA_SATZ),
@@ -232,10 +277,12 @@ export function BeispieleNodo({ data }: NodeProps<BeispieleFlowNodo>) {
     enviciigi(async () => {
       setMeldoj([]);
       const novaj: string[] = [];
-      const rezulto = await beispielLigi(marko, adresse);
+      const rezulto = estasPinterestAdreso(adresse)
+        ? await beispielVorschau(marko, adresse)
+        : await beispielLigi(marko, adresse);
       preni(adresse, rezulto, novaj);
       setMeldoj(novaj);
-      if (rezulto.speco === "datei" || rezulto.speco === "verweis") {
+      if (rezulto.speco !== "nelegebla" && rezulto.speco !== "problemo") {
         (el as HTMLElement & { value?: string }).value = "";
         el.setAttribute("value", "");
       }
@@ -258,10 +305,55 @@ export function BeispieleNodo({ data }: NodeProps<BeispieleFlowNodo>) {
   const verweisForigi = useCallback(
     (adresse: string) => {
       enviciigi(async () => {
+        // The taken images stay: they are files of their own.
         meti(senVerweis(aktuala.current, adresse), false);
+        setVorschauen(({ [adresse]: _, ...resto }) => resto);
       });
     },
     [enviciigi, meti],
+  );
+
+  /** Spec 058: asks for the preview of a link again – only on a click („Vorschau zeigen“). */
+  const zeigen = useCallback(
+    (adresse: string) => {
+      enviciigi(async () => {
+        setMeldoj([]);
+        const novaj: string[] = [];
+        preni(adresse, await beispielVorschau(marko, adresse), novaj);
+        setMeldoj(novaj);
+      });
+    },
+    [enviciigi, preni, marko],
+  );
+
+  /**
+   * Spec 058: takes images of a preview, one after another, each not yet taken; one that does
+   * not come in stands calmly named at the node, the others stay.
+   */
+  const nehmen = useCallback(
+    (bilder: readonly PinterestBild[]) => {
+      enviciigi(async () => {
+        setMeldoj([]);
+        const novaj: string[] = [];
+        for (const b of bilder) {
+          if (estasGenommen(aktuala.current, b.bild)) continue;
+          const nomo = bildNomoDe(b.bild);
+          const rezulto = await beispielLigi(marko, b.bild);
+          if (rezulto.speco === "datei") {
+            preni(nomo, { speco: "datei", datei: { ...rezulto.datei, quelle: b.bild } }, novaj);
+          } else if (rezulto.speco === "nelegebla") {
+            novaj.push(meldoDe(nomo, rezulto.satz));
+          } else if (rezulto.speco === "problemo") {
+            novaj.push(meldoDe(nomo, NE_KONSERVITA_SATZ));
+          } else {
+            // No image at that address: the file is not there, nothing is kept as a reference.
+            novaj.push(meldoDe(nomo, NELEGEBLA_DOSIERO_SATZ));
+          }
+        }
+        setMeldoj(novaj);
+      });
+    },
+    [enviciigi, preni, marko],
   );
 
   // The field takes its address on Enter (the Ero's native keydown, as the colour fields).
@@ -415,27 +507,110 @@ export function BeispieleNodo({ data }: NodeProps<BeispieleFlowNodo>) {
         </div>
         {verweise.length === 0 ? null : (
           <ul className="nr-g-beispiele-verweise">
-            {verweise.map((v) => (
-              <li key={v.adresse} data-nr-verweis={v.adresse}>
-                <span>
-                  <span className="mono" title={v.adresse}>
-                    {v.adresse}
-                  </span>
-                  {v.satz === undefined ? null : <span className="nr-g-mallauta">{v.satz}</span>}
-                </span>
-                <fm-butono
-                  className={`${NODRAG} ${NOPAN}`}
-                  size="small"
-                  emphasis="low"
-                  label="Verweis entfernen"
-                  title="Verweis entfernen"
-                  data-nr-verweis-forigi={v.adresse}
-                  onClick={() => verweisForigi(v.adresse)}
+            {verweise.map((v) => {
+              // A Pinterest link whose preview was shown (it has no fallback sentence).
+              const pinterest = v.satz === undefined && estasPinterestAdreso(v.adresse);
+              const bilder = (vorschauen[v.adresse] ?? []).slice(0, PINTEREST_BILDER_ZAHL);
+              const offen = bilder.filter((b) => !estasGenommen(inhalt, b.bild));
+              return (
+                <li
+                  key={v.adresse}
+                  data-nr-verweis={v.adresse}
+                  data-nr-pinterest={pinterest ? v.adresse : undefined}
                 >
-                  ×
-                </fm-butono>
-              </li>
-            ))}
+                  <div className="nr-g-beispiele-verweis">
+                    <span>
+                      {v.titel === undefined ? null : (
+                        <span className="nr-g-beispiele-titel" data-nr-pinterest-titel="">
+                          {v.titel}
+                        </span>
+                      )}
+                      <span className="mono" title={v.adresse}>
+                        {v.adresse}
+                      </span>
+                      {v.satz === undefined ? null : (
+                        <span className="nr-g-mallauta">{v.satz}</span>
+                      )}
+                    </span>
+                    <fm-butono
+                      className={`${NODRAG} ${NOPAN}`}
+                      size="small"
+                      emphasis="low"
+                      label="Verweis entfernen"
+                      title="Verweis entfernen"
+                      data-nr-verweis-forigi={v.adresse}
+                      onClick={() => verweisForigi(v.adresse)}
+                    >
+                      ×
+                    </fm-butono>
+                  </div>
+                  {!pinterest ? null : bilder.length === 0 ? (
+                    <div className="nr-g-pinterest-aktoj">
+                      <fm-butono
+                        className={`${NODRAG} ${NOPAN}`}
+                        size="small"
+                        emphasis="low"
+                        disabled={laboras}
+                        data-nr-pinterest-zeigen={v.adresse}
+                        onClick={() => zeigen(v.adresse)}
+                      >
+                        Vorschau zeigen
+                      </fm-butono>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="nr-g-pinterest-raster">
+                        {bilder.map((b) => {
+                          const genommen = estasGenommen(inhalt, b.bild);
+                          return (
+                            <div
+                              key={b.bild}
+                              className="nr-g-pinterest-bild"
+                              data-nr-pinterest-bild={b.bild}
+                              data-nr-genommen={genommen ? "" : undefined}
+                            >
+                              <img
+                                src={b.vorschau}
+                                alt=""
+                                referrerPolicy="no-referrer"
+                                loading="lazy"
+                                draggable={false}
+                              />
+                              {genommen ? (
+                                <span>genommen</span>
+                              ) : (
+                                <fm-butono
+                                  className={`${NODRAG} ${NOPAN}`}
+                                  size="small"
+                                  emphasis="low"
+                                  disabled={laboras}
+                                  data-nr-pinterest-nehmen={b.bild}
+                                  onClick={() => nehmen([b])}
+                                >
+                                  als Beispiel nehmen
+                                </fm-butono>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="nr-g-pinterest-aktoj">
+                        <fm-butono
+                          className={`${NODRAG} ${NOPAN}`}
+                          size="small"
+                          emphasis="medium"
+                          disabled={laboras || offen.length === 0}
+                          data-nr-pinterest-alle={v.adresse}
+                          onClick={() => nehmen(offen)}
+                        >
+                          alle nehmen
+                        </fm-butono>
+                      </div>
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
         <Erkannt />

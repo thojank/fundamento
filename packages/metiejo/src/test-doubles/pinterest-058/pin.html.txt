@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<!-- Spec 058 (MAW-3.5): an INVENTED page in the shape of a single pin – no copy of a real page.
+     No og:title (the title comes from <title>), no JSON, one image in two sizes. -->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>  Hobelbank
+  aus Eiche </title>
+<meta property='og:image' content='https://i.pinimg.com/originals/c4/d5/e6/c4d5e6f7a8b90001.jpg'>
+</head>
+<body>
+<img src="https://i.pinimg.com/736x/c4/d5/e6/c4d5e6f7a8b90001.jpg" alt="Hobelbank">
+<script id="__PWS_INITIAL_PROPS__" type="application/json">{nicht lesbar</script>
+</body>
+</html>

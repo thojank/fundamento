@@ -9,6 +9,8 @@
 // Spec 055 (T5): the named Stände – `staendeSxargi` lists them, `standKonservi` saves the draft and
 // the canvas state as a new Stand, `standMalfermi` opens one (the server backs the current state up
 // first). The answers carry no judgement; a Stand whose Agordo does not read answers its calm line.
+// Spec 058 (T2): the canvas loads with `stufe=58` (`fonto058`); `skribi` also carries the write key
+// `{name}` (the display name; the server side is MAW-3.2), unchanged in shape.
 
 import {
   type Bildo,
@@ -57,6 +59,15 @@ const tekstoDe = (html: string): string =>
 export function fontoKun(fonto: string, kabloj: Kabloj | undefined): string {
   if (kabloj === undefined) return fonto;
   return `${fonto}${fonto.includes("?") ? "&" : "?"}kabloj=${kablojTeksto(kabloj)}`;
+}
+
+/**
+ * Spec 058 (T2): `fonto` with `stufe=58` – the answer then carries each preview's view, layout
+ * choice and 058 address and the new contents of the stored state (plan §3.3). Every later load of
+ * the canvas (`kabloj`, `rekomenci`) goes to this address.
+ */
+export function fonto058(fonto: string): string {
+  return `${fonto}${fonto.includes("?") ? "&" : "?"}stufe=58`;
 }
 
 /**

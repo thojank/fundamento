@@ -10,6 +10,10 @@
 // output into the Marke is detached – the muted body with NE_KONEKTITA_MARKO_SATZ at its foot.
 // Werte has one output per value: its pills fade on their own. Since Spec 056 ports and signs are
 // round (Teil V).
+// Spec 058 (T2, MAW-2.1): the frame does the same for the nodes of Spec 058 – Grundlagen (dashed
+// without a description, muted with NE_KONEKTITA_MARKO_SATZ while its edge into the Marke is
+// detached, never removable), the Layout-Beispiel (dashed without a file, never removable) and
+// „Namen und Beschreibung“ (dashed and with „×“ while it holds no proposal).
 
 import { estasMalplena } from "@fundamento/metiejo/enhavo";
 import {
@@ -17,6 +21,10 @@ import {
   type EnhavoId,
   estasEnhavoId,
   FIKSAJ_TEKSTOJ,
+  GRUNDLAGEN_ELIR,
+  GRUNDLAGEN_ID,
+  KI_NAMEN_ID,
+  LAYOUT_ID,
   NE_KONEKTITA_MARKO_SATZ,
   type Zeichen,
 } from "@fundamento/metiejo/gestalten";
@@ -110,6 +118,22 @@ export function NodoKapo({ signo, nomo, children }: NodoKapoProps) {
   );
 }
 
+/**
+ * Whether the frame of node `id` is empty by its content: a node of Spec 056 by `estasMalplena`;
+ * Spec 058: Grundlagen without a description and the Layout-Beispiel without a file (both by
+ * `estasMalplena`), „Namen und Beschreibung“ without a proposal; any other node never.
+ */
+function malplenaDe(
+  id: string,
+  enhavo: EnhavoId | undefined,
+  inhaltDe: ReturnType<typeof useGestalten>["inhaltDe"],
+): boolean {
+  if (enhavo !== undefined) return estasMalplena(enhavo, inhaltDe(enhavo));
+  if (id === GRUNDLAGEN_ID || id === LAYOUT_ID) return estasMalplena(id, inhaltDe(id));
+  if (id === KI_NAMEN_ID) return inhaltDe(KI_NAMEN_ID)?.vorschlag === undefined;
+  return false;
+}
+
 export interface NodoSxeloProps {
   /** The node id; also `data-nr-nodo` for scripts. */
   id: string;
@@ -145,14 +169,16 @@ export function NodoSxelo({
     ringo === undefined || ringo === "" ? {} : ({ "--nr-g-ringo": ringo } as CSSProperties);
   // Spec 056: what the frame decides for a node of this run.
   const enhavo = estasEnhavoId(id) ? id : undefined;
-  const malplena = leer ?? (enhavo !== undefined && estasMalplena(enhavo, inhaltDe(enhavo)));
-  const elir = enhavo === undefined ? undefined : markoElirDe(enhavo);
+  const malplena = leer ?? malplenaDe(id, enhavo, inhaltDe);
+  const elir =
+    id === GRUNDLAGEN_ID ? GRUNDLAGEN_ELIR : enhavo === undefined ? undefined : markoElirDe(enhavo);
   const geloest = elir !== undefined && markoGeloest.includes(elir);
   const malkonektita = abgehaengt ?? geloest;
   const forigebla =
-    enhavo !== undefined &&
     malplena &&
-    !FIKSAJ_TEKSTOJ.includes(enhavo as (typeof FIKSAJ_TEKSTOJ)[number]);
+    ((enhavo !== undefined &&
+      !FIKSAJ_TEKSTOJ.includes(enhavo as (typeof FIKSAJ_TEKSTOJ)[number])) ||
+      id === KI_NAMEN_ID);
   return (
     <SxeloKunteksto.Provider value={forigebla ? { forigi: () => forigi(id) } : null}>
       <div

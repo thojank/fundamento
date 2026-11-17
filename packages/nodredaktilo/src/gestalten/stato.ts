@@ -13,24 +13,46 @@
 // out of `markoGeloest`, and nothing else at that input changes (D-18). This file keeps exactly one
 // import statement, from `@fundamento/metiejo/gestalten`, and none of the alias of leinwand-enhavo.ts:
 // leinwand-stato-055 and leinwand-sxelo-056 load it by replacing that one import (D-20).
+// Spec 058 (MP-2c, T2, MAW-2.1, plan §3.1, §3.4): the session also holds the contents of
+// Grundlagen, „Namen und Beschreibung“, the Layout-Beispiel and the Marke (`inhaltoj`), whether
+// „Namen und Beschreibung“ was added and which outputs are detached from it (`kiNamen`), and the
+// view and layout choice of every preview, fixed and added (`wahloj`). Grundlagen's edge into the
+// Marke detaches like a text node's (`markoGeloest`). Every addition is written only when present,
+// so a session of Spec 055 or 056 gives the same state as before, and a state of Spec 055 or 056
+// the same session.
 
 import {
+  type Ansicht,
+  type AufbauWahl,
+  ansichtDe,
+  aufbauWahlDe,
   BEISPIELE_ELIR,
   type Bildo,
   type BildoLigo,
   type EnhavoId,
+  type EnhavoId058,
   enhavoSpecoDe,
+  estasAnsicht,
+  estasAufbauWahl,
   estasEnhavoId,
   estasMarkoEnir,
   FARBO_ROLOJ,
   FIKSAJ_TEKSTOJ,
+  GRUNDLAGEN_ELIR,
+  GRUNDLAGEN_ID,
   type Kabloj,
+  KI_NAMEN_BILDO_ENIR,
+  KI_NAMEN_ID,
+  KI_NAMEN_TEKSTO_ENIR,
   kablojDe,
+  LAYOUT_ID,
   type LeinwandStato,
   type LeinwandStatoKnoto,
   type LigoSitzung,
   ligoId,
   ligojKun,
+  NODOJ_058,
+  type Nodo058,
   type Pozicio,
   type Schema,
   TEKSTO_IDS,
@@ -61,14 +83,32 @@ export interface Sesio {
   aldonitaj?: readonly EnhavoId[];
   /**
    * Spec 056: the content of each node of this run (`inhalt`, as `enhavoDe` reads it), fixed text
-   * nodes included; absent = none.
+   * nodes included; absent = none. Spec 058: also Grundlagen, „Namen und Beschreibung“, the
+   * Layout-Beispiel and the Marke (`marko`: the Markenprofil).
    */
-  inhaltoj?: Readonly<Partial<Record<EnhavoId, Record<string, unknown>>>>;
+  inhaltoj?: Readonly<Partial<Record<EnhavoId058, Record<string, unknown>>>>;
   /**
    * Spec 056 (D-19): the outputs whose edge into the Marke is detached (`"teksto-werte.el.w2"`,
-   * `"beispiele.el"`); absent = every edge into the Marke stands. Never in `geloest`.
+   * `"beispiele.el"`); absent = every edge into the Marke stands. Never in `geloest`. Spec 058:
+   * also Grundlagen's output (`"teksto-grundlagen.el"`).
    */
   markoGeloest?: readonly string[];
+  /**
+   * Spec 058: „Namen und Beschreibung“ (`ki-namen`) is on the canvas, with the outputs whose edge
+   * into it is detached (its own, independent of the Marke's); absent = not on the canvas.
+   */
+  kiNamen?: { geloest: readonly string[] };
+  /**
+   * Spec 058: the view and layout choice of each preview by id (the two fixed ones and the added
+   * ones); absent or a missing id = the defaults („marke“, „auto“).
+   */
+  wahloj?: Readonly<Record<string, VorschauWahl>>;
+}
+
+/** Spec 058: the choice of one preview node as the session keeps it (each part only when set). */
+export interface VorschauWahl {
+  ansicht?: Ansicht;
+  aufbau?: AufbauWahl;
 }
 
 /** The state the canvas sends and the server answers (without `version`). */
@@ -103,6 +143,11 @@ const ordigita = (eroj: Iterable<string>): string[] => [...new Set(eroj)].sort()
  * nothing else – the other edges there stay as they are.
  */
 export function kunZiehen(nun: Sesio, ligoj: readonly BildoLigo[], de: string, al: string): Sesio {
+  // Spec 058: at an input of „Namen und Beschreibung“ it plugs `de` there and changes nothing else.
+  if (estasKiNamenEnir(al)) {
+    if (nun.kiNamen === undefined) return nun;
+    return { ...nun, kiNamen: { geloest: nun.kiNamen.geloest.filter((g) => g !== de) } };
+  }
   if (estasMarkoEnir(al)) {
     const markoGeloest = (nun.markoGeloest ?? []).filter((g) => g !== de);
     const { markoGeloest: _m, ...resto } = nun;
@@ -124,18 +169,35 @@ export function markoElirDe(id: string): string | undefined {
   return estasMarkoEnir(id.slice(indekso + 1)) ? id.slice(0, indekso) : undefined;
 }
 
+/** Spec 058: whether `port` is one of the two inputs of „Namen und Beschreibung“. */
+export const estasKiNamenEnir = (port: string): boolean =>
+  port === KI_NAMEN_TEKSTO_ENIR || port === KI_NAMEN_BILDO_ENIR;
+
+/** Spec 058: the output of an edge into „Namen und Beschreibung“ (`"<de>>ki-namen.en.…"`), else undefined. */
+export function kiNamenElirDe(id: string): string | undefined {
+  const indekso = id.lastIndexOf(">");
+  if (indekso < 0) return undefined;
+  return estasKiNamenEnir(id.slice(indekso + 1)) ? id.slice(0, indekso) : undefined;
+}
+
 /**
  * Detaches edges in the session: from the Agordo's (`geloest`) and from the drawn ones. Spec 056
- * (D-19): an edge into the Marke detaches its output (`markoGeloest`), never a colour edge.
+ * (D-19): an edge into the Marke detaches its output (`markoGeloest`), never a colour edge. Spec
+ * 058: an edge into „Namen und Beschreibung“ detaches its output there only (`kiNamen.geloest`).
  */
 export function kunLoesen(nun: Sesio, ids: readonly string[]): Sesio {
   const eliroj = ids.flatMap((id) => markoElirDe(id) ?? []);
-  const weg = new Set(ids.filter((id) => markoElirDe(id) === undefined));
-  const sesio: Sesio = {
+  const kiEliroj = ids.flatMap((id) => kiNamenElirDe(id) ?? []);
+  const weg = new Set(
+    ids.filter((id) => markoElirDe(id) === undefined && kiNamenElirDe(id) === undefined),
+  );
+  let sesio: Sesio = {
     ...nun,
     geloest: [...nun.geloest.filter((g) => !weg.has(g)), ...weg],
     gezogen: nun.gezogen.filter((g) => !weg.has(ligoId(g.de, g.al))),
   };
+  if (kiEliroj.length > 0 && nun.kiNamen !== undefined)
+    sesio = { ...sesio, kiNamen: { geloest: ordigita([...nun.kiNamen.geloest, ...kiEliroj]) } };
   if (eliroj.length === 0) return sesio;
   return { ...sesio, markoGeloest: ordigita([...(nun.markoGeloest ?? []), ...eliroj]) };
 }
@@ -166,8 +228,16 @@ export function enhavoKnotenDe(sesio: Sesio): LeinwandStatoKnoto[] {
   });
 }
 
-/** Spec 056: adds a node of „+ Knoten“ (once; a fixed text node or an unknown id: nothing). */
+/**
+ * Spec 056: adds a node of „+ Knoten“ (once; a fixed text node or an unknown id: nothing). Spec
+ * 058: „Namen und Beschreibung“ starts connected to every input that goes into the Marke now – the
+ * outputs detached from the Marke are detached from it as well.
+ */
 export function kunAldono(nun: Sesio, id: string): Sesio {
+  if (id === KI_NAMEN_ID) {
+    if (nun.kiNamen !== undefined) return nun;
+    return { ...nun, kiNamen: { geloest: markoGeloestDe(nun) } };
+  }
   if (!estasEnhavoId(id) || FIKSAJ_TEKSTOJ.includes(id as (typeof FIKSAJ_TEKSTOJ)[number]))
     return nun;
   if ((nun.aldonitaj ?? []).includes(id)) return nun;
@@ -179,6 +249,15 @@ export function kunAldono(nun: Sesio, id: string): Sesio {
  * removed only while empty – the node decides; a fixed one never).
  */
 export function kunForigo(nun: Sesio, id: string): Sesio {
+  // Spec 058: „Namen und Beschreibung“ goes with its content and its detached edges.
+  if (id === KI_NAMEN_ID) {
+    if (nun.kiNamen === undefined) return nun;
+    const { kiNamen: _k, inhaltoj: _i, ...resto } = nun;
+    const inhaltoj = Object.fromEntries(
+      Object.entries(nun.inhaltoj ?? {}).filter(([k]) => k !== id),
+    );
+    return { ...resto, ...(Object.keys(inhaltoj).length === 0 ? {} : { inhaltoj }) };
+  }
   if (!(nun.aldonitaj ?? []).includes(id as EnhavoId)) return nun;
   const { aldonitaj: _a, inhaltoj: _i, markoGeloest: _m, ...resto } = nun;
   const aldonitaj = (nun.aldonitaj ?? []).filter((a) => a !== id);
@@ -202,21 +281,92 @@ function wertIdsDe(inhalt: Record<string, unknown> | undefined): string[] {
 }
 
 /**
- * Spec 056 (D-19): the detached outputs that still exist – of a text node on the canvas, a value
- * of Werte, Beispiele – sorted and unique, as the reader keeps them (`geloestDe`).
+ * The outputs that can run into the Marke now – of a text node on the canvas, a value of Werte,
+ * Beispiele, and (Spec 058) Grundlagen, which stands on every canvas.
  */
-export function markoGeloestDe(sesio: Sesio): string[] {
-  const nodoj = enhavoNodojDe(sesio);
-  const eliroj = new Set<string>();
-  for (const id of nodoj) {
+function elirojDe(sesio: Sesio): Set<string> {
+  const eliroj = new Set<string>([GRUNDLAGEN_ELIR]);
+  for (const id of enhavoNodojDe(sesio)) {
     if (id === "schrift") continue;
     if (id === "beispiele") eliroj.add(BEISPIELE_ELIR);
     else if (id === "teksto-werte")
       for (const w of wertIdsDe(sesio.inhaltoj?.[id])) eliroj.add(wertElirDe(w));
     else eliroj.add(`${id}.el`);
   }
+  return eliroj;
+}
+
+/**
+ * Spec 056 (D-19): the detached outputs that still exist – of a text node on the canvas, a value
+ * of Werte, Beispiele; Spec 058: Grundlagen – sorted and unique, as the reader keeps them
+ * (`geloestDe`).
+ */
+export function markoGeloestDe(sesio: Sesio): string[] {
+  const eliroj = elirojDe(sesio);
   return ordigita((sesio.markoGeloest ?? []).filter((g) => eliroj.has(g)));
 }
+
+/**
+ * Spec 058: the outputs detached from „Namen und Beschreibung“ that still exist, sorted and unique
+ * (empty while the node is not on the canvas).
+ */
+export function kiNamenGeloestDe(sesio: Sesio): string[] {
+  if (sesio.kiNamen === undefined) return [];
+  const eliroj = elirojDe(sesio);
+  return ordigita(sesio.kiNamen.geloest.filter((g) => eliroj.has(g)));
+}
+
+/**
+ * Spec 058: the nodes of Spec 058 on the canvas – Grundlagen, „Namen und Beschreibung“ while it was
+ * added, the Layout-Beispiel – in the order of the process.
+ */
+export function nodoj058De(sesio: Sesio): Nodo058[] {
+  return NODOJ_058.filter((id) => id !== KI_NAMEN_ID || sesio.kiNamen !== undefined);
+}
+
+/**
+ * Spec 058: the nodes of Spec 058 as the canvas state lists them, without places – what
+ * `kiNamenLigojDe` and the rules of the evaluation read: the content (when it has one), and on
+ * „Namen und Beschreibung“ `speco: "ki"` and its detached outputs.
+ */
+export function knoten058De(sesio: Sesio): LeinwandStatoKnoto[] {
+  return nodoj058De(sesio).map((id) => {
+    const inhalt = sesio.inhaltoj?.[id];
+    const geloest = id === KI_NAMEN_ID ? kiNamenGeloestDe(sesio) : [];
+    return {
+      id,
+      ...(id === KI_NAMEN_ID ? { speco: "ki" as const } : {}),
+      ...(inhalt === undefined ? {} : { inhalt }),
+      ...(geloest.length === 0 ? {} : { geloest }),
+    };
+  });
+}
+
+/** Spec 058: the choice of a preview with the defaults filled in („marke“, „auto“). */
+export function vorschauWahlDe(sesio: Sesio, id: string): { ansicht: Ansicht; aufbau: AufbauWahl } {
+  const wahl = sesio.wahloj?.[id];
+  return { ansicht: ansichtDe(wahl), aufbau: aufbauWahlDe(wahl) };
+}
+
+/** Spec 058: sets parts of the choice of a preview; the other part stays. */
+export function kunWahl(nun: Sesio, id: string, wahl: VorschauWahl): Sesio {
+  const nova: VorschauWahl = { ...nun.wahloj?.[id], ...wahl };
+  return { ...nun, wahloj: { ...nun.wahloj, [id]: nova } };
+}
+
+/** Spec 058: the choice of a stored node, each part only when it reads. */
+function wahlDeKnoto(k: LeinwandStatoKnoto): VorschauWahl {
+  return {
+    ...(estasAnsicht(k.ansicht) ? { ansicht: k.ansicht } : {}),
+    ...(estasAufbauWahl(k.aufbau) ? { aufbau: k.aufbau } : {}),
+  };
+}
+
+/** Spec 058: a content worth writing (not empty), else undefined. */
+const plenaInhalt = (
+  inhalt: Record<string, unknown> | undefined,
+): Record<string, unknown> | undefined =>
+  inhalt === undefined || Object.keys(inhalt).length === 0 ? undefined : inhalt;
 
 /** The colour nodes with their state and the session nodes: what `kablojDe` needs. */
 export function nodojKunStato(
@@ -279,7 +429,16 @@ export function statoDeSesio(
   const knoten: LeinwandStatoKnoto[] = [];
   for (const n of bildo.nodoj) {
     const p = verschoben.get(n.id);
-    if (p !== undefined) knoten.push({ id: n.id, x: p.x, y: p.y });
+    // Spec 058: the Marke with its profile, a fixed preview with its choice – also without a place.
+    const inhalt = n.id === "marko" ? plenaInhalt(sesio.inhaltoj?.marko) : undefined;
+    const wahl = n.speco === "vorschau" ? (sesio.wahloj?.[n.id] ?? {}) : {};
+    if (p === undefined && inhalt === undefined && Object.keys(wahl).length === 0) continue;
+    knoten.push({
+      id: n.id,
+      ...(p === undefined ? {} : { x: p.x, y: p.y }),
+      ...(inhalt === undefined ? {} : { inhalt }),
+      ...wahl,
+    });
   }
   for (const s of sesio.nodoj) {
     const p = verschoben.get(s.id);
@@ -289,6 +448,7 @@ export function statoDeSesio(
       schema: s.schema,
       ...(p === undefined ? {} : { x: p.x, y: p.y }),
       ...(s.inhalt === undefined ? {} : { inhalt: s.inhalt }),
+      ...sesio.wahloj?.[s.id],
     });
   }
   // Spec 056: the nodes of this run in a fixed order; a fixed text node only with a place or a
@@ -303,6 +463,20 @@ export function statoDeSesio(
       ...(k.speco === undefined ? {} : { speco: k.speco }),
       ...(p === undefined ? {} : { x: p.x, y: p.y }),
       ...(inhalt === undefined ? {} : { inhalt }),
+    });
+  }
+  // Spec 058: Grundlagen and the Layout-Beispiel only with a place or a content, „Namen und
+  // Beschreibung“ always while it is on the canvas (with `speco: "ki"` and its detached outputs).
+  for (const k of knoten058De(sesio)) {
+    const p = verschoben.get(k.id);
+    const inhalt = plenaInhalt(k.inhalt);
+    if (k.speco === undefined && p === undefined && inhalt === undefined) continue;
+    knoten.push({
+      id: k.id,
+      ...(k.speco === undefined ? {} : { speco: k.speco }),
+      ...(p === undefined ? {} : { x: p.x, y: p.y }),
+      ...(inhalt === undefined ? {} : { inhalt }),
+      ...(k.geloest === undefined ? {} : { geloest: k.geloest }),
     });
   }
   const geloest = markoGeloestDe(sesio);
@@ -330,9 +504,27 @@ export function sesioDeStato(
 ): { sesio: Sesio; verschoben: Map<string, Pozicio>; vorschauNombro: number } {
   const nodoj: SesioNodo[] = [];
   const aldonitaj: EnhavoId[] = [];
-  const inhaltoj: Partial<Record<EnhavoId, Record<string, unknown>>> = {};
+  const inhaltoj: Partial<Record<EnhavoId058, Record<string, unknown>>> = {};
+  const wahloj: Record<string, VorschauWahl> = {};
+  let kiNamen: Sesio["kiNamen"];
   let vorschauNombro = UNUA_VORSCHAU;
   for (const k of stato?.knoten ?? []) {
+    // Spec 058: the choice of every preview (fixed or added), the contents of the Marke, Grundlagen
+    // and the Layout-Beispiel, and „Namen und Beschreibung“ with its detached outputs.
+    if (k.speco === undefined || k.speco === "vorschau") {
+      const wahl = wahlDeKnoto(k);
+      if (Object.keys(wahl).length > 0 && k.id.startsWith("vorschau-")) wahloj[k.id] = wahl;
+    }
+    if (k.id === "marko" || k.id === GRUNDLAGEN_ID || k.id === LAYOUT_ID) {
+      if (k.inhalt !== undefined) inhaltoj[k.id] = k.inhalt;
+      continue;
+    }
+    if (k.id === KI_NAMEN_ID) {
+      if (k.speco !== "ki") continue;
+      kiNamen = { geloest: [...(k.geloest ?? [])] };
+      if (k.inhalt !== undefined) inhaltoj[k.id] = k.inhalt;
+      continue;
+    }
     // Spec 056: the added nodes of this run and the contents (fixed text nodes too).
     if (estasEnhavoId(k.id)) {
       const fiksa = FIKSAJ_TEKSTOJ.includes(k.id as (typeof FIKSAJ_TEKSTOJ)[number]);
@@ -356,6 +548,9 @@ export function sesioDeStato(
     ...nodoj.map(sesioId),
     ...FIKSAJ_TEKSTOJ,
     ...aldonitaj,
+    GRUNDLAGEN_ID,
+    LAYOUT_ID,
+    ...(kiNamen === undefined ? [] : [KI_NAMEN_ID]),
   ]);
   const verschoben = new Map<string, Pozicio>();
   for (const k of stato?.knoten ?? []) {
@@ -370,6 +565,8 @@ export function sesioDeStato(
       ...(aldonitaj.length === 0 ? {} : { aldonitaj }),
       ...(Object.keys(inhaltoj).length === 0 ? {} : { inhaltoj }),
       ...(markoGeloest.length === 0 ? {} : { markoGeloest }),
+      ...(kiNamen === undefined ? {} : { kiNamen }),
+      ...(Object.keys(wahloj).length === 0 ? {} : { wahloj }),
     },
     verschoben,
     vorschauNombro,

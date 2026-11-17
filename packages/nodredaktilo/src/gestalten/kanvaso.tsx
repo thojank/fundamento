@@ -44,40 +44,79 @@
 //     Plugging `beispiele.el` again runs the follow rule (`folgi("gesteckt")`).
 //   - Schrift on the canvas: a fixed edge Schrift → Vorschau to every preview (no „×“).
 //   - Primär shows „aus Material“ as soon as the Beispiele say so (`primaerStatoKun`).
+// Spec 058 (T2, MAW-2.1, plan §3.4): the shell of the tickets of Phases 3 and 4.
+//   - It loads `/api/leinwand?…&stufe=58` and places every node by ARANGXO_058
+//     (`poziciojKun(…, {stufe: 58})`, widths by `largxoDe(…, {stufe: 58})`).
+//   - Grundlagen and the Layout-Beispiel stand on every canvas (also of a brand from before this
+//     spec), never removable. Grundlagen's edge into `marko.en.teksto` detaches and plugs like a
+//     text node's (`geloest`). The fixed edges Layout-Beispiel → `<preview>.en.bildo` go to every
+//     preview, the added ones too (no „×“, like Schrift → Vorschau).
+//   - „+ Knoten“ shows KATALOGO_058; „Namen und Beschreibung“ adds `ki-namen` once, connected to
+//     every input that goes into the Marke then (`kiNamenLigojDe`); each of its edges detaches
+//     (persisted on the node) and plugs again by drawing; both its inputs take many edges.
+//   - The node types `grundlagen`, `ki` and `layout` (placeholder files of their owners); the
+//     side panel `MarkoFlanko` (gestalten/flanko.tsx) in `<aside data-nr-flanko="marko">` while the
+//     Marke is selected; the header slot `marken` and „Anordnen“.
+//   - The context of §3.4: `nomo`/`nomoMeti`, `stato`, `vorschauWahl`/`vorschauWahlMeti` (the
+//     choice of every preview, in session and state), `markeAbdruck` (of the last confirmed write),
+//     `haltigiDum`, `konserviNun`, `schriften`, `auswertungEnigo`.
+//   - „Anordnen“ (`anordnungDe`, anordnen.ts): the measured sizes and the visible edges, every place
+//     into `verschoben` (one state write, as a drag), then the view fitted once the nodes stand.
+//     The nodes jump (no glide), so nothing moves under `prefers-reduced-motion` either; a failed
+//     write keeps the places for the session with NE_KONSERVITA_SATZ; nothing lays out by itself.
 
+import {
+  type AuswertungEnigo,
+  abdruckDe,
+  markeInhaltDe,
+  wirksamerAufbau,
+} from "@fundamento/metiejo/auswertung";
 import {
   enhavoDe,
   estasMalplena,
+  kiNamenLigojDe,
   markoEnhavoDe,
   markoLigojDe,
   primaerStatoKun,
 } from "@fundamento/metiejo/enhavo";
 import {
   type Aldoneblo,
+  type Ansicht,
+  type AufbauWahl,
   aldonebloj,
   anschlussDe,
   type Bildo,
+  type BildoFarbo,
   type BildoLigo,
   type BildoNodo,
   type EnhavoId,
+  type EnhavoId058,
   estasEnhavoId,
-  estasMarkoEnir,
+  estasMultaEnir,
   FIKSAJ_TEKSTOJ,
-  type InhaltMapo,
-  KATALOGO_056,
+  GRUNDLAGEN_ID,
+  type InhaltMapo058,
+  type KATALOGO_056,
+  KATALOGO_058,
   type Kabloj,
+  KI_NAMEN_ID,
   kablojTeksto,
+  LAYOUT_ELIR,
+  LAYOUT_ID,
   type LeinwandStato,
   type LeinwandSxangxo,
   largxoDe,
   ligoId,
   ligojKun,
+  MARKENPROFIL_EINZELHEITEN,
+  type Nodo058,
   type Pozicio,
   poziciojKun,
   SCHRIFT_ELIR,
   type Schema,
   tenilojDe,
   validaLigo,
+  vorschauBildoEnir,
   vorschauHref,
   vorschauTiparoEnir,
 } from "@fundamento/metiejo/gestalten";
@@ -101,7 +140,9 @@ import {
   useUpdateNodeInternals,
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { anordnungDe } from "./anordnen.js";
 import {
+  fonto058,
   gespeichertTeksto,
   type Respondo,
   type SkriboRezulto,
@@ -111,10 +152,12 @@ import {
   statoSkribi,
   sxargi,
 } from "./datumoj.js";
+import { MarkoFlanko } from "./flanko.js";
 import { folgi } from "./folgo.js";
 import { Kanto, type KantoFlowLigo } from "./kanto.js";
 import { Kapo, type Konservo, LigoHinweis } from "./kapo.js";
 import {
+  type Datumo058,
   type EnhavoDatumo,
   type GestaltenFlowNodo,
   GestaltenKunteksto,
@@ -122,34 +165,42 @@ import {
   type VorschauDatumo,
 } from "./kunteksto.js";
 import { Legendo, Zomo } from "./legendo.js";
+import { Marken } from "./marken.js";
 import { Menuo } from "./menuo.js";
 import { BeispieleNodo } from "./nodoj/beispiele.js";
 import { FarboNodo } from "./nodoj/farbo.js";
+import { GrundlagenNodo } from "./nodoj/grundlagen.js";
+import { KiNamenNodo } from "./nodoj/ki-namen.js";
+import { LayoutBeispielNodo } from "./nodoj/layout-beispiel.js";
 import { MarkoNodo } from "./nodoj/marko.js";
 import { PaletroNodo } from "./nodoj/paletro.js";
 import { SchriftNodo } from "./nodoj/schrift.js";
 import { TekstoNodo } from "./nodoj/teksto.js";
 import { VorschauNodo } from "./nodoj/vorschau.js";
-import { BAZA_STILO, GESTALTEN_STILO, useStilo } from "./roloj.js";
+import { BAZA_STILO, GESTALTEN_STILO, ROLOJ, useStilo } from "./roloj.js";
 import { Staende } from "./staende.js";
 import {
   enhavoKnotenDe,
   enhavoNodojDe,
   kablojDeSesio,
+  knoten058De,
   kunAldono,
   kunForigo,
   kunLoesen,
+  kunWahl,
   kunZiehen,
   ligoSitzungDe,
   markoGeloestDe,
+  nodoj058De,
   type Sesio,
-  type SesioNodo,
   sesioDeStato,
   sesioId,
   sesioLigoj,
   statoDeSesio,
   statoTeksto,
+  vorschauWahlDe,
 } from "./stato.js";
+import { schriftenSxargi } from "./tiparo-datumoj.js";
 
 export interface GestaltenProps {
   /** The mount element `#nr-leinwand`; it carries the ready marks. */
@@ -169,6 +220,26 @@ const NODO_TIPOJ = {
   teksto: TekstoNodo,
   beispiele: BeispieleNodo,
   schrift: SchriftNodo,
+  // Spec 058: the placeholder nodes of MAW-3.2, MAW-3.3 and MAW-4.2 (each replaces its own file).
+  grundlagen: GrundlagenNodo,
+  ki: KiNamenNodo,
+  layout: LayoutBeispielNodo,
+};
+
+/** Spec 058: every place, width and height of this canvas comes from ARANGXO_058. */
+const STUFO_58 = { stufe: 58 } as const;
+
+/**
+ * Spec 058: the catalog „+ Knoten“ of this run. It is KATALOGO_056 with Grundlagen, „Namen und
+ * Beschreibung“ and the Layout-Beispiel added at their groups, every other entry as there.
+ */
+const KATALOGO: typeof KATALOGO_056 = KATALOGO_058;
+
+/** Spec 058: the node type of each node of Spec 058. */
+const SPECOJ_058: Readonly<Record<Nodo058, Datumo058["speco"]>> = {
+  "teksto-grundlagen": "grundlagen",
+  "ki-namen": "ki",
+  "layout-beispiel": "layout",
 };
 
 const LIGO_TIPOJ = { kanto: Kanto };
@@ -182,6 +253,31 @@ const ENPASO = {
   maxZoom: 1,
   duration: 0,
 } as const;
+
+/**
+ * Spec 058 (B-1): the frame of the side panel – on the right, below the header (where the list
+ * „+ Knoten“ starts on the left), above the canvas, scrolling on its own. Its content is
+ * `MarkoFlanko` (gestalten/flanko.tsx).
+ */
+const FLANKO_STILO = `
+.nr-g-flanko {
+  position: absolute;
+  z-index: 10;
+  inset-block-start: calc(var(--fm-spacing-large) + var(--fm-size-control-medium) + var(--fm-spacing-large));
+  inset-inline-end: var(--fm-spacing-large);
+  inline-size: var(--fm-size-container-small);
+  max-inline-size: calc(100vw - 2 * var(--fm-spacing-large));
+  max-block-size: calc(100vh - 8 * var(--fm-spacing-large));
+  overflow: auto;
+  box-sizing: border-box;
+  padding: var(--fm-spacing-large);
+  background: ${ROLOJ.tavolo};
+  color: ${ROLOJ.teksto};
+  border: var(--fm-border-width-default) var(--fm-stroke-solid) ${ROLOJ.linio};
+  border-radius: var(--fm-radius-medium);
+  box-shadow: ${ROLOJ.ombroTavolo};
+}
+`;
 
 /** Whether two edge lists hold the same edges (by id; an input carries at most one). */
 function samajLigoj(a: readonly BildoLigo[], b: readonly BildoLigo[]): boolean {
@@ -217,6 +313,17 @@ const nodoDe = (port: string): string => anschlussDe(port)?.nodo ?? port.split("
 /** Spec 056: whether `id` is one of the three fixed text nodes (never removable). */
 const estasFiksa = (id: string): boolean =>
   FIKSAJ_TEKSTOJ.includes(id as (typeof FIKSAJ_TEKSTOJ)[number]);
+
+/** Spec 058: the fixed edges Layout-Beispiel → Vorschau (image input), one to every preview. */
+function layoutLigojDe(vorschauen: readonly string[]): BildoLigo[] {
+  return vorschauen.map((v) => ({
+    id: ligoId(LAYOUT_ELIR, vorschauBildoEnir(v)),
+    de: LAYOUT_ELIR,
+    al: vorschauBildoEnir(v),
+    art: "bildo",
+    fest: true,
+  }));
+}
 
 /** Spec 056: the fixed edges Schrift → Vorschau, one to every preview, while Schrift is there. */
 function schriftLigojDe(vorschauen: readonly string[]): BildoLigo[] {
@@ -275,37 +382,58 @@ function sxangxitaj(antaua: Bildo, nova: Bildo): Set<string> {
   return out;
 }
 
-type CxiuNodo = { nodo: BildoNodo | VorschauDatumo | EnhavoDatumo; sitzung: boolean };
+type CxiuNodo = {
+  nodo: BildoNodo | VorschauDatumo | EnhavoDatumo | Datumo058;
+  sitzung: boolean;
+};
 
 /**
  * The `data.nodo` of every node on the canvas: the Bildo's first, then the session's previews,
- * then (Spec 056) the nodes of this run – the three fixed text nodes and the added ones.
+ * then (Spec 056) the nodes of this run – the three fixed text nodes and the added ones – then
+ * (Spec 058) Grundlagen, „Namen und Beschreibung“ while added, and the Layout-Beispiel. An added
+ * preview carries its choice and the 058 address (`inh`: the abdruck of the page „Marke“).
  */
 function cxiujNodoj(
   bildo: Bildo,
-  sesio: readonly SesioNodo[],
+  sesio: Sesio,
   enhavoj: readonly EnhavoId[],
   marko: string,
   kabloj: Kabloj,
+  inh: string,
 ): CxiuNodo[] {
+  const layout = enhavoDe(LAYOUT_ID, sesio.inhaltoj?.[LAYOUT_ID]);
   return [
     ...bildo.nodoj.map((nodo) => ({ nodo, sitzung: false })),
-    ...sesio.map((s) => ({
-      nodo: {
-        id: s.id,
-        speco: "vorschau",
-        fazo: "fazo-5",
-        schema: s.schema,
-        href: vorschauHref(marko, s.schema, bildo.rev, kabloj),
-      } satisfies VorschauDatumo,
-      sitzung: true,
-    })),
+    ...sesio.nodoj.map((s) => {
+      const { ansicht, aufbau } = vorschauWahlDe(sesio, s.id);
+      return {
+        nodo: {
+          id: s.id,
+          speco: "vorschau",
+          fazo: "fazo-5",
+          schema: s.schema,
+          ansicht,
+          aufbau,
+          href: vorschauHref(marko, s.schema, bildo.rev, kabloj, {
+            ...STUFO_58,
+            ansicht,
+            aufbau: wirksamerAufbau({ aufbau }, layout),
+            inh,
+          }),
+        } satisfies VorschauDatumo,
+        sitzung: true,
+      };
+    }),
     ...enhavoj.map((id) => ({
       nodo: {
         id,
         speco: id === "beispiele" || id === "schrift" ? id : ("teksto" as const),
       } satisfies EnhavoDatumo,
       sitzung: !estasFiksa(id),
+    })),
+    ...nodoj058De(sesio).map((id) => ({
+      nodo: { id, speco: SPECOJ_058[id] } satisfies Datumo058,
+      sitzung: id === KI_NAMEN_ID,
     })),
   ];
 }
@@ -319,7 +447,7 @@ function flowNodo(
   const komuna = {
     id: nodo.id,
     position: pozicio,
-    width: largxoDe(nodo.id),
+    width: largxoDe(nodo.id, STUFO_58),
     ...(levita ? { zIndex: LEVITA_Z } : {}),
   };
   switch (nodo.speco) {
@@ -345,6 +473,20 @@ function flowNodo(
         type: "schrift",
         data: { nodo: { id: "schrift", speco: "schrift" }, sitzung },
       };
+    case "grundlagen":
+      return {
+        ...komuna,
+        type: "grundlagen",
+        data: { nodo: { id: GRUNDLAGEN_ID, speco: "grundlagen" }, sitzung },
+      };
+    case "ki":
+      return { ...komuna, type: "ki", data: { nodo: { id: KI_NAMEN_ID, speco: "ki" }, sitzung } };
+    case "layout":
+      return {
+        ...komuna,
+        type: "layout",
+        data: { nodo: { id: LAYOUT_ID, speco: "layout" }, sitzung },
+      };
   }
 }
 
@@ -358,6 +500,12 @@ interface StatoSkribilo {
   konati(teksto: string): void;
   /** Writes again after `atendi` without a new state from the server (the load failed). */
   dauxrigi(): void;
+  /**
+   * Spec 058 (`konserviNun`): waits for a write in flight (a scheduled one is dropped), then writes
+   * `stato` at once unless the server holds it, and writes on from there. Resolves whether the
+   * server holds `stato` now.
+   */
+  nun(stato: LeinwandStato): Promise<boolean>;
 }
 
 /**
@@ -370,7 +518,8 @@ interface StatoSkribilo {
 function statoSkribilo(o: {
   legi: () => LeinwandStato;
   sendi: (stato: LeinwandStato) => Promise<StatoRezulto>;
-  rezulto: (rezulto: StatoRezulto) => void;
+  /** What a write answered, with the state it sent (Spec 058: `markeAbdruck` follows it). */
+  rezulto: (rezulto: StatoRezulto, stato: LeinwandStato) => void;
   konata: string;
 }): StatoSkribilo {
   let konata = o.konata;
@@ -395,7 +544,7 @@ function statoSkribilo(o: {
     if (rezulto.speco === "ok") konata = teksto;
     flugo = null;
     fini();
-    o.rezulto(rezulto);
+    o.rezulto(rezulto, stato);
     if (statoTeksto(o.legi()) !== teksto) plani();
   };
   const plani = (): void => {
@@ -421,6 +570,28 @@ function statoSkribilo(o: {
       haltita = false;
       plani();
     },
+    nun: async (stato) => {
+      haltita = true;
+      nuligi();
+      while (flugo !== null) await flugo;
+      const teksto = statoTeksto(stato);
+      let tenata = teksto === konata;
+      if (!tenata) {
+        let fini = (): void => undefined;
+        flugo = new Promise<void>((done) => {
+          fini = done;
+        });
+        const rezulto = await o.sendi(stato);
+        tenata = rezulto.speco === "ok";
+        if (tenata) konata = teksto;
+        flugo = null;
+        fini();
+        o.rezulto(rezulto, stato);
+      }
+      haltita = false;
+      if (statoTeksto(o.legi()) !== konata) plani();
+      return tenata;
+    },
   };
 }
 
@@ -439,6 +610,7 @@ function Fluo({
   komenca: Komenco;
 }) {
   useStilo("baza", BAZA_STILO);
+  useStilo("flanko-sxelo", FLANKO_STILO);
   // Spec 055 (T4): the session starts from the stored state (none: the start layout).
   const [unua] = useState(() => sesioDeStato(komenca.stato, komenca.bildo));
   const [bildo, setBildo] = useState(komenca.bildo);
@@ -468,8 +640,17 @@ function Fluo({
   const petoj = useRef({ sendita: 0, montrita: 0 });
   const bildoRef = useRef(bildo);
   bildoRef.current = bildo;
+  const sesioRef = useRef(sesio);
+  sesioRef.current = sesio;
+  const verschobenRef = useRef(verschoben);
+  verschobenRef.current = verschoben;
   /** The number of the next further preview: past the highest one stored (`vorschau-3` first). */
   const vorschauNombro = useRef(unua.vorschauNombro);
+  // Spec 058: the name while it is typed in Grundlagen (null: the Agordo's), the fonts for the
+  // rules of the evaluation, and whether the view is fitted once the laid-out nodes stand.
+  const [nomoTajpita, setNomoTajpita] = useState<string | null>(null);
+  const [schriften, setSchriften] = useState<AuswertungEnigo["schriften"]>({});
+  const enpasoPost = useRef(false);
   const { fitView } = useReactFlow();
   const preta = useNodesInitialized();
 
@@ -479,6 +660,11 @@ function Fluo({
   // outputs that still exist, and what arrives at the Marke – all from the live session.
   const enhavoj = useMemo(() => enhavoNodojDe(sesio), [sesio]);
   const enhavoKnoten = useMemo(() => enhavoKnotenDe(sesio), [sesio]);
+  // Spec 058: with Grundlagen, „Namen und Beschreibung“ and the Layout-Beispiel.
+  const knotenCxiuj = useMemo(
+    () => [...enhavoKnoten, ...knoten058De(sesio)],
+    [enhavoKnoten, sesio],
+  );
   const markoGeloest = useMemo(() => markoGeloestDe(sesio), [sesio]);
   const markoEnhavo = useMemo(
     () => markoEnhavoDe(enhavoKnoten, markoGeloest),
@@ -491,7 +677,8 @@ function Fluo({
     [bildo, beispieleInhalt],
   );
   // The colour edges of the session (054/055), then (Spec 056) the edges into the Marke and the
-  // fixed Schrift → Vorschau edges.
+  // fixed Schrift → Vorschau edges; Spec 058: Grundlagen's edge into the Marke first, the edges
+  // into „Namen und Beschreibung“ and the fixed Layout-Beispiel → Vorschau edges.
   const farboLigoj = useMemo(() => ligojKun(ligoSitzungDe(sesio), bildo), [sesio, bildo]);
   const ligoj = useMemo(() => {
     const vorschauen = [
@@ -500,10 +687,12 @@ function Fluo({
     ];
     return [
       ...farboLigoj,
-      ...markoLigojDe(enhavoKnoten, markoGeloest),
+      ...markoLigojDe(knotenCxiuj, markoGeloest, STUFO_58),
+      ...kiNamenLigojDe(knotenCxiuj),
       ...(enhavoj.includes("schrift") ? schriftLigojDe(vorschauen) : []),
+      ...layoutLigojDe(vorschauen),
     ];
-  }, [farboLigoj, enhavoKnoten, markoGeloest, enhavoj, bildo, sesioNodoj]);
+  }, [farboLigoj, knotenCxiuj, markoGeloest, enhavoj, bildo, sesioNodoj]);
   const ligojRef = useRef(ligoj);
   ligojRef.current = ligoj;
   // Spec 056: Werte has one port per value; React Flow measures the ports of a node again only when
@@ -538,10 +727,6 @@ function Fluo({
   const geloestNombro = Object.keys(kabloj).length + markoGeloest.length;
   const ligoHinweisNombro =
     ligojSxangxitaj || markoGeloest.length > 0 ? Math.max(geloestNombro, 1) : 0;
-  const cxiuj = useMemo(
-    () => cxiujNodoj(bildoMontrita, sesioNodoj, enhavoj, marko, kabloj),
-    [bildoMontrita, sesioNodoj, enhavoj, marko, kabloj],
-  );
 
   // Load (again) with the session's kabloj and show only an answer newer than the one shown.
   const sxargiDenove = useCallback(
@@ -584,14 +769,22 @@ function Fluo({
   const statoRef = useRef(stato);
   statoRef.current = stato;
   const statoTekstoNun = statoTeksto(stato);
+  // Spec 058: the state as it would be written now, typing included (`stato` of the context), and
+  // the state the server confirmed last (`markeAbdruck` follows it).
+  const statoSesio = useMemo(
+    () => statoDeSesio(bildo, sesio, verschoben, kabloj),
+    [bildo, sesio, verschoben, kabloj],
+  );
+  const [konfirmita, setKonfirmita] = useState<LeinwandStato>(stato);
   const skribiloRef = useRef<StatoSkribilo | null>(null);
   skribiloRef.current ??= statoSkribilo({
     legi: () => statoRef.current,
     sendi: (s) => statoSkribi(marko, s),
-    rezulto: (r) => {
+    rezulto: (r, sendita) => {
       if (r.speco === "ok") {
         setGespeichert({ speco: "ok", teksto: gespeichertTeksto(r.gespeichert) });
         setStatoUnlesbar(false);
+        setKonfirmita(sendita);
       } else setGespeichert({ speco: "ne" });
     },
     konata: statoTekstoNun,
@@ -600,6 +793,25 @@ function Fluo({
   useEffect(() => {
     if (statoTekstoNun !== "") skribilo.plani();
   }, [statoTekstoNun, skribilo]);
+
+  // Spec 058: the live display name and the abdruck of the page „Marke“ as last confirmed.
+  const etikedo = bildo.marko.etikedo;
+  const nomo =
+    nomoTajpita === null
+      ? etikedo === ""
+        ? marko
+        : etikedo
+      : nomoTajpita.trim() === ""
+        ? marko
+        : nomoTajpita.trim();
+  const markeAbdruck = useMemo(
+    () => abdruckDe(markeInhaltDe(konfirmita, etikedo)),
+    [konfirmita, etikedo],
+  );
+  const cxiuj = useMemo(
+    () => cxiujNodoj(bildoMontrita, sesio, enhavoj, marko, kabloj, markeAbdruck),
+    [bildoMontrita, sesio, enhavoj, marko, kabloj, markeAbdruck],
+  );
 
   // Spec 055 (T4): the session again from the stored state (plan §2.4, contract for LNS-3.1).
   const rekomenci = useCallback(async (): Promise<void> => {
@@ -622,9 +834,11 @@ function Fluo({
     setStatoUnlesbar(respondo.statoUnlesbar);
     setElektitajLigoj(new Set());
     setFokusPor(null);
-    skribilo.konati(
-      statoTeksto(statoDeSesio(respondo.bildo, nova.sesio, nova.verschoben, novajKabloj)),
-    );
+    // Spec 058: the Agordo may carry another name now; the reloaded state is the confirmed one.
+    setNomoTajpita(null);
+    const novaStato = statoDeSesio(respondo.bildo, nova.sesio, nova.verschoben, novajKabloj);
+    setKonfirmita(novaStato);
+    skribilo.konati(statoTeksto(novaStato));
   }, [fonto, skribilo]);
 
   // „Anordnung zurücksetzen“: start places, the Agordo's connections, added nodes stay at their
@@ -647,6 +861,7 @@ function Fluo({
     const pozicioj = poziciojKun(
       verschoben,
       cxiuj.map(({ nodo }) => ({ id: nodo.id })),
+      STUFO_58,
     );
     const elekti = elektota.current;
     elektota.current = null;
@@ -664,6 +879,15 @@ function Fluo({
       });
     });
   }, [cxiuj, verschoben, levitaj]);
+  const nodojRef = useRef(nodoj);
+  nodojRef.current = nodoj;
+  // Spec 058: after „Anordnen“ the view is fitted once the nodes stand at their new places (React
+  // Flow's store has them after this render's child effects).
+  useEffect(() => {
+    if (!enpasoPost.current || nodoj.length === 0) return;
+    enpasoPost.current = false;
+    void fitView(ENPASO);
+  }, [nodoj, fitView]);
 
   const onNodesChange = useCallback((sxangxoj: NodeChange<GestaltenFlowNodo>[]) => {
     // Nodes are never removed here (`onBeforeDelete` keeps them); places, sizes and selection change.
@@ -772,7 +996,7 @@ function Fluo({
     const sesiaj = new Set(sesioNodoj.map(sesioId));
     const surMarko = new Set(ligoj.filter((l) => l.de === "marko.el").map((l) => nodoDe(l.al)));
     const nodoAl = (id: string) => indekso.get(id);
-    const inhaltoj = new Map(enhavoKnoten.map((k) => [k.id, k.inhalt] as const));
+    const inhaltoj = new Map(knotenCxiuj.map((k) => [k.id, k.inhalt] as const));
     return ligoj.map((ligo: BildoLigo) => {
       const de = nodoDe(ligo.de);
       const fontaNodo = nodoAl(de);
@@ -780,8 +1004,8 @@ function Fluo({
         sesiaj.has(de) || (fontaNodo?.speco === "farbo" && fontaNodo.stato === "leer");
       const farbo = de.startsWith("farbo-");
       // Spec 056: an edge into the Marke is fainter from an empty node, and lights up when the
-      // node's content was saved.
-      const enMarkon = estasMarkoEnir(ligo.al);
+      // node's content was saved. Spec 058: an edge into „Namen und Beschreibung“ as well.
+      const enMarkon = estasMultaEnir(ligo.al);
       const malplenaEnhavo = enMarkon && estasMalplena(de, inhaltoj.get(de));
       // 055 D-18: a fixed edge leaves Primär at its bottom handle and cannot be touched.
       const teniloj = tenilojDe(ligo);
@@ -802,7 +1026,7 @@ function Fluo({
         },
       };
     });
-  }, [ligoj, sesioNodoj, indekso, lumoj, markoLumoj, elektitajLigoj, enhavoKnoten]);
+  }, [ligoj, sesioNodoj, indekso, lumoj, markoLumoj, elektitajLigoj, knotenCxiuj]);
 
   const skribiKaj = useCallback(
     async (sxangxo: LeinwandSxangxo): Promise<SkriboRezulto> => {
@@ -810,6 +1034,8 @@ function Fluo({
       if (rezulto.speco === "ok") {
         setGespeichert({ speco: "ok", teksto: gespeichertTeksto(rezulto.gespeichert) });
         await sxargiDenove(kablojRef.current);
+        // Spec 058: the written name is the Agordo's now; the typed one gives way to it.
+        if ("name" in sxangxo) setNomoTajpita(null);
       }
       return rezulto;
     },
@@ -817,18 +1043,23 @@ function Fluo({
   );
 
   const forigi = useCallback((id: string) => {
-    // Spec 056: an added node of this run goes with its content and its detached outputs.
-    if (estasEnhavoId(id)) {
+    // Spec 058: Grundlagen and the Layout-Beispiel stand on every canvas.
+    if (id === GRUNDLAGEN_ID || id === LAYOUT_ID) return;
+    // Spec 056: an added node of this run goes with its content and its detached outputs; Spec
+    // 058: „Namen und Beschreibung“ too.
+    if (estasEnhavoId(id) || id === KI_NAMEN_ID) {
       if (estasFiksa(id)) return;
       setSesio((nun) => kunForigo(nun, id));
-      setKonservitaj(({ [id]: _weg, ...resto }) => resto);
+      setKonservitaj(({ [id as EnhavoId058]: _weg, ...resto }) => resto);
     }
     setSesio((nun) => {
       if (!nun.nodoj.some((s) => sesioId(s) === id)) return nun;
+      const { [id]: _wahl, ...wahloj } = nun.wahloj ?? {};
       return {
         ...nun,
         nodoj: nun.nodoj.filter((s) => sesioId(s) !== id),
         gezogen: nun.gezogen.filter((g) => nodoDe(g.de) !== id && nodoDe(g.al) !== id),
+        ...(nun.wahloj === undefined ? {} : { wahloj }),
       };
     });
     setVerschoben((nun) => {
@@ -864,7 +1095,7 @@ function Fluo({
   const listo = useMemo(
     () =>
       aldonebloj(
-        KATALOGO_056,
+        KATALOGO,
         cxiuj.map(({ nodo }) =>
           nodo.speco === "farbo" ? { id: nodo.id, stato: nodo.stato } : { id: nodo.id },
         ),
@@ -882,15 +1113,24 @@ function Fluo({
     [cxiuj, indekso],
   );
   // Spec 056: a node of „+ Knoten“ at its slot, selected (once; the list offers it only then).
-  const nodoAldoni = useCallback((id: EnhavoId) => {
-    if (estasFiksa(id)) return;
+  // Spec 058: also „Namen und Beschreibung“; a node already on the canvas stays as it is.
+  const nodoAldoni = useCallback((id: EnhavoId | typeof KI_NAMEN_ID) => {
+    if (id !== KI_NAMEN_ID && estasFiksa(id)) return;
+    const sesioNun = sesioRef.current;
+    const jam =
+      id === KI_NAMEN_ID ? sesioNun.kiNamen !== undefined : enhavoNodojDe(sesioNun).includes(id);
+    if (jam) return;
     elektota.current = id;
     setSesio((nun) => kunAldono(nun, id));
   }, []);
   const elekti = useCallback(
     (a: Aldoneblo) => {
       setMenuo(false);
-      if (a.stato === "anlegen" && a.nodo !== undefined && estasEnhavoId(a.nodo)) {
+      if (
+        a.stato === "anlegen" &&
+        a.nodo !== undefined &&
+        (estasEnhavoId(a.nodo) || a.nodo === KI_NAMEN_ID)
+      ) {
         nodoAldoni(a.nodo);
         return;
       }
@@ -924,7 +1164,7 @@ function Fluo({
   // Spec 056 (§2.2): a node sets its content; `konservi` also writes the state and lights its
   // edges into the Marke.
   const inhaltMeti = useCallback(
-    <I extends EnhavoId>(id: I, inhalt: InhaltMapo[I], konservi: boolean): void => {
+    <I extends EnhavoId058>(id: I, inhalt: InhaltMapo058[I], konservi: boolean): void => {
       const roh = inhalt as Record<string, unknown>;
       setSesio((nun) => ({ ...nun, inhaltoj: { ...nun.inhaltoj, [id]: roh } }));
       if (!konservi) return;
@@ -936,9 +1176,105 @@ function Fluo({
   );
   const inhaltoj = sesio.inhaltoj;
   const inhaltDe = useCallback(
-    <I extends EnhavoId>(id: I): InhaltMapo[I] | undefined => enhavoDe(id, inhaltoj?.[id]),
+    <I extends EnhavoId058>(id: I): InhaltMapo058[I] | undefined => enhavoDe(id, inhaltoj?.[id]),
     [inhaltoj],
   );
+
+  // Spec 058 (§3.4): the rest of the contract of Phases 3 and 4.
+  const nomoMeti = useCallback((teksto: string) => setNomoTajpita(teksto), []);
+  const vorschauWahl = useCallback((id: string) => vorschauWahlDe(sesio, id), [sesio]);
+  const vorschauWahlMeti = useCallback(
+    (id: string, wahl: { ansicht?: Ansicht; aufbau?: AufbauWahl }) =>
+      setSesio((nun) => kunWahl(nun, id, wahl)),
+    [],
+  );
+  // `haltigiDum`: the writer stands while `fn` runs; it resumes in the effect after the render
+  // that follows (so a result put into the session right after the `await` is in that render).
+  const haltoj = useRef(0);
+  const [dauxrigoj, setDauxrigoj] = useState(0);
+  useEffect(() => {
+    if (dauxrigoj > 0 && haltoj.current === 0) skribilo.dauxrigi();
+  }, [dauxrigoj, skribilo]);
+  const haltigiDum = useCallback(
+    async <T,>(fn: () => Promise<T>): Promise<T> => {
+      haltoj.current += 1;
+      try {
+        await skribilo.atendi();
+        return await fn();
+      } finally {
+        haltoj.current -= 1;
+        setDauxrigoj((n) => n + 1);
+      }
+    },
+    [skribilo],
+  );
+  const nomoTajpitaRef = useRef(nomoTajpita);
+  nomoTajpitaRef.current = nomoTajpita;
+  const konserviNun = useCallback(async (): Promise<boolean> => {
+    // A typed name that differs from the Agordo's (an empty one stands for the identifier).
+    const tajpita = nomoTajpitaRef.current?.trim();
+    if (
+      tajpita !== undefined &&
+      (tajpita === "" ? marko : tajpita) !== bildoRef.current.marko.etikedo
+    ) {
+      const rezulto = await skribiKaj({ name: tajpita });
+      if (rezulto.speco !== "ok") {
+        setGespeichert({ speco: "ne" });
+        return false;
+      }
+    }
+    // Contents still being typed count as saved from here (the writer reads them from now on).
+    const nun = sesioRef.current;
+    const nunaStato = statoDeSesio(
+      bildoRef.current,
+      nun,
+      verschobenRef.current,
+      kablojDeSesio(bildoRef.current, nun),
+    );
+    setKonservitaj(nun.inhaltoj ?? {});
+    return skribilo.nun(nunaStato);
+  }, [marko, skribiKaj, skribilo]);
+  // Spec 058: the families of Überschrift and Text for the rules of the evaluation, per rev.
+  const rev = bildo.rev;
+  useEffect(() => {
+    let nuligita = false;
+    void schriftenSxargi(marko).then((datumoj) => {
+      // An answer older than the Bildo shown is no news (as the node Schrift reads it).
+      if (nuligita || datumoj === undefined || datumoj.rev < rev) return;
+      const eingabe = (r: "display" | "body") => {
+        const s = datumoj.schriften[r];
+        return s === undefined
+          ? {}
+          : {
+              [r]: { familie: s.familie, ...(s.tiparo === undefined ? {} : { tiparo: s.tiparo }) },
+            };
+      };
+      setSchriften({ ...eingabe("display"), ...eingabe("body") });
+    });
+    return () => {
+      nuligita = true;
+    };
+  }, [marko, rev]);
+  const farben = useMemo(
+    () => bildoMontrita.nodoj.filter((n): n is BildoFarbo => n.speco === "farbo"),
+    [bildoMontrita],
+  );
+  const auswertungEnigo = useMemo<AuswertungEnigo>(
+    () => ({ stato: statoSesio, nomo, farben, schriften }),
+    [statoSesio, nomo, farben, schriften],
+  );
+
+  // Spec 058 (product spec A): „Anordnen“ from the measured sizes and the visible edges.
+  const anordnen = useCallback(() => {
+    const mezuritaj = nodojRef.current.map((n) => ({
+      id: n.id,
+      largxo: n.measured?.width ?? n.width ?? 0,
+      alteco: n.measured?.height ?? n.height ?? 0,
+    }));
+    if (mezuritaj.length === 0 || mezuritaj.some((m) => m.alteco === 0)) return;
+    enpasoPost.current = true;
+    setVerschoben(anordnungDe(mezuritaj, ligojRef.current));
+  }, []);
 
   const valoro = useMemo<GestaltenValoro>(
     () => ({
@@ -961,6 +1297,16 @@ function Fluo({
       markoEnhavo,
       markoGeloest,
       nodoAldoni,
+      nomo,
+      nomoMeti,
+      stato: statoSesio,
+      vorschauWahl,
+      vorschauWahlMeti,
+      markeAbdruck,
+      haltigiDum,
+      konserviNun,
+      schriften,
+      auswertungEnigo,
     }),
     [
       marko,
@@ -979,6 +1325,16 @@ function Fluo({
       markoEnhavo,
       markoGeloest,
       nodoAldoni,
+      nomo,
+      nomoMeti,
+      statoSesio,
+      vorschauWahl,
+      vorschauWahlMeti,
+      markeAbdruck,
+      haltigiDum,
+      konserviNun,
+      schriften,
+      auswertungEnigo,
     ],
   );
   const valoroRef = useRef(valoro);
@@ -1017,6 +1373,8 @@ function Fluo({
   }, [preta, bildo, fitView, ujo]);
 
   const primaer = indeksoDe(bildoMontrita).get("farbo-primaer");
+  // Spec 058: the side panel while the Marke is selected.
+  const markoElektita = nodoj.some((n) => n.id === "marko" && n.selected === true);
 
   return (
     <GestaltenKunteksto.Provider value={valoro}>
@@ -1055,7 +1413,9 @@ function Fluo({
         </ReactFlow>
         <Kapo
           marko={marko}
-          etikedo={bildo.marko.etikedo}
+          nomo={nomo}
+          marken={<Marken />}
+          anordnen={anordnen}
           menuoMalfermita={menuo}
           menuo={() => setMenuo((m) => !m)}
           gespeichert={gespeichert}
@@ -1072,6 +1432,15 @@ function Fluo({
         />
         {menuo ? (
           <Menuo aldonebloj={listo} hexDe={hexDe} elekti={elekti} fermi={fermiMenuon} />
+        ) : null}
+        {markoElektita ? (
+          <aside
+            className="nr-g-flanko"
+            aria-label={MARKENPROFIL_EINZELHEITEN}
+            data-nr-flanko="marko"
+          >
+            <MarkoFlanko />
+          </aside>
         ) : null}
       </div>
     </GestaltenKunteksto.Provider>
@@ -1096,7 +1465,9 @@ function Ruhig({ respondo }: { respondo: Exclude<Respondo, { speco: "bildo" }> }
   );
 }
 
-export function Gestalten({ ujo, fonto, marko }: GestaltenProps) {
+export function Gestalten({ ujo, fonto: fontoMuntita, marko }: GestaltenProps) {
+  // Spec 058: every load of this canvas asks for the answer of Spec 058 (`stufe=58`).
+  const fonto = useMemo(() => fonto058(fontoMuntita), [fontoMuntita]);
   const [respondo, setRespondo] = useState<Respondo | null>(null);
   useEffect(() => {
     let nuligita = false;

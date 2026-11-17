@@ -5,6 +5,11 @@
 // edges into the Marke and what arrives there, the follow rule „Farbe folgt den Bildern“ (plan D-6,
 // D-7) and Primär's state „aus Material“. Its only import is the shared module, so the browser
 // bundle takes it through an alias. Pure and deterministic: no clock, no randomness, no storage.
+// Spec 058 (MP-2c, T1): `enhavoDe` reads the contents of Grundlagen, „Namen und Beschreibung“, the
+// Layout-Beispiel and the Markenprofil on the Marke (each field on its own); a Pinterest image
+// keeps its `quelle`, a reference its `titel`; Grundlagen's output may be detached; with
+// `{stufe: 58}` the edges into the Marke start with Grundlagen, and `kiNamenLigojDe` gives the edges
+// into „Namen und Beschreibung“. Without the new ids or the option every answer is as before.
 
 import {
   BEISPIELE_ARTOJ,
@@ -15,22 +20,44 @@ import {
   DAZU_ORDO,
   type EigeneSchrift,
   type EnhavoId,
+  type EnhavoId058,
   type ErkanntaFarbo,
   estasEnhavoId,
+  estasEnhavoId058,
   estasWertId,
+  type FarbVorschlag,
   FIKSAJ_TEKSTOJ,
   type FolgoEnigo,
   type FolgoRezulto,
-  type Inhalt,
+  GRUNDLAGEN_ELIR,
+  GRUNDLAGEN_ID,
+  type Inhalt058,
   type InhaltBeispiele,
+  type InhaltLayout,
   type InhaltMapo,
+  type InhaltMapo058,
   type InhaltTonalitaet,
+  KI_NAMEN_BILDO_ENIR,
+  KI_NAMEN_ID,
+  KI_NAMEN_TEKSTO_ENIR,
+  type Kosto,
+  LAYOUT_ID,
   type LeinwandStatoKnoto,
+  type Leitgedanke,
   ligoId,
   MARKO_BILDO_ENIR,
   MARKO_TEKSTO_ENIR,
   type MarkoEnhavo,
+  MERKMALE_WERTE,
+  type Merkmale,
+  type MerkmaleLego,
+  type NamenIdee,
+  type NamenVorschlag,
+  type Opcioj058,
   type Primaer,
+  type Profil,
+  type ProfilEingaben,
+  type ProfilVorschlag,
   type SchriftDosiero,
   TEKSTO_IDS,
   type TekstoId,
@@ -147,6 +174,8 @@ function dateienDe(roh: unknown): BeispielDosiero[] | undefined {
     if (farben !== undefined) dosiero.farben = farben;
     if (plena(eintrag.satz)) dosiero.satz = eintrag.satz;
     if (eintrag.fehlt === true) dosiero.fehlt = true;
+    // Spec 058: the address a Pinterest image was taken from.
+    if (plena(eintrag.quelle)) dosiero.quelle = eintrag.quelle;
     return [dosiero];
   });
 }
@@ -155,11 +184,12 @@ function verweiseDe(roh: unknown): Verweis[] | undefined {
   if (!Array.isArray(roh)) return undefined;
   return roh.flatMap((eintrag): Verweis[] => {
     if (!isObjekto(eintrag) || !plena(eintrag.adresse)) return [];
-    return [
-      plena(eintrag.satz)
-        ? { adresse: eintrag.adresse, satz: eintrag.satz }
-        : { adresse: eintrag.adresse },
-    ];
+    const verweis: Verweis = plena(eintrag.satz)
+      ? { adresse: eintrag.adresse, satz: eintrag.satz }
+      : { adresse: eintrag.adresse };
+    // Spec 058: the title of a Pinterest board or pin whose preview was shown.
+    if (plena(eintrag.titel)) verweis.titel = eintrag.titel;
+    return [verweis];
   });
 }
 
@@ -204,6 +234,148 @@ function beispieleDe(roh: Objekto): InhaltBeispiele {
   return out;
 }
 
+// Spec 058: the contents of the new nodes and of the Marke
+
+/** A list of texts with something in them, in order; undefined for no list. */
+function tekstListoDe(roh: unknown): string[] | undefined {
+  return Array.isArray(roh) ? roh.filter(plena) : undefined;
+}
+
+const isNombro = (x: unknown): x is number => typeof x === "number" && Number.isFinite(x) && x >= 0;
+
+/** What a model call cost; undefined unless every field has its type. */
+export function kostoDe(roh: unknown): Kosto | undefined {
+  if (!isObjekto(roh)) return undefined;
+  const { enigo, eligo, usd, modelo, zeit } = roh;
+  if (!isNombro(enigo) || !isNombro(eligo) || !plena(modelo) || !plena(zeit)) return undefined;
+  const kosto: Kosto = { enigo, eligo, modelo, zeit };
+  if (isNombro(usd)) kosto.usd = usd;
+  return kosto;
+}
+
+function farbVorschlagDe(roh: unknown): FarbVorschlag | undefined {
+  if (!isObjekto(roh) || typeof roh.hex !== "string" || !HEX.test(roh.hex)) return undefined;
+  return { hex: roh.hex, grund: typeof roh.grund === "string" ? roh.grund : "" };
+}
+
+function vorschlagDe(roh: unknown): ProfilVorschlag | undefined {
+  if (!isObjekto(roh)) return undefined;
+  const out: ProfilVorschlag = {};
+  for (const teil of ["primaer", "akzent", "neutral"] as const) {
+    const farbo = farbVorschlagDe(roh[teil]);
+    if (farbo !== undefined) out[teil] = farbo;
+  }
+  const schrift = roh.schrift;
+  if (isObjekto(schrift) && plena(schrift.display) && plena(schrift.body))
+    out.schrift = {
+      display: schrift.display,
+      body: schrift.body,
+      grund: typeof schrift.grund === "string" ? schrift.grund : "",
+    };
+  return out;
+}
+
+function leitgedankenDe(roh: unknown): Leitgedanke[] | undefined {
+  if (!Array.isArray(roh)) return undefined;
+  return roh.flatMap((e): Leitgedanke[] =>
+    isObjekto(e) && plena(e.titel) && typeof e.text === "string"
+      ? [{ titel: e.titel, text: e.text }]
+      : [],
+  );
+}
+
+function profilEingabenDe(roh: unknown): ProfilEingaben {
+  return isObjekto(roh)
+    ? tekstojDe(roh, ["primaer", "akzent", "neutral", "display", "body"] as const)
+    : {};
+}
+
+/**
+ * A stored Markenprofil: without `abdruck` or `kosto` it is none (it could never say „veraltet“
+ * or its price); inside, every field of the wrong type drops out on its own.
+ */
+export function profilDe(roh: unknown): Profil | undefined {
+  if (!isObjekto(roh) || !plena(roh.abdruck)) return undefined;
+  const kosto = kostoDe(roh.kosto);
+  if (kosto === undefined) return undefined;
+  const profil: Profil = { abdruck: roh.abdruck, eingaben: profilEingabenDe(roh.eingaben), kosto };
+  if (plena(roh.kernsatz)) profil.kernsatz = roh.kernsatz;
+  const leitgedanken = leitgedankenDe(roh.leitgedanken);
+  if (leitgedanken !== undefined) profil.leitgedanken = leitgedanken;
+  for (const kampo of ["charakter", "passt", "reibt", "verworfen"] as const) {
+    const listo = tekstListoDe(roh[kampo]);
+    if (listo !== undefined) profil[kampo] = listo;
+  }
+  const vorschlag = vorschlagDe(roh.vorschlag);
+  if (vorschlag !== undefined) profil.vorschlag = vorschlag;
+  if (plena(roh.gesichert)) profil.gesichert = roh.gesichert;
+  return profil;
+}
+
+/** A stored name proposal: as `profilDe`, the list of names is needed as well. */
+export function namenVorschlagDe(roh: unknown): NamenVorschlag | undefined {
+  if (!isObjekto(roh) || !plena(roh.abdruck) || !Array.isArray(roh.namen)) return undefined;
+  const kosto = kostoDe(roh.kosto);
+  if (kosto === undefined) return undefined;
+  const namen = roh.namen.flatMap((e): NamenIdee[] =>
+    isObjekto(e) && plena(e.name)
+      ? [{ name: e.name, grund: typeof e.grund === "string" ? e.grund : "" }]
+      : [],
+  );
+  const vorschlag: NamenVorschlag = { namen, abdruck: roh.abdruck, kosto };
+  if (plena(roh.beschreibung)) vorschlag.beschreibung = roh.beschreibung;
+  const verworfen = tekstListoDe(roh.verworfen);
+  if (verworfen !== undefined) vorschlag.verworfen = verworfen;
+  if (plena(roh.gesichert)) vorschlag.gesichert = roh.gesichert;
+  return vorschlag;
+}
+
+/** The features of a Layout-Beispiel, each on its own (a value outside its list drops out). */
+export function merkmaleDe(roh: unknown): MerkmaleLego | undefined {
+  if (!isObjekto(roh)) return undefined;
+  const out: MerkmaleLego = {};
+  for (const kampo of Object.keys(MERKMALE_WERTE) as (keyof Merkmale)[]) {
+    const wert = roh[kampo];
+    if (typeof wert === "string" && (MERKMALE_WERTE[kampo] as readonly string[]).includes(wert))
+      (out as Record<string, string>)[kampo] = wert;
+  }
+  return out;
+}
+
+function layoutDe(roh: Objekto): InhaltLayout {
+  const out: InhaltLayout = {};
+  const datei = dateienDe([roh.datei])?.[0];
+  if (datei !== undefined) out.datei = datei;
+  const merkmale = merkmaleDe(roh.merkmale);
+  if (merkmale !== undefined && Object.keys(merkmale).length > 0) out.merkmale = merkmale;
+  if (plena(roh.worte)) out.worte = roh.worte;
+  if (plena(roh.abdruck)) out.abdruck = roh.abdruck;
+  const kosto = kostoDe(roh.kosto);
+  if (kosto !== undefined) out.kosto = kosto;
+  return out;
+}
+
+/** Spec 058: the content of a new node or of the Marke; undefined for any other id. */
+function enhavo058De(id: string, roh: Objekto): Inhalt058 | undefined {
+  switch (id) {
+    case GRUNDLAGEN_ID:
+      return tekstojDe(roh, ["beschreibung"] as const);
+    case KI_NAMEN_ID: {
+      const vorschlag = namenVorschlagDe(roh.vorschlag);
+      return vorschlag === undefined ? {} : { vorschlag };
+    }
+    case LAYOUT_ID:
+      return layoutDe(roh);
+    case "marko": {
+      // The Marke has a content only with a profile (an older reader asked undefined of it).
+      const profil = profilDe(roh.profil);
+      return profil === undefined ? undefined : { profil };
+    }
+    default:
+      return undefined;
+  }
+}
+
 /**
  * The content of a node of Spec 056 by its kind (tech spec „Inhalt je Knoten“, plan D-5, D-6).
  * Undefined for another node or a content that is no object. Inside, every field of the wrong type
@@ -213,9 +385,12 @@ function beispieleDe(roh: Objekto): InhaltBeispiele {
  * `GET /api/leinwand` carries it); the file reader removes it with `senFehlt`.
  */
 export function enhavoDe<I extends EnhavoId>(id: I, roh: unknown): InhaltMapo[I] | undefined;
-export function enhavoDe(id: string, roh: unknown): Inhalt | undefined;
-export function enhavoDe(id: string, roh: unknown): Inhalt | undefined {
-  if (!estasEnhavoId(id) || !isObjekto(roh)) return undefined;
+export function enhavoDe<I extends EnhavoId058>(id: I, roh: unknown): InhaltMapo058[I] | undefined;
+export function enhavoDe(id: string, roh: unknown): Inhalt058 | undefined;
+export function enhavoDe(id: string, roh: unknown): Inhalt058 | undefined {
+  if (!estasEnhavoId058(id) || !isObjekto(roh)) return undefined;
+  // Spec 058: Grundlagen, „Namen und Beschreibung“, the Layout-Beispiel and the Marke.
+  if (!estasEnhavoId(id)) return enhavo058De(id, roh);
   switch (id) {
     case "teksto-ausgangslage":
       return tekstojDe(roh, ["text"] as const);
@@ -250,7 +425,13 @@ export function enhavoDe(id: string, roh: unknown): Inhalt | undefined {
  * The content as the file keeps it: without `fehlt` (it only ever stands in answers of
  * `GET /api/leinwand`, plan §2.1). Undefined as `enhavoDe`.
  */
-export function senFehlt(id: string, roh: unknown): Inhalt | undefined {
+export function senFehlt(id: string, roh: unknown): Inhalt058 | undefined {
+  if (id === LAYOUT_ID) {
+    const layout = enhavoDe(LAYOUT_ID, roh);
+    if (layout?.datei === undefined) return layout;
+    const { fehlt: _f, ...datei } = layout.datei;
+    return { ...layout, datei };
+  }
   if (id === "beispiele") {
     const beispiele = enhavoDe("beispiele", roh);
     if (beispiele?.dateien === undefined) return beispiele;
@@ -313,7 +494,10 @@ export function eigenschaftAldoni(
  * trait, no slider set (Tonalität), no image and no reference (Beispiele), no own font (Schrift –
  * the canvas also counts the font choice of the Agordo there). An unknown node is empty.
  */
-export function estasMalplena(id: string, inhalt: Inhalt | Objekto | undefined): boolean {
+export function estasMalplena(id: string, inhalt: Inhalt058 | Objekto | undefined): boolean {
+  // Spec 058: Grundlagen without a description, the Layout-Beispiel without a file.
+  if (id === GRUNDLAGEN_ID) return enhavoDe(GRUNDLAGEN_ID, inhalt)?.beschreibung === undefined;
+  if (id === LAYOUT_ID) return enhavoDe(LAYOUT_ID, inhalt)?.datei === undefined;
   if (!estasEnhavoId(id)) return true;
   const ne = (x: readonly unknown[] | undefined): boolean => (x?.length ?? 0) === 0;
   switch (id) {
@@ -420,6 +604,11 @@ export function geloestDe(roh: unknown, knoten: readonly LeinwandStatoKnoto[]): 
   const out = new Set<string>();
   for (const eintrag of roh) {
     if (typeof eintrag !== "string") continue;
+    // Spec 058: Grundlagen stands on every canvas of this run; its edge into the Marke detaches.
+    if (eintrag === GRUNDLAGEN_ELIR) {
+      out.add(eintrag);
+      continue;
+    }
     const elir = elirNodo(eintrag);
     if (elir === undefined || !nodoj.has(elir.nodo)) continue;
     if (elir.wert !== undefined && !werte.has(elir.wert)) continue;
@@ -437,12 +626,15 @@ export function geloestDe(roh: unknown, knoten: readonly LeinwandStatoKnoto[]): 
 export function markoLigojDe(
   knoten: readonly LeinwandStatoKnoto[],
   geloest: readonly string[],
+  /** Spec 058: Grundlagen's edge first (it stands on every canvas of this run). */
+  opcioj?: Opcioj058,
 ): BildoLigo[] {
   const nodoj = nodojDe(knoten);
   const fort = new Set(geloest);
   const ligo = (de: string, al: string, art: BildoLigo["art"]): BildoLigo[] =>
     fort.has(de) ? [] : [{ id: ligoId(de, al), de, al, art }];
-  const out: BildoLigo[] = [];
+  const out: BildoLigo[] =
+    opcioj?.stufe === 58 ? ligo(GRUNDLAGEN_ELIR, MARKO_TEKSTO_ENIR, "teksto") : [];
   for (const id of TEKSTO_IDS) {
     if (!nodoj.has(id)) continue;
     if (id === "teksto-werte") {
@@ -452,6 +644,27 @@ export function markoLigojDe(
   }
   if (nodoj.has("beispiele")) out.push(...ligo(BEISPIELE_ELIR, MARKO_BILDO_ENIR, "bildo"));
   return out;
+}
+
+/**
+ * Spec 058: the edges into „Namen und Beschreibung“ – from every output that can run into the Marke
+ * of this run (Grundlagen, the text nodes, the values, Beispiele), except those detached from this
+ * node (its own `geloest`, independent of the Marke's); none while the node is not on the canvas.
+ * „+ Knoten“ starts the node with the Marke's detached outputs (`kiNamenGeloestKomenco`), so it is
+ * connected to every input that goes into the Marke at that moment.
+ */
+export function kiNamenLigojDe(knoten: readonly LeinwandStatoKnoto[]): BildoLigo[] {
+  const ki = knoten.find((k) => k.id === KI_NAMEN_ID);
+  if (ki === undefined) return [];
+  return markoLigojDe(knoten, ki.geloest ?? [], { stufe: 58 }).map((l): BildoLigo => {
+    const al = l.al === MARKO_BILDO_ENIR ? KI_NAMEN_BILDO_ENIR : KI_NAMEN_TEKSTO_ENIR;
+    return { id: ligoId(l.de, al), de: l.de, al, art: l.art };
+  });
+}
+
+/** Spec 058: the `geloest` a new „Namen und Beschreibung“ starts with: the Marke's detached ones. */
+export function kiNamenGeloestKomenco(geloest: readonly string[] | undefined): string[] {
+  return [...new Set(geloest ?? [])].sort();
 }
 
 /**

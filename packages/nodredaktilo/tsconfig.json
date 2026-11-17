@@ -10,7 +10,9 @@
     "paths": {
       "@fundamento/metiejo/grafeo": ["../metiejo/src/grafeo-sicht.ts"],
       "@fundamento/metiejo/gestalten": ["../metiejo/src/grafeo-gestalten-sicht.ts"],
-      "@fundamento/metiejo/enhavo": ["../metiejo/src/leinwand-enhavo.ts"]
+      "@fundamento/metiejo/enhavo": ["../metiejo/src/leinwand-enhavo.ts"],
+      "@fundamento/metiejo/auswertung": ["../metiejo/src/leinwand-auswertung.ts"],
+      "@fundamento/metiejo/ident": ["../metiejo/src/ident.ts"]
     }
   },
   "include": ["src", "scripts", "vite.config.ts"]

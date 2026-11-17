@@ -12,13 +12,21 @@
 // an image goes on as an upload, anything else (a page, an error, no answer) becomes a reference
 // with its sentence, Pinterest's own. The images are only evaluated: no preview, export or package
 // reads them. 404 `{satz}` for an unknown brand, as the 055 state routes; no rule, no judgement.
+// Spec 058 (MP-2c, T8, MAW-3.5): with `{url, vorschau: true}` the address is first checked with
+// `permesataAdreso` (no private address is fetched), and a page whose FINAL address after the
+// redirects is Pinterest's is read by `pinterestVorschauDe`: 200 `{verweis: {adresse, titel?,
+// bilder: [{vorschau, bild}]}}`. A redirect elsewhere, 403/429, a login, an empty list or no
+// answer keep the reference with Pinterest's sentence. Same fetch, same time limit, same per-file
+// limit for the page. Without `vorschau` every answer is byte-identical to Spec 056.
 
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
+import { type PinterestBild, pinterestVorschauDe } from "./beispiele-pinterest.js";
 import { legiMaterialon, MATERIALO_DIR } from "./enportilo/materialo.js";
 import { RETEJO_TEMPOLIMO } from "./enportilo/retejo.js";
+import { permesataAdreso } from "./esploro/esploro.js";
 import { farbArtDe } from "./farb-arto.js";
 import {
   type BeispielArt,
@@ -191,18 +199,39 @@ function dosieroDeAdreso(adresse: URL, art: BeispielArt | undefined, tipo: strin
     : `${bazo}${FINAJXO_DE_ARTO[art]}`;
 }
 
-type Ligado = { datei: BeispielDosiero } | { verweis: Verweis };
+type Ligado =
+  | { datei: BeispielDosiero }
+  | { verweis: Verweis }
+  | { verweis: { adresse: string; titel?: string; bilder: PinterestBild[] } };
 
-/** Loads an address once (D-10): an image as an upload, anything else as a reference. */
+/** The address an answer came from after the redirects (a double may name none: the asked one). */
+function finaAdreso(respondo: Response, adresse: URL): URL {
+  try {
+    return respondo.url === "" ? adresse : new URL(respondo.url);
+  } catch {
+    return adresse;
+  }
+}
+
+/** Pinterest's login or sign-up page: never read (no login is bypassed). */
+const estasAnmeldung = (adresse: URL): boolean =>
+  /^\/(login|signup|register)(\/|$)/i.test(adresse.pathname);
+
+/**
+ * Loads an address once (D-10): an image as an upload, anything else as a reference. Spec 058:
+ * with `vorschau` a private address is not fetched, and a Pinterest page gives its preview.
+ */
 async function legiAdreson(
   kunteksto: VojoKunteksto,
   name: string,
   adresse: URL,
   teksto: string,
+  vorschau = false,
 ): Promise<Ligado> {
   const verweis = (): Ligado => ({
     verweis: { adresse: teksto, satz: estasPinterest(adresse) ? PINTEREST_SATZ : KEIN_BILD_SATZ },
   });
+  if (vorschau && !permesataAdreso(adresse.toString())) return verweis();
   const abrufi = kunteksto.options.esploro?.fetch ?? fetch;
   let respondo: Response;
   try {
@@ -216,6 +245,12 @@ async function legiAdreson(
     return verweis();
   }
   if (!respondo.ok) return verweis();
+  if (vorschau) {
+    const fina = finaAdreso(respondo, adresse);
+    if (estasPinterest(fina)) return legiPinterest(kunteksto, respondo, fina, teksto, verweis);
+    // A Pinterest link that ends elsewhere is not read there.
+    if (estasPinterest(adresse)) return verweis();
+  }
   const tipo = (respondo.headers.get("content-type") ?? "").toLowerCase();
   let bytes: Buffer | undefined;
   try {
@@ -233,6 +268,28 @@ async function legiAdreson(
   return {
     datei: await legiBeispielon(kunteksto, name, dosieroDeAdreso(adresse, art, tipo), bytes),
   };
+}
+
+/** Spec 058: reads a Pinterest page (final address `fina`) into its preview, else the reference. */
+async function legiPinterest(
+  kunteksto: VojoKunteksto,
+  respondo: Response,
+  fina: URL,
+  teksto: string,
+  verweis: () => Ligado,
+): Promise<Ligado> {
+  const tipo = (respondo.headers.get("content-type") ?? "").toLowerCase();
+  if (estasAnmeldung(fina) || tipo.startsWith("image/")) return verweis();
+  let bytes: Buffer | undefined;
+  try {
+    bytes = await korpoGis(respondo, dateiGrenzeDe(kunteksto.ANFRAGE_GRENZE));
+  } catch {
+    return verweis();
+  }
+  if (bytes === undefined) return verweis();
+  const { titel, bilder } = pinterestVorschauDe(bytes.toString("utf8"), fina.toString());
+  if (bilder.length === 0) return verweis();
+  return { verweis: { adresse: teksto, ...(titel === undefined ? {} : { titel }), bilder } };
 }
 
 /** A web address of the text, or undefined (no address, or not http/https). */
@@ -283,7 +340,8 @@ export async function beispieleVojoj(
           sendJson(respondo, { satz: KEIN_BILD_SATZ }, 422);
           return true;
         }
-        sendJson(respondo, await legiAdreson(kunteksto, name, adresse, korpo.url.trim()));
+        const vorschau = korpo.vorschau === true;
+        sendJson(respondo, await legiAdreson(kunteksto, name, adresse, korpo.url.trim(), vorschau));
       } else if (
         isObjekto(korpo) &&
         typeof korpo.filename === "string" &&
